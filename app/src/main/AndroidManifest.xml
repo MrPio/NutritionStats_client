@@ -3,6 +3,7 @@
     package="it.univpm.nutritionstats">
 
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:allowBackup="true"
@@ -10,7 +11,8 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.NutritionStats">
+        android:theme="@style/Theme.NutritionStats"
+        android:usesCleartextTraffic="true">
         <activity android:name=".Scanner" />
         <activity
             android:name=".MainActivity"

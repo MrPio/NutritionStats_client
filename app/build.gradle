@@ -42,7 +42,14 @@ dependencies {
     //implementation 'com.android.support:appcompat-v7:28.0.0'
     //implementation 'com.android.support:support-v4:28.0.0'
     implementation 'com.android.support:support-annotations:28.0.0'
-
+    implementation 'com.googlecode.json-simple:json-simple:1.1.1'
 
     implementation 'com.budiyev.android:code-scanner:2.1.0'
 }
+
+configurations.all {
+    resolutionStrategy {
+        force 'org.hamcrest:hamcrest-junit:2.0.0.0'
+    }
+}
+configurations { compile.exclude group: "junit", module: "junit" }

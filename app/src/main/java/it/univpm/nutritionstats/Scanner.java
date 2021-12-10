@@ -6,6 +6,8 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import android.Manifest;
+import android.app.Activity;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.View;
@@ -21,21 +23,24 @@ import com.google.zxing.Result;
 
 import org.jetbrains.annotations.NotNull;
 
+import it.univpm.nutritionstats.api.APICommunication;
+
 public class Scanner extends AppCompatActivity {
     private CodeScanner myCodeScanner;
-    private CodeScannerView scanner_view;
+    private CodeScannerView  scanner_view;
+    private APICommunication apiCommunication;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_scanner);
         scanner_view=findViewById(R.id.scanner_view);
+        apiCommunication=new APICommunication(getIntent().getExtras().getString("ip"));
 
         setupPermission();
         codeScanner();
     }
 
     private void codeScanner(){
-        final String[] oldResult = {""};
         myCodeScanner = new CodeScanner(this,scanner_view);
         myCodeScanner.setCamera(CodeScanner.CAMERA_BACK);
         myCodeScanner.setFormats(CodeScanner.ONE_DIMENSIONAL_FORMATS);
@@ -49,9 +54,11 @@ public class Scanner extends AppCompatActivity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        if(result.getText().equals(oldResult[0]))return;
                         Toast.makeText(Scanner.this, result.getText(), Toast.LENGTH_SHORT).show();
-                        oldResult[0] =result.getText();
+                        MainActivity.resultList.add(apiCommunication.getInfoFromEan(result.getText()));
+                        Intent resultIntent = new Intent();
+                        setResult(Activity.RESULT_OK, resultIntent);
+                        finish();
                     }
                 });
             }
