@@ -3,7 +3,7 @@ package it.univpm.nutritionstats.api;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import it.univpm.nutritionstats.MainActivity;
 
 class APICommunicationTest {
 
@@ -13,6 +13,7 @@ class APICommunicationTest {
 
     @Test
     void requestSignUp() {
-        System.out.println(new APICommunication().requestSignUp("email@example.com"));
+        System.out.println(new APICommunication().requestSignUp("userName", "userEmail",
+                1990, MainActivity.Diet.CLASSIC, 80, 170, MainActivity.Gender.MALE));
     }
 }

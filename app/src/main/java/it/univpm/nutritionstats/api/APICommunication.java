@@ -3,18 +3,15 @@ package it.univpm.nutritionstats.api;
 //import org.json.JSONObject;
 
 import org.json.simple.*;
-import org.json.simple.parser.ParseException;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
 import java.net.URL;
 import java.net.URLConnection;
+
+import it.univpm.nutritionstats.MainActivity;
 
 public class APICommunication {
     final String API_BASE_URL    = "http://192.168.1.16:5000";
@@ -59,15 +56,23 @@ public class APICommunication {
         return outputJson[0];
     }
 
-    public JSONObject requestSignUp(String userEmail) {
+    public JSONObject requestSignUp(String userName, String userEmail, int born, MainActivity.Diet diet, int weight, int height, MainActivity.Gender gender) {
         final JSONObject[] outputJson = {null};
 
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
-                    HttpURLConnection conn =
-                            (HttpURLConnection) new URL(API_BASE_URL + ENDPOINT_SIGNUP + "?email=" + userEmail).openConnection();
+                    String url = API_BASE_URL + ENDPOINT_SIGNUP
+                            + "?nickname=" + userName
+                            + "&email=" + userEmail
+                            + "&year=" + born
+                            + "&weight=" + weight
+                            + "&height=" + height
+                            + "&diet=" + diet.name()
+                            + "&gender=" + gender.name();
+
+                    HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
                     conn.setRequestMethod("POST");
                     conn.setDoOutput(true);
 

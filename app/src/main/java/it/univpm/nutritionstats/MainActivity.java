@@ -1,8 +1,11 @@
 package it.univpm.nutritionstats;
 
+import android.app.ActivityOptions;
 import android.content.Intent;
 import android.os.Bundle;
+import android.transition.Explode;
 import android.view.View;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -19,14 +22,22 @@ import it.univpm.nutritionstats.utility.InputOutput;
 import it.univpm.nutritionstats.utility.InputOutputImpl;
 
 public class MainActivity extends AppCompatActivity {
+    public enum Diet{CLASSIC,PESCETARIAN,VEGETARIAN,VEGAN};
+    public enum Gender{MALE,FEMALE};
+
     final        String TOKEN_PATH           = "token.dat";
     final        String API_BASE_URL         = "192.168.1.1:8080";
     final static int    REQUEST_CODE_SCANNER = 1;
     final static int    REQUEST_CODE_LOGIN   = 2;
 
     public static ArrayList<JSONObject> resultList = new ArrayList<JSONObject>();
-    public static String userEmail="";
-    public static String userName="";
+    public static String                userEmail  = "";
+    public static String                userName   = "";
+    public static Diet diet=null;
+    public static int weight=0;
+    public static int height=0;
+    public static Gender gender=null;
+    public static int born=0;
 
     private Button   buttonScanner  = null;
     private TextView textViewOutput = null;
@@ -39,6 +50,7 @@ public class MainActivity extends AppCompatActivity {
         buttonScanner = findViewById(R.id.buttonScanner);
         textViewOutput = findViewById(R.id.textViewOutput);
 
+
         buttonScanner.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -48,22 +60,21 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        if(isLogged()) {
-            String savedLogin=new InputOutputImpl(getApplicationContext(),TOKEN_PATH).readFile();
-            userName =savedLogin.split(":")[0];
-            userEmail =savedLogin.split(":")[1];
-            Toast.makeText(getApplicationContext(),"Welcome back "+userName+"!",Toast.LENGTH_SHORT).show();
-        }
-        else signUp();
+        if (isLogged()) {
+            String savedLogin = new InputOutputImpl(getApplicationContext(), TOKEN_PATH).readFile();
+            userName = savedLogin.split(":")[0];
+            userEmail = savedLogin.split(":")[1];
+            Toast.makeText(getApplicationContext(), "Welcome back " + userName + "!", Toast.LENGTH_SHORT).show();
+        } else signUp();
     }
 
 
     private boolean isLogged() {
-        return new InputOutputImpl(getApplicationContext(),TOKEN_PATH).existFile();
+        return new InputOutputImpl(getApplicationContext(), TOKEN_PATH).existFile();
     }
 
     private void signUp() {
-        Toast.makeText(getApplicationContext(),"Welcome, please proceed wit the signup!",Toast.LENGTH_SHORT).show();
+        Toast.makeText(getApplicationContext(), "Welcome, please proceed with the signup!", Toast.LENGTH_LONG).show();
 
         Intent i = (new Intent(MainActivity.this, Login.class));
         startActivityForResult(i, REQUEST_CODE_LOGIN);
@@ -80,10 +91,11 @@ public class MainActivity extends AppCompatActivity {
                 }
                 break;
             case REQUEST_CODE_LOGIN:
-                JSONObject response=new APICommunication().requestSignUp(userEmail);
-                String formatted=userName +":"+response.get("email")+":"+response.get("token");
-                new InputOutputImpl(getApplicationContext(),TOKEN_PATH).writeFile(formatted);
-                Toast.makeText(getApplicationContext(),"You successfully logged-in! response=\r\n"+response,Toast.LENGTH_SHORT).show();
+                JSONObject response = new APICommunication().requestSignUp(userName,userEmail,born,diet,weight,height,gender);
+                String formatted =
+                        userName + ":" + response.get("email") + ":" + response.get("token");
+                new InputOutputImpl(getApplicationContext(), TOKEN_PATH).writeFile(formatted);
+                Toast.makeText(getApplicationContext(), "You successfully logged-in! response=\r\n" + response, Toast.LENGTH_SHORT).show();
                 break;
         }
 
