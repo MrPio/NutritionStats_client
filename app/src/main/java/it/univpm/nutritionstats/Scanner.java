@@ -34,7 +34,7 @@ public class Scanner extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_scanner);
         scanner_view=findViewById(R.id.scanner_view);
-        apiCommunication=new APICommunication(getIntent().getExtras().getString("ip"));
+        apiCommunication=new APICommunication();
 
         setupPermission();
         codeScanner();

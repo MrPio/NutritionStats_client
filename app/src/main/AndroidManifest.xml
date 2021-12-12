@@ -4,6 +4,8 @@
 
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_INTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_INTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
@@ -13,6 +15,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.NutritionStats"
         android:usesCleartextTraffic="true">
+        <activity android:name=".login.Login"></activity>
         <activity android:name=".Scanner" />
         <activity
             android:name=".MainActivity"

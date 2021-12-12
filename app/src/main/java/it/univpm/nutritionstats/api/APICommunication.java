@@ -17,11 +17,9 @@ import java.net.URL;
 import java.net.URLConnection;
 
 public class APICommunication {
-    String baseUrl;
-
-    public APICommunication(String baseUrl) {
-        this.baseUrl = baseUrl;
-    }
+    final String API_BASE_URL    = "http://192.168.1.16:5000";
+    final String ENDPOINT_EAN    = "/api/ean/";
+    final String ENDPOINT_SIGNUP = "/signup";
 
     public JSONObject getInfoFromEan(String ean) {
         final JSONObject[] outputJson = {null};
@@ -29,31 +27,20 @@ public class APICommunication {
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
-                try  {
-                    String route = "/api/ean/" + ean;
-                    try {
+                try {
+                    URLConnection conn =
+                            new URL(API_BASE_URL + ENDPOINT_EAN + ean).openConnection();
 
-                        URLConnection openConnection = new URL(baseUrl+route).openConnection();
-                        openConnection.addRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:25.0) Gecko/20100101 Firefox/25.0");
-                        InputStream in = openConnection.getInputStream();
+                    StringBuilder data = new StringBuilder();
+                    String line = "";
+                    try (InputStream in = conn.getInputStream();) {
+                        InputStreamReader inR = new InputStreamReader(in);
+                        BufferedReader buf = new BufferedReader(inR);
 
-                        StringBuilder data = new StringBuilder();
-                        String line = "";
-                        try {
-                            InputStreamReader inR = new InputStreamReader( in );
-                            BufferedReader buf = new BufferedReader( inR );
-
-                             while ( ( line = buf.readLine() ) != null ) {
-                                data.append(line);
-                                System.out.println( line );
-                            }
-                        } finally {
-                            in.close();
-                        }
-                        outputJson[0] = (JSONObject) JSONValue.parseWithException(data.toString());
-                    } catch (Exception e) {
-                        e.printStackTrace();
+                        while ((line = buf.readLine()) != null)
+                            data.append(line);
                     }
+                    outputJson[0] = (JSONObject) JSONValue.parseWithException(data.toString());
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -62,7 +49,54 @@ public class APICommunication {
 
         thread.start();
 
-        while(outputJson[0]==null) {
+        while (outputJson[0] == null) {
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        return outputJson[0];
+    }
+
+    public JSONObject requestSignUp(String userEmail) {
+        final JSONObject[] outputJson = {null};
+
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    HttpURLConnection conn =
+                            (HttpURLConnection) new URL(API_BASE_URL + ENDPOINT_SIGNUP + "?email=" + userEmail).openConnection();
+                    conn.setRequestMethod("POST");
+                    conn.setDoOutput(true);
+
+                    StringBuilder data = new StringBuilder();
+                    String line = "";
+                    try (InputStream in = conn.getInputStream();) {
+                        InputStreamReader inR = new InputStreamReader(in);
+                        BufferedReader buf = new BufferedReader(inR);
+
+                        while ((line = buf.readLine()) != null)
+                            data.append(line);
+                    }
+                    outputJson[0] = (JSONObject) JSONValue.parseWithException(data.toString());
+                        /*
+                        {
+                            "email":"email@example.com",
+                            "token":"G4UB53UYIHUER9UFHER8IVHRIU"
+                        }
+                         */
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        thread.start();
+
+        while (outputJson[0] == null) {
             try {
                 Thread.sleep(10);
             } catch (InterruptedException e) {
