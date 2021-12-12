@@ -1,16 +1,12 @@
-package it.univpm.nutritionstats.login;
+package it.univpm.nutritionstats.activity;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.content.Intent;
-import android.media.Image;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
-import android.widget.CalendarView;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -32,9 +28,6 @@ import com.google.android.gms.common.api.OptionalPendingResult;
 import com.google.android.gms.common.api.ResultCallback;
 import com.squareup.picasso.Picasso;
 
-import java.util.Calendar;
-
-import it.univpm.nutritionstats.MainActivity;
 import it.univpm.nutritionstats.R;
 
 public class Login extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {

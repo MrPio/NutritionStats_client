@@ -15,10 +15,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.NutritionStats"
         android:usesCleartextTraffic="true">
-        <activity android:name=".login.Login"></activity>
-        <activity android:name=".Scanner" />
+        <activity android:name=".activity.Login"></activity>
+        <activity android:name=".activity.Scanner" />
         <activity
-            android:name=".MainActivity"
+            android:name=".activity.MainActivity"
             android:exported="true"
             android:label="NutritionStats"
             android:theme="@style/Theme.NutritionStats">

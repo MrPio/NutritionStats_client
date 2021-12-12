@@ -1,4 +1,4 @@
-package it.univpm.nutritionstats;
+package it.univpm.nutritionstats.activity;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -23,6 +23,7 @@ import com.google.zxing.Result;
 
 import org.jetbrains.annotations.NotNull;
 
+import it.univpm.nutritionstats.R;
 import it.univpm.nutritionstats.api.APICommunication;
 
 public class Scanner extends AppCompatActivity {

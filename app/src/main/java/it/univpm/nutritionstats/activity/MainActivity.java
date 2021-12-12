@@ -1,11 +1,8 @@
-package it.univpm.nutritionstats;
+package it.univpm.nutritionstats.activity;
 
-import android.app.ActivityOptions;
 import android.content.Intent;
 import android.os.Bundle;
-import android.transition.Explode;
 import android.view.View;
-import android.view.Window;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -16,9 +13,8 @@ import org.json.simple.JSONObject;
 
 import java.util.ArrayList;
 
+import it.univpm.nutritionstats.R;
 import it.univpm.nutritionstats.api.APICommunication;
-import it.univpm.nutritionstats.login.Login;
-import it.univpm.nutritionstats.utility.InputOutput;
 import it.univpm.nutritionstats.utility.InputOutputImpl;
 
 public class MainActivity extends AppCompatActivity {

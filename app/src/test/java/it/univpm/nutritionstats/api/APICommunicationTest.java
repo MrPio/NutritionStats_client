@@ -3,7 +3,7 @@ package it.univpm.nutritionstats.api;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import it.univpm.nutritionstats.MainActivity;
+import it.univpm.nutritionstats.activity.MainActivity;
 
 class APICommunicationTest {
 

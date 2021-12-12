@@ -11,7 +11,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 
-import it.univpm.nutritionstats.MainActivity;
+import it.univpm.nutritionstats.activity.MainActivity;
 
 public class APICommunication {
     final String API_BASE_URL    = "http://192.168.1.16:5000";
