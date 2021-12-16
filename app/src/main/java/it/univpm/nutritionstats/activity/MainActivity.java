@@ -365,6 +365,11 @@ public class MainActivity extends AppCompatActivity {
 
     private void loadTodayValues() {
         JSONObject response = APICommunication.requestTodayValues(token);
+        if(response.keySet().contains("result") && response.get("result").toString().contains("error")){
+            Toast.makeText(getApplicationContext(),response.get("result").toString(),Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         if (response.keySet().contains("result") && response.get("result").equals("day not found"))
             return;
         carbohydrates = ((Number) response.get("carbohydrates")).floatValue();
@@ -385,7 +390,11 @@ public class MainActivity extends AppCompatActivity {
             return false;
         token = file.readFile().split(":")[2];
         JSONObject response = APICommunication.requestLogin(token);
-        if (response.get("result").equals("not found"))
+        if (response.get("result").equals("error")){
+            Toast.makeText(getApplicationContext(),response.get("result").toString(),Toast.LENGTH_SHORT).show();
+            return true;
+        }
+        else if (response.get("result").equals("not found"))
             return false;
         else {
             login(response);
@@ -451,6 +460,10 @@ public class MainActivity extends AppCompatActivity {
             case REQUEST_CODE_LOGIN:
                 JSONObject response =
                         new APICommunication().requestSignUp(userName, userEmail, born, diet, weight, height, gender);
+                if(response.get("result").toString().contains("error")){
+                    Toast.makeText(getApplicationContext(),response.get("result").toString(),Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 token = response.get("token").toString();
                 String formatted =
                         userName + ":" + userEmail + ":" + token;
