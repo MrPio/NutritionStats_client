@@ -29,6 +29,7 @@ import com.google.android.gms.common.api.ResultCallback;
 import com.squareup.picasso.Picasso;
 
 import it.univpm.nutritionstats.R;
+import it.univpm.nutritionstats.utility.InputOutputImpl;
 
 public class Login extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
     final int TOTAL_STAGES=3;
@@ -106,7 +107,7 @@ public class Login extends AppCompatActivity implements GoogleApiClient.OnConnec
         diet[1].setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                MainActivity.diet= MainActivity.Diet.PESCETARIAN;
+                MainActivity.diet= MainActivity.Diet.PESCATARIAN;
                 diet[1].animate().scaleX(1.2f).scaleY(1.2f).alpha(1.0f).setDuration(600).start();
                 diet[0].animate().scaleX(1).scaleY(1).alpha(0.5f).setDuration(600).start();
                 diet[2].animate().scaleX(1).scaleY(1).alpha(0.5f).setDuration(600).start();
@@ -230,6 +231,8 @@ public class Login extends AppCompatActivity implements GoogleApiClient.OnConnec
             textViewLoginEmail.setText("Email: " + account.getEmail());
             MainActivity.userEmail=account.getEmail();
             try {
+                new InputOutputImpl(getApplicationContext(),"user_image").writeFile(
+                        account.getPhotoUrl().toString());
                 Picasso.get().load(account.getPhotoUrl()).into(imageViewLoginPhoto);
             } catch (NullPointerException e) {
                 Toast.makeText(getApplicationContext(), "image not found", Toast.LENGTH_LONG).show();

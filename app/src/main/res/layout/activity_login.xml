@@ -89,51 +89,44 @@
         android:background="@color/col_3"
         app:layout_constraintBottom_toTopOf="@+id/buttonLoginNext"
         app:layout_constraintTop_toBottomOf="@+id/imageViewLoginPhoto"
-        tools:visibility="invisible">
-
-        <TextView
-            android:id="@+id/textViewLoginDieta"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
-            android:layout_marginTop="32dp"
-            android:layout_marginEnd="24dp"
-            android:fontFamily="sans-serif-black"
-            android:text="Do you follow any specific diet?"
-            android:textColor="@color/common_google_signin_btn_text_dark_pressed"
-            android:textSize="34sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/imageViewLoginPhoto" />
-
-        <TextView
-            android:id="@+id/textViewLoginDieta2"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="24dp"
-            android:fontFamily="serif"
-            android:text="we will adapt at your lifestyle"
-            android:textColor="@android:color/darker_gray"
-            android:textSize="24sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textViewLoginDieta" />
+        tools:visibility="visible">
 
         <ScrollView
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:layout_marginTop="24dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textViewLoginDieta2">
+            app:layout_constraintTop_toTopOf="parent">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/textViewLoginDieta"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="24dp"
+                    android:layout_marginTop="32dp"
+                    android:layout_marginEnd="24dp"
+                    android:fontFamily="sans-serif-black"
+                    android:text="Do you follow any specific diet?"
+                    android:textColor="@color/common_google_signin_btn_text_dark_pressed"
+                    android:textSize="34sp" />
+
+                <TextView
+                    android:id="@+id/textViewLoginDieta2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="24dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="24dp"
+                    android:fontFamily="serif"
+                    android:text="we will adapt at your lifestyle"
+                    android:textColor="@android:color/darker_gray"
+                    android:textSize="24sp" />
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/dietClassic"
@@ -259,7 +252,8 @@
         android:layout_marginBottom="32dp"
         android:background="@color/col_3"
         app:layout_constraintBottom_toTopOf="@+id/buttonLoginNext"
-        app:layout_constraintTop_toBottomOf="@+id/imageViewLoginPhoto">
+        app:layout_constraintTop_toBottomOf="@+id/imageViewLoginPhoto"
+        tools:visibility="invisible">
 
         <ScrollView
             android:layout_width="match_parent"

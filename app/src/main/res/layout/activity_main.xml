@@ -6,37 +6,557 @@
     android:layout_height="match_parent"
     tools:context=".activity.MainActivity">
 
-    <Button
-        android:id="@+id/buttonScanner"
+    <ImageView
+        android:id="@+id/imageView2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="32dp"
-        android:text="Scanner"
+        android:scaleType="fitXY"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/bk_2" />
 
-    <ScrollView
-        android:layout_width="0dp"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/menuDiary"
+        android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toBottomOf="@+id/imageView5"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
+        <ScrollView
+            android:id="@+id/scrollView2"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
-            <TextView
-                android:id="@+id/textViewOutput"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:id="@+id/imageViewUserPhoto2"
+                    android:layout_width="match_parent"
+                    android:layout_height="130dp"
+                    android:paddingTop="20dp"
+                    android:paddingBottom="20dp"
+                    tools:srcCompat="@tools:sample/avatars" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@color/col_3"
+                    android:orientation="vertical">
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent">
+
+                        <com.github.mikephil.charting.charts.PieChart
+                            android:id="@+id/pieChartCPG"
+                            android:layout_width="0dp"
+                            android:layout_height="200dp"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+                    <View
+                        android:id="@+id/view"
+                        android:layout_width="match_parent"
+                        android:layout_height="20dp" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal"
+                        android:paddingBottom="3dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="serif"
+                            android:paddingStart="20dp"
+                            android:text="Carboydrats:"
+                            android:textAlignment="textStart"
+                            android:textColor="@color/white"
+                            android:textSize="20sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/textViewCarboydrats"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:fontFamily="serif"
+                            android:paddingStart="20dp"
+                            android:text="(22 g)"
+                            android:textAlignment="textStart"
+                            android:textColor="@color/cardview_dark_background"
+                            android:textSize="20sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal"
+                        android:paddingBottom="3dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="serif"
+                            android:paddingStart="20dp"
+                            android:text="       Proteins:"
+                            android:textAlignment="textStart"
+                            android:textColor="@color/white"
+                            android:textSize="20sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/textViewProteins"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:fontFamily="serif"
+                            android:paddingStart="20dp"
+                            android:text="(11 g)"
+                            android:textAlignment="textStart"
+                            android:textColor="@color/cardview_dark_background"
+                            android:textSize="20sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal"
+                        android:paddingBottom="3dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="serif"
+                            android:paddingStart="20dp"
+                            android:text="           Lipids:"
+                            android:textAlignment="textStart"
+                            android:textColor="@color/white"
+                            android:textSize="20sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/textViewLipids"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:fontFamily="serif"
+                            android:paddingStart="20dp"
+                            android:text="(2 g)"
+                            android:textAlignment="textStart"
+                            android:textColor="@color/cardview_dark_background"
+                            android:textSize="20sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <ImageView
+                        android:id="@+id/imageView3"
+                        android:layout_width="match_parent"
+                        android:layout_height="26dp"
+                        android:scaleY="0.6"
+                        app:srcCompat="@drawable/orizontal_fade" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal"
+                        android:paddingBottom="3dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="serif"
+                            android:paddingStart="20dp"
+                            android:text="       Calories:"
+                            android:textAlignment="textStart"
+                            android:textColor="@color/white"
+                            android:textSize="20sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/textViewCalories"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:fontFamily="serif"
+                            android:paddingStart="20dp"
+                            android:text="(150 Kcal)"
+                            android:textAlignment="textStart"
+                            android:textColor="@color/cardview_dark_background"
+                            android:textSize="24sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </LinearLayout>
+        </ScrollView>
+
+        <ImageView
+            android:id="@+id/imageViewAddSnack"
+            android:layout_width="58dp"
+            android:layout_height="58dp"
+            android:layout_marginEnd="24dp"
+            android:layout_marginBottom="32dp"
+            android:alpha="0"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:srcCompat="@drawable/snack_anim" />
+
+        <ImageView
+            android:id="@+id/imageViewAddDinner"
+            android:layout_width="58dp"
+            android:layout_height="58dp"
+            android:layout_marginEnd="24dp"
+            android:layout_marginBottom="32dp"
+            android:alpha="0"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:srcCompat="@drawable/dinner_anim" />
+
+        <ImageView
+            android:id="@+id/imageViewAddLunch"
+            android:layout_width="58dp"
+            android:layout_height="58dp"
+            android:layout_marginEnd="24dp"
+            android:layout_marginBottom="32dp"
+            android:alpha="0"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:srcCompat="@drawable/lunch_anim" />
+
+        <ImageView
+            android:id="@+id/imageViewAddBreakfast"
+            android:layout_width="58dp"
+            android:layout_height="58dp"
+            android:layout_marginEnd="24dp"
+            android:layout_marginBottom="32dp"
+            android:alpha="0"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:srcCompat="@drawable/breakfast_anim" />
+
+        <ImageView
+            android:id="@+id/imageViewAddButton"
+            android:layout_width="58dp"
+            android:layout_height="58dp"
+            android:layout_marginEnd="24dp"
+            android:layout_marginBottom="32dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:srcCompat="@drawable/add_button_anim" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/menuUser"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="@+id/imageView5"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="invisible">
+
+        <ScrollView
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="32dp"
-                android:textSize="20sp"
-                tools:text="output" />
-        </LinearLayout>
-    </ScrollView>
+                android:orientation="vertical">
+
+                <ImageView
+                    android:id="@+id/imageViewUserPhoto"
+                    android:layout_width="match_parent"
+                    android:layout_height="130dp"
+                    android:paddingTop="20dp"
+                    android:paddingBottom="20dp"
+                    tools:srcCompat="@tools:sample/avatars" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@color/col_3"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal"
+                        android:paddingBottom="3dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="serif"
+                            android:paddingStart="20dp"
+                            android:text="Email:"
+                            android:textAlignment="textStart"
+                            android:textColor="@color/white"
+                            android:textSize="20sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/textViewEmail"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:fontFamily="serif"
+                            android:paddingStart="20dp"
+                            android:text="valeriomorelli50@gmail.com"
+                            android:textAlignment="textStart"
+                            android:textColor="@color/cardview_dark_background"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal"
+                        android:paddingBottom="3dp">
+
+                        <TextView
+                            android:id="@+id/textView"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="serif"
+                            android:paddingStart="20dp"
+                            android:text="Name:"
+                            android:textAlignment="textStart"
+                            android:textColor="@color/white"
+                            android:textSize="20sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/textViewNickname"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:fontFamily="serif"
+                            android:paddingStart="20dp"
+                            android:text="Valerio_Morelli"
+                            android:textAlignment="textStart"
+                            android:textColor="@color/cardview_dark_background"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal"
+                        android:paddingBottom="3dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="serif"
+                            android:paddingStart="20dp"
+                            android:text="    Age:"
+                            android:textAlignment="textStart"
+                            android:textColor="@color/white"
+                            android:textSize="20sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/textViewAge"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:fontFamily="serif"
+                            android:paddingStart="20dp"
+                            android:text="20"
+                            android:textAlignment="textStart"
+                            android:textColor="@color/cardview_dark_background"
+                            android:textSize="20sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal"
+                        android:paddingBottom="3dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="serif"
+                            android:paddingStart="20dp"
+                            android:text="Weight:"
+                            android:textAlignment="textStart"
+                            android:textColor="@color/white"
+                            android:textSize="20sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/textViewWeight"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:fontFamily="serif"
+                            android:paddingStart="20dp"
+                            android:text="78 kg"
+                            android:textAlignment="textStart"
+                            android:textColor="@color/cardview_dark_background"
+                            android:textSize="20sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal"
+                        android:paddingBottom="3dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="serif"
+                            android:paddingStart="20dp"
+                            android:text="   Height:"
+                            android:textAlignment="textStart"
+                            android:textColor="@color/white"
+                            android:textSize="20sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/textViewHeight"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:fontFamily="serif"
+                            android:paddingStart="20dp"
+                            android:text="180 cm"
+                            android:textAlignment="textStart"
+                            android:textColor="@color/cardview_dark_background"
+                            android:textSize="20sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal"
+                        android:paddingBottom="3dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="serif"
+                            android:paddingStart="20dp"
+                            android:text="Gender:"
+                            android:textAlignment="textStart"
+                            android:textColor="@color/white"
+                            android:textSize="20sp"
+                            android:textStyle="bold" />
+
+                        <ImageView
+                            android:id="@+id/imageViewGender"
+                            android:layout_width="60dp"
+                            android:layout_height="30dp"
+                            android:layout_weight="1"
+                            android:paddingStart="20dp"
+                            app:srcCompat="@drawable/male" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal"
+                        android:paddingBottom="3dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="serif"
+                            android:paddingStart="20dp"
+                            android:text="      Diet:"
+                            android:textAlignment="textStart"
+                            android:textColor="@color/white"
+                            android:textSize="20sp"
+                            android:textStyle="bold" />
+
+                        <ImageView
+                            android:id="@+id/imageViewDiet"
+                            android:layout_width="60dp"
+                            android:layout_height="30dp"
+                            android:layout_weight="1"
+                            android:paddingStart="20dp"
+                            app:srcCompat="@drawable/meat" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+            </LinearLayout>
+        </ScrollView>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <ImageView
+        android:id="@+id/imageView5"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:alpha="0.3"
+        android:scaleType="fitEnd"
+        app:layout_constraintBottom_toTopOf="@+id/linearLayout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:srcCompat="@drawable/orizontal_fade" />
+
+    <LinearLayout
+        android:id="@+id/linearLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#A60C1219"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <ImageView
+            android:id="@+id/imageViewDiary"
+            android:layout_width="wrap_content"
+            android:layout_height="65dp"
+            android:layout_weight="1"
+            android:alpha="0.5"
+            android:scaleX="0.6"
+            android:scaleY="0.6"
+            app:srcCompat="@drawable/diary_anim" />
+
+        <ImageView
+            android:id="@+id/imageViewUser"
+            android:layout_width="wrap_content"
+            android:layout_height="65dp"
+            android:layout_weight="1"
+            android:alpha="0.5"
+            android:scaleX="0.6"
+            android:scaleY="0.6"
+            app:srcCompat="@drawable/user_anim" />
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
