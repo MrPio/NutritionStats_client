@@ -28,6 +28,9 @@ import com.google.android.gms.common.api.OptionalPendingResult;
 import com.google.android.gms.common.api.ResultCallback;
 import com.squareup.picasso.Picasso;
 
+import java.time.format.DateTimeFormatter;
+import java.util.Calendar;
+
 import it.univpm.nutritionstats.R;
 import it.univpm.nutritionstats.utility.InputOutputImpl;
 
@@ -177,7 +180,9 @@ public class Login extends AppCompatActivity implements GoogleApiClient.OnConnec
             @Override
             public void onDateSet(DatePicker view, int year, int monthOfYear,
                                   int dayOfMonth) {
-                MainActivity.born= year;
+                Calendar calendar = Calendar.getInstance();
+                calendar.set(year, monthOfYear, dayOfMonth);
+                MainActivity.birth= calendar.getTime();
                 editTextDate.setText(dayOfMonth+"/"+monthOfYear+"/"+year);
             }
 
@@ -250,7 +255,7 @@ public class Login extends AppCompatActivity implements GoogleApiClient.OnConnec
                     }
                     else
                     {
-                        if(MainActivity.weight!=0 && MainActivity.height!=0 && MainActivity.gender!=null && MainActivity.born!=0) {
+                        if(MainActivity.weight!=0 && MainActivity.height!=0 && MainActivity.gender!=null && MainActivity.birth!=null) {
                             Intent resultIntent = new Intent();
                             setResult(Activity.RESULT_OK, resultIntent);
                             finish();

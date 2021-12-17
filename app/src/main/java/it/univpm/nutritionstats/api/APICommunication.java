@@ -14,14 +14,17 @@ import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 import it.univpm.nutritionstats.activity.MainActivity;
 
 public class APICommunication {
-    final static String API_BASE_URL          = "http://192.168.1.5:5000";
+    final static String API_BASE_URL          = "http://192.168.1.16:5000";
     final static String ENDPOINT_EAN          = "/api/ean/";
     final static String ENDPOINT_SIGNUP       = "/signup";
     final static String ENDPOINT_LOGIN        = "/login";
@@ -41,11 +44,12 @@ public class APICommunication {
         return makeRequest(conn);
     }
 
-    public static JSONObject requestSignUp(String userName, String userEmail, int born, MainActivity.Diet diet, int weight, int height, MainActivity.Gender gender) {
+    public static JSONObject requestSignUp(String userName, String userEmail, Date birth, MainActivity.Diet diet, int weight, int height, MainActivity.Gender gender) {
+        DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
         String url = API_BASE_URL + ENDPOINT_SIGNUP
                 + "?nickname=" + userName
                 + "&email=" + userEmail
-                + "&year=" + born
+                + "&year=" + df.format(birth)
                 + "&weight=" + weight
                 + "&height=" + height
                 + "&diet=" + diet.name()
@@ -128,16 +132,35 @@ public class APICommunication {
     }
 
     private static String readResult(HttpURLConnection conn) throws IOException {
+        final InputStream[] in = new InputStream[1];
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    if (conn.getResponseCode() < 400)
+                        in[0] = conn.getInputStream();
+                    else
+                        in[0] = conn.getErrorStream();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
         StringBuilder data = new StringBuilder();
         String line = "";
-        InputStream in;
-        //TODO STUCK HERE!
-        if (conn.getResponseCode() < 400)
-            in = conn.getInputStream();
-        else
-            in = conn.getErrorStream();
-
-        InputStreamReader inR = new InputStreamReader(in);
+        //se non trova il server continua ad aspettare per 15-20 min la risposta;
+        long timer=0;
+        while (in[0] == null) {
+            if(timer>5000)
+                return "{\"result\":\"error: request timeout\"}";
+            try {
+                Thread.sleep(100);
+                timer+=100;
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        InputStreamReader inR = new InputStreamReader(in[0]);
         BufferedReader buf = new BufferedReader(inR);
 
         while ((line = buf.readLine()) != null)

@@ -10,4 +10,7 @@
     <color name="col_1" />
     <color name="col_12">#48000000</color>
     <color name="col_3">#6A000000</color>
+    <color name="cyan">#67B9E4</color>
+    <color name="cyan2">#83C7E6</color>
+    <color name="cyan3">#9ED4FF</color>
 </resources>

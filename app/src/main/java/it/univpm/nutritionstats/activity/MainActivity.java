@@ -2,17 +2,24 @@ package it.univpm.nutritionstats.activity;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Typeface;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
+import android.media.SoundPool;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.Display;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
@@ -28,15 +35,22 @@ import com.jakewharton.threetenabp.AndroidThreeTen;
 import com.squareup.picasso.Picasso;
 
 import org.json.simple.JSONObject;
+import org.threeten.bp.LocalDate;
 
-import java.time.LocalDate;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.Period;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 
 import it.univpm.nutritionstats.R;
 import it.univpm.nutritionstats.api.APICommunication;
 import it.univpm.nutritionstats.utility.Circle;
 import it.univpm.nutritionstats.utility.InputOutputImpl;
+import it.univpm.nutritionstats.utility.Sound;
 
 public class MainActivity extends AppCompatActivity {
     public enum Diet {CLASSIC, PESCATARIAN, VEGETARIAN, VEGAN}
@@ -59,22 +73,38 @@ public class MainActivity extends AppCompatActivity {
     public static int    weight        = 0;
     public static int    height        = 0;
     public static Gender gender        = null;
-    public static int    born          = 0;
+    public static Date   birth         = null;
     //Current Values
     public static float  carbohydrates = 0;
     public static float  proteins      = 0;
     public static float  lipids        = 0;
     public static float  calories      = 0;
     public static float  water         = 0;
+    public static float  fiber         = 0;
+    public static float  sodium        = 0;
+    public static float  calcium       = 0;
+    public static float  potassium     = 0;
+    public static float  iron          = 0;
+    public static float  vitaminA      = 0;
+    public static float  vitaminC      = 0;
 
+    MediaPlayer mPlayer = new MediaPlayer();
     private ConstraintLayout menuDiary                               = null;
     private ConstraintLayout menuUser                                = null;
     private ImageView        imageViewUserPhoto, imageViewUserPhoto2 = null;
-    private PieChart  pieChartCPG           = null;
-    private TextView  textViewCarboydrats   = null;
-    private TextView  textViewProteins      = null;
-    private TextView  textViewLipids        = null;
-    private TextView  textViewCalories      = null;
+    private PieChart pieChartCPG         = null;
+    private TextView textViewCalories    = null;
+    private TextView textViewCarboydrats = null;
+    private TextView textViewProteins    = null;
+    private TextView textViewLipids      = null;
+    private TextView textViewFiber       = null;
+    private TextView textViewSodium      = null;
+    private TextView textViewCalcium     = null;
+    private TextView textViewPotassium   = null;
+    private TextView textViewIron        = null;
+    private TextView textViewVitaminA    = null;
+    private TextView textViewVitaminC    = null;
+
     private ImageView imageViewAddButton    = null;
     private ImageView imageViewAddBreakfast = null;
     private ImageView imageViewAddLunch     = null;
@@ -85,21 +115,33 @@ public class MainActivity extends AppCompatActivity {
     private ImageView imageViewUser    = null;
     private TextView  textViewEmail    = null;
     private TextView  textViewNickname = null;
+    private TextView  textViewAge      = null;
     private TextView  textViewWeight   = null;
     private TextView  textViewHeight   = null;
     private ImageView imageViewGender  = null;
     private ImageView imageViewDiet    = null;
 
-    private int actualTab = 0;
-    private boolean addButtonPressed=false;
-    Circle circleAddButton=null;
-    private int addButtonSelected=0;
+    private int     actualTab        = 0;
+    private boolean addButtonPressed = false;
+    Circle circleAddButton = null;
+    private int addButtonSelected = 0;
+    long  startTime;
+    Point screenSize;
+    Point movementStart;
+    Point movementEnd;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        startTime = System.nanoTime();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         AndroidThreeTen.init(this);
+
+        Display display = getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        screenSize = new Point(size.x, size.y);
 
         menuDiary = findViewById(R.id.menuDiary);
         menuUser = findViewById(R.id.menuUser);
@@ -110,6 +152,14 @@ public class MainActivity extends AppCompatActivity {
         textViewProteins = findViewById(R.id.textViewProteins);
         textViewLipids = findViewById(R.id.textViewLipids);
         textViewCalories = findViewById(R.id.textViewCalories);
+        textViewFiber = findViewById(R.id.textViewFiber);
+        textViewSodium = findViewById(R.id.textViewSodium);
+        textViewCalcium = findViewById(R.id.textViewCalcium);
+        textViewPotassium = findViewById(R.id.textViewPotassium);
+        textViewIron = findViewById(R.id.textViewIron);
+        textViewVitaminA = findViewById(R.id.textViewVitaminA);
+        textViewVitaminC = findViewById(R.id.textViewVitaminC);
+
         imageViewAddButton = findViewById(R.id.imageViewAddButton);
         imageViewAddBreakfast = findViewById(R.id.imageViewAddBreakfast);
         imageViewAddLunch = findViewById(R.id.imageViewAddLunch);
@@ -122,6 +172,7 @@ public class MainActivity extends AppCompatActivity {
         imageViewUser = findViewById(R.id.imageViewUser);
         textViewEmail = findViewById(R.id.textViewEmail);
         textViewNickname = findViewById(R.id.textViewNickname);
+        textViewAge = findViewById(R.id.textViewAge);
         textViewWeight = findViewById(R.id.textViewWeight);
         textViewHeight = findViewById(R.id.textViewHeight);
         imageViewGender = findViewById(R.id.imageViewGender);
@@ -158,6 +209,7 @@ public class MainActivity extends AppCompatActivity {
                 fromUserToDiary();
             }
         });
+
         imageViewUser.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -174,10 +226,12 @@ public class MainActivity extends AppCompatActivity {
             public boolean onTouch(View view, MotionEvent motionEvent) {
 
                 if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
-                    addButtonSelected=0;
-                    circleAddButton= new Circle(460,new Point((int)motionEvent.getRawX(),(int)motionEvent.getRawY()));
-                    addButtonPressed=true;
+                    addButtonSelected = 0;
+                    circleAddButton =
+                            new Circle(460, new Point((int) motionEvent.getRawX(), (int) motionEvent.getRawY()));
+                    addButtonPressed = true;
                     imageViewAddButton.animate().scaleX(1.30f).scaleY(1.30f).setDuration(160).start();
+                    makeSound(Sound.Sounds.BIP_13);
                     imageViewAddButton.setImageDrawable(getResources().getDrawable(R.drawable.add_button_hover));
 
 
@@ -190,13 +244,15 @@ public class MainActivity extends AppCompatActivity {
                     addMealList[3].animate().alpha(1.0f).scaleX(1f).scaleY(1f)
                             .translationX(circleAddButton.getPointFromAngle(90f).x).translationY(-circleAddButton.getPointFromAngle(90f).y).start();
                 }
-                if(motionEvent.getAction()==MotionEvent.ACTION_MOVE){
-                    float angle=circleAddButton.getAngleByPoint(new Point((int)motionEvent.getRawX(),(int)motionEvent.getRawY()));
-                    if(circleAddButton.getDistaceFromCenter(new Point((int)motionEvent.getRawX(),(int)motionEvent.getRawY()))<170)
+                if (motionEvent.getAction() == MotionEvent.ACTION_MOVE) {
+                    float angle =
+                            circleAddButton.getAngleByPoint(new Point((int) motionEvent.getRawX(), (int) motionEvent.getRawY()));
+                    if (circleAddButton.getDistaceFromCenter(new Point((int) motionEvent.getRawX(), (int) motionEvent.getRawY())) < 170)
                         return true;
-                    if(angle>165f){
-                        if(addButtonSelected==1)return true;
-                        addButtonSelected=1;
+                    if (angle > 165f) {
+                        if (addButtonSelected == 1) return true;
+                        makeSound(Sound.Sounds.valueOf("BIP_" + ((int) (Math.random() * 13) + 1)));
+                        addButtonSelected = 1;
                         addMealList[0].animate().scaleX(1.35f).scaleY(1.35f).setDuration(120).start();
                         addMealList[1].animate().scaleX(1f).scaleY(1f).setDuration(120).start();
                         addMealList[2].animate().scaleX(1f).scaleY(1f).setDuration(120).start();
@@ -205,10 +261,10 @@ public class MainActivity extends AppCompatActivity {
                         addMealList[1].setImageDrawable(getResources().getDrawable(R.drawable.lunch));
                         addMealList[2].setImageDrawable(getResources().getDrawable(R.drawable.snack));
                         addMealList[3].setImageDrawable(getResources().getDrawable(R.drawable.dinner));
-                    }
-                    else if(angle>135f){
-                        if(addButtonSelected==2)return true;
-                        addButtonSelected=2;
+                    } else if (angle > 135f) {
+                        if (addButtonSelected == 2) return true;
+                        makeSound(Sound.Sounds.valueOf("BIP_" + ((int) (Math.random() * 13) + 1)));
+                        addButtonSelected = 2;
                         addMealList[0].animate().scaleX(1f).scaleY(1f).setDuration(120).start();
                         addMealList[1].animate().scaleX(1.35f).scaleY(1.35f).setDuration(120).start();
                         addMealList[2].animate().scaleX(1f).scaleY(1f).setDuration(120).start();
@@ -217,10 +273,10 @@ public class MainActivity extends AppCompatActivity {
                         addMealList[1].setImageDrawable(getResources().getDrawable(R.drawable.lunch_hover));
                         addMealList[2].setImageDrawable(getResources().getDrawable(R.drawable.snack));
                         addMealList[3].setImageDrawable(getResources().getDrawable(R.drawable.dinner));
-                    }
-                    else if(angle>105){
-                        if(addButtonSelected==3)return true;
-                        addButtonSelected=3;
+                    } else if (angle > 105) {
+                        if (addButtonSelected == 3) return true;
+                        makeSound(Sound.Sounds.valueOf("BIP_" + ((int) (Math.random() * 13) + 1)));
+                        addButtonSelected = 3;
                         addMealList[0].animate().scaleX(1f).scaleY(1f).setDuration(120).start();
                         addMealList[1].animate().scaleX(1f).scaleY(1f).setDuration(120).start();
                         addMealList[2].animate().scaleX(1.35f).scaleY(1.35f).setDuration(120).start();
@@ -229,10 +285,10 @@ public class MainActivity extends AppCompatActivity {
                         addMealList[1].setImageDrawable(getResources().getDrawable(R.drawable.lunch));
                         addMealList[2].setImageDrawable(getResources().getDrawable(R.drawable.snack_hover));
                         addMealList[3].setImageDrawable(getResources().getDrawable(R.drawable.dinner));
-                    }
-                    else if(angle>75){
-                        if(addButtonSelected==4)return true;
-                        addButtonSelected=4;
+                    } else if (angle > 75) {
+                        if (addButtonSelected == 4) return true;
+                        makeSound(Sound.Sounds.valueOf("BIP_" + ((int) (Math.random() * 13) + 1)));
+                        addButtonSelected = 4;
                         addMealList[0].animate().scaleX(1f).scaleY(1f).setDuration(120).start();
                         addMealList[1].animate().scaleX(1f).scaleY(1f).setDuration(120).start();
                         addMealList[2].animate().scaleX(1f).scaleY(1f).setDuration(120).start();
@@ -244,9 +300,10 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
                 if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
-                    addButtonPressed=false;
+                    addButtonPressed = false;
                     imageViewAddButton.animate().scaleX(1f).scaleY(1f).setDuration(160).start();
                     imageViewAddButton.setImageDrawable(getResources().getDrawable(R.drawable.add_button));
+                    makeSound(Sound.Sounds.BIP_3);
 
                     addMealList[0].animate().alpha(0f).scaleX(0.2f).scaleY(0.2f).translationX(0).translationY(0).start();
                     addMealList[1].animate().alpha(0f).scaleX(0.2f).scaleY(0.2f).translationX(0).translationY(0).start();
@@ -257,8 +314,6 @@ public class MainActivity extends AppCompatActivity {
                     addMealList[1].setImageDrawable(getResources().getDrawable(R.drawable.lunch));
                     addMealList[2].setImageDrawable(getResources().getDrawable(R.drawable.snack));
                     addMealList[3].setImageDrawable(getResources().getDrawable(R.drawable.dinner));
-                    
-                    Toast.makeText(getApplicationContext(),String.valueOf(addButtonSelected),Toast.LENGTH_SHORT).show();
                 }
                 return true;
             }
@@ -321,13 +376,16 @@ public class MainActivity extends AppCompatActivity {
         l.setTextColor(Color.WHITE);
         l.setTypeface(Typeface.DEFAULT_BOLD);
         l.setTextSize(12);*/
+        Log.e("MY", "load" + String.valueOf((System.nanoTime() - startTime) / 1000000f));
     }
 
     private void fromUserToDiary() {
+        makeSound(Sound.Sounds.SLIDE_OUT_2);
+
         menuUser.setVisibility(View.VISIBLE);
         menuUser.setTranslationX(0);
         menuUser.setAlpha(1);
-        menuUser.animate().translationX(600).alpha(0).setDuration(401).setListener(new AnimatorListenerAdapter() {
+        menuUser.animate().translationX(screenSize.x).alpha(0).setDuration(401).setListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
@@ -337,22 +395,24 @@ public class MainActivity extends AppCompatActivity {
         }).start();
 
         menuDiary.setVisibility(View.VISIBLE);
-        menuDiary.setTranslationX(-600);
+        menuDiary.setTranslationX(-screenSize.x);
         menuDiary.setAlpha(0);
         menuDiary.animate().translationX(0).alpha(1).setDuration(400).start();
         actualTab = 0;
     }
 
     private void fromDiaryToUser() {
+        makeSound(Sound.Sounds.SLIDE_OUT_2);
+
         menuUser.setVisibility(View.VISIBLE);
-        menuUser.setTranslationX(600);
+        menuUser.setTranslationX(screenSize.x);
         menuUser.setAlpha(0);
         menuUser.animate().translationX(0).alpha(1).setDuration(400).start();
 
         menuDiary.setVisibility(View.VISIBLE);
         menuDiary.setTranslationX(0);
         menuDiary.setAlpha(1);
-        menuDiary.animate().translationX(-600).alpha(0).setDuration(401).setListener(new AnimatorListenerAdapter() {
+        menuDiary.animate().translationX(-screenSize.x).alpha(0).setDuration(401).setListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
@@ -365,8 +425,8 @@ public class MainActivity extends AppCompatActivity {
 
     private void loadTodayValues() {
         JSONObject response = APICommunication.requestTodayValues(token);
-        if(response.keySet().contains("result") && response.get("result").toString().contains("error")){
-            Toast.makeText(getApplicationContext(),response.get("result").toString(),Toast.LENGTH_SHORT).show();
+        if (response.keySet().contains("result") && response.get("result").toString().contains("error")) {
+            Toast.makeText(getApplicationContext(), response.get("result").toString(), Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -377,11 +437,27 @@ public class MainActivity extends AppCompatActivity {
         lipids = ((Number) response.get("lipids")).floatValue();
         calories = ((Number) response.get("calories")).floatValue();
         water = ((Number) response.get("water")).floatValue();
+        fiber = ((Number) response.get("fiber")).floatValue();
+        calcium = ((Number) response.get("calcium")).floatValue();
+        sodium = ((Number) response.get("sodium")).floatValue();
+        potassium = ((Number) response.get("potassium")).floatValue();
+        iron = ((Number) response.get("iron")).floatValue();
+        vitaminA = ((Number) response.get("vitamin_a")).floatValue();
+        vitaminC = ((Number) response.get("vitamin_c")).floatValue();
 
-        textViewCarboydrats.setText(String.valueOf(carbohydrates));
-        textViewProteins.setText(String.valueOf(proteins));
-        textViewLipids.setText(String.valueOf(lipids));
-        textViewCalories.setText(String.valueOf(calories));
+        textViewCalories.setText("(" + String.format("%.2f", calories) + " gr)");
+        textViewCarboydrats.setText("(" + String.format("%.2f", carbohydrates) + " gr)");
+        textViewProteins.setText("(" + String.format("%.2f", proteins) + " gr)");
+        textViewLipids.setText("(" + String.format("%.2f", lipids) + " gr)");
+        textViewFiber.setText("(" + String.format("%.2f", fiber * 1000) + " mg)");
+        textViewSodium.setText("(" + String.format("%.2f", sodium * 1000) + " mg)");
+        textViewCalcium.setText("(" + String.format("%.2f", calcium * 1000) + " mg)");
+        textViewPotassium.setText("(" + String.format("%.2f", potassium * 1000) + " mg)");
+        textViewIron.setText("(" + String.format("%.2f", iron * 1000) + " mg)");
+        textViewVitaminA.setText("(" + String.format("%.2f", vitaminA * 1000) + " mg)");
+        textViewVitaminC.setText("(" + String.format("%.2f", vitaminC * 1000) + " mg)");
+
+        Log.e("MY", "loadTodayValues" + String.valueOf((System.nanoTime() - startTime) / 1000000f));
     }
 
     private boolean isLogged() {
@@ -390,22 +466,45 @@ public class MainActivity extends AppCompatActivity {
             return false;
         token = file.readFile().split(":")[2];
         JSONObject response = APICommunication.requestLogin(token);
-        if (response.get("result").equals("error")){
-            Toast.makeText(getApplicationContext(),response.get("result").toString(),Toast.LENGTH_SHORT).show();
+        //API IRRAGGIUNGIBILE
+        if (response.keySet().contains("result") && response.get("result").equals("error: request timeout")) {
+            Toast.makeText(getApplicationContext(), "Cannot reach the server! [TIMEOUT ERROR]", Toast.LENGTH_LONG).show();
+            finish();
+            System.exit(0);
+            return false;
+        }
+        //ERRORE GENERICO NELLA RICHIESTA HTTP
+        if (response.get("result").equals("error")) {
+            Toast.makeText(getApplicationContext(), response.get("result").toString(), Toast.LENGTH_SHORT).show();
             return true;
         }
+        //LOGIN FALLITO
         else if (response.get("result").equals("not found"))
             return false;
         else {
             login(response);
             return true;
         }
+
+
     }
 
+    @SuppressLint("SimpleDateFormat")
     private void login(JSONObject response) {
-
         textViewEmail.setText(response.get("email").toString());
         textViewNickname.setText(response.get("nickname").toString());
+        try {
+            birth = new SimpleDateFormat("yyyy-MM-dd").parse(response.get("birth").toString());
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        Calendar dob = Calendar.getInstance();
+        dob.set(birth.getYear(), birth.getMonth(), birth.getDay());
+        int age = Calendar.getInstance().get(Calendar.YEAR) - birth.getYear() - 1900;
+        if (Calendar.getInstance().get(Calendar.DAY_OF_YEAR) < dob.get(Calendar.DAY_OF_YEAR))
+            age--;
+        textViewAge.setText(String.valueOf(age));
+        //textViewAge.setText();
         Object[] weights =
                 ((HashMap<LocalDate, Integer>) response.get("weight")).values().toArray();
         textViewWeight.setText(weights[weights.length - 1].toString());
@@ -438,6 +537,8 @@ public class MainActivity extends AppCompatActivity {
         String photoUri = new InputOutputImpl(getApplicationContext(), "user_image").readFile();
         Picasso.get().load(photoUri).into(imageViewUserPhoto);
         Picasso.get().load(photoUri).into(imageViewUserPhoto2);
+        Log.e("MY", "login" + String.valueOf((System.nanoTime() - startTime) / 1000000f));
+
     }
 
     private void signUp() {
@@ -445,6 +546,26 @@ public class MainActivity extends AppCompatActivity {
 
         Intent i = (new Intent(MainActivity.this, Login.class));
         startActivityForResult(i, REQUEST_CODE_LOGIN);
+    }
+
+    void makeSound(Sound.Sounds sound) {
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                final MediaPlayer[] mPlayer =
+                        {MediaPlayer.create(getApplicationContext(), sound.res)};
+                mPlayer[0].setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                    public void onCompletion(MediaPlayer mp) {
+                        mPlayer[0].release();
+                        mPlayer[0] = null;
+                    }
+                });
+                mPlayer[0].start();
+
+            }
+        }).start();
+
     }
 
     @Override
@@ -459,9 +580,9 @@ public class MainActivity extends AppCompatActivity {
                 break;
             case REQUEST_CODE_LOGIN:
                 JSONObject response =
-                        new APICommunication().requestSignUp(userName, userEmail, born, diet, weight, height, gender);
-                if(response.get("result").toString().contains("error")){
-                    Toast.makeText(getApplicationContext(),response.get("result").toString(),Toast.LENGTH_SHORT).show();
+                        new APICommunication().requestSignUp(userName, userEmail, birth, diet, weight, height, gender);
+                if (response.get("result").toString().contains("error")) {
+                    Toast.makeText(getApplicationContext(), response.get("result").toString(), Toast.LENGTH_SHORT).show();
                     return;
                 }
                 token = response.get("token").toString();
@@ -473,6 +594,110 @@ public class MainActivity extends AppCompatActivity {
                 loadPieChartData();
                 break;
         }
+    }
 
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent event) {
+        if (event.getY() / screenSize.y > 0.7f)
+            return super.dispatchTouchEvent(event);
+        if (addButtonPressed)
+            return super.dispatchTouchEvent(event);
+
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            movementStart = new Point((int) event.getX(), (int) event.getY());
+            if (actualTab == 0) {
+                menuUser.setVisibility(View.VISIBLE);
+                //menuUser.setTranslationX(screenSize.x);
+                // menuUser.setAlpha(0);
+            }
+            if (actualTab == 1) {
+                menuDiary.setVisibility(View.VISIBLE);
+                //menuDiary.setTranslationX(-screenSize.x);
+                //menuDiary.setAlpha(0);
+            }
+        }
+
+        if (event.getAction() == MotionEvent.ACTION_MOVE) {
+            if (actualTab == 0 && (float) movementStart.x / screenSize.x > 0.85) {
+                menuUser.setTranslationX(event.getX());
+                menuUser.setAlpha(1 - (event.getX() / screenSize.x));
+                menuDiary.setVisibility(View.VISIBLE);
+                menuUser.setVisibility(View.VISIBLE);
+                menuDiary.setTranslationX(-(screenSize.x - event.getX()));
+                menuDiary.setAlpha((event.getX() / screenSize.x));
+            } else if (actualTab == 1 && (float) movementStart.x / screenSize.x < 0.15) {
+
+                menuUser.setTranslationX(event.getX());
+                menuUser.setAlpha(1 - ((float) event.getX() / screenSize.x));
+                menuDiary.setVisibility(View.VISIBLE);
+                menuUser.setVisibility(View.VISIBLE);
+                menuDiary.setTranslationX(event.getX() - screenSize.x);
+                menuDiary.setAlpha(((float) event.getX() / screenSize.x));
+            }
+        }
+
+        if (event.getAction() == MotionEvent.ACTION_UP) {
+            movementEnd = new Point((int) event.getX(), (int) event.getY());
+
+            if (actualTab == 0) {
+                if ((float) movementStart.x / screenSize.x > 0.85 &&
+                        Math.abs(movementStart.x - movementEnd.x) / (float) screenSize.x > 0.28) {
+                    makeSound(Sound.Sounds.SLIDE_IN);
+
+                    menuUser.animate().translationX(0).alpha(1).setDuration(300).start();
+                    menuDiary.animate().translationX(-screenSize.x).alpha(0).setDuration(304).setListener(new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            super.onAnimationEnd(animation);
+                            if (animation.getDuration() == 304)
+                                menuDiary.setVisibility(View.GONE);
+                        }
+                    }).start();
+                    actualTab = 1;
+                    imageViewDiary.animate().alpha(0.5f).scaleX(0.6f).scaleY(0.6f).setDuration(400).start();
+                    imageViewUser.animate().alpha(1f).scaleX(0.75f).scaleY(0.75f).setDuration(400).start();
+
+                } else {
+                    menuUser.animate().translationX(screenSize.x).alpha(0).setDuration(301).setListener(new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            super.onAnimationEnd(animation);
+                            if (animation.getDuration() == 301)
+                                menuUser.setVisibility(View.GONE);
+                        }
+                    }).start();
+                    menuDiary.animate().translationX(0).alpha(1).setDuration(300).start();
+                }
+            } else if (actualTab == 1) {
+                if ((float) movementStart.x / screenSize.x < 0.15 &&
+                        Math.abs(movementStart.x - movementEnd.x) / (float) screenSize.x > 0.28) {
+                    makeSound(Sound.Sounds.SLIDE_IN);
+
+                    menuUser.animate().translationX(screenSize.x).alpha(0).setDuration(302).setListener(new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            super.onAnimationEnd(animation);
+                            if (animation.getDuration() == 302)
+                                menuUser.setVisibility(View.GONE);
+                        }
+                    }).start();
+                    menuDiary.animate().translationX(0).alpha(1).setDuration(300).start();
+                    actualTab = 0;
+                    imageViewDiary.animate().alpha(1f).scaleX(0.75f).scaleY(0.75f).setDuration(400).start();
+                    imageViewUser.animate().alpha(0.5f).scaleX(0.6f).scaleY(0.6f).setDuration(400).start();
+                } else {
+                    menuUser.animate().translationX(0).alpha(1).setDuration(300).start();
+                    menuDiary.animate().translationX(-screenSize.x).alpha(0).setDuration(303).setListener(new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            super.onAnimationEnd(animation);
+                            if (animation.getDuration() == 303)
+                                menuDiary.setVisibility(View.GONE);
+                        }
+                    }).start();
+                }
+            }
+        }
+        return super.dispatchTouchEvent(event);
     }
 }

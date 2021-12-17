@@ -84,9 +84,48 @@
                             android:layout_height="wrap_content"
                             android:fontFamily="serif"
                             android:paddingStart="20dp"
-                            android:text="Carboydrats:"
+                            android:text="       Calories:"
                             android:textAlignment="textStart"
                             android:textColor="@color/white"
+                            android:textSize="20sp"
+                            android:textStyle="bold|italic" />
+
+                        <TextView
+                            android:id="@+id/textViewCalories"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:fontFamily="serif"
+                            android:paddingStart="20dp"
+                            android:text="(0 Kcal)"
+                            android:textAlignment="textStart"
+                            android:textColor="@color/cardview_dark_background"
+                            android:textSize="24sp"
+                            android:textStyle="bold|italic" />
+                    </LinearLayout>
+
+                    <ImageView
+                        android:id="@+id/imageView3"
+                        android:layout_width="match_parent"
+                        android:layout_height="26dp"
+                        android:alpha="0.3"
+                        android:scaleY="0.75"
+                        app:srcCompat="@drawable/orizontal_fade" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal"
+                        android:paddingBottom="3dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="serif"
+                            android:paddingStart="20dp"
+                            android:text="Carboydrats:"
+                            android:textAlignment="textStart"
+                            android:textColor="@color/cyan3"
                             android:textSize="20sp"
                             android:textStyle="bold" />
 
@@ -97,7 +136,7 @@
                             android:layout_weight="1"
                             android:fontFamily="serif"
                             android:paddingStart="20dp"
-                            android:text="(22 g)"
+                            android:text="(0.00 gr)"
                             android:textAlignment="textStart"
                             android:textColor="@color/cardview_dark_background"
                             android:textSize="20sp"
@@ -117,7 +156,7 @@
                             android:paddingStart="20dp"
                             android:text="       Proteins:"
                             android:textAlignment="textStart"
-                            android:textColor="@color/white"
+                            android:textColor="@color/cyan3"
                             android:textSize="20sp"
                             android:textStyle="bold" />
 
@@ -128,7 +167,7 @@
                             android:layout_weight="1"
                             android:fontFamily="serif"
                             android:paddingStart="20dp"
-                            android:text="(11 g)"
+                            android:text="(0.00 gr)"
                             android:textAlignment="textStart"
                             android:textColor="@color/cardview_dark_background"
                             android:textSize="20sp"
@@ -148,7 +187,7 @@
                             android:paddingStart="20dp"
                             android:text="           Lipids:"
                             android:textAlignment="textStart"
-                            android:textColor="@color/white"
+                            android:textColor="@color/cyan3"
                             android:textSize="20sp"
                             android:textStyle="bold" />
 
@@ -159,7 +198,7 @@
                             android:layout_weight="1"
                             android:fontFamily="serif"
                             android:paddingStart="20dp"
-                            android:text="(2 g)"
+                            android:text="(0.00 gr)"
                             android:textAlignment="textStart"
                             android:textColor="@color/cardview_dark_background"
                             android:textSize="20sp"
@@ -167,11 +206,13 @@
                     </LinearLayout>
 
                     <ImageView
-                        android:id="@+id/imageView3"
+                        android:id="@+id/imageView4"
                         android:layout_width="match_parent"
                         android:layout_height="26dp"
-                        android:scaleY="0.6"
+                        android:alpha="0.3"
+                        android:scaleY="0.75"
                         app:srcCompat="@drawable/orizontal_fade" />
+
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -184,25 +225,216 @@
                             android:layout_height="wrap_content"
                             android:fontFamily="serif"
                             android:paddingStart="20dp"
-                            android:text="       Calories:"
+                            android:text="             Fiber:"
                             android:textAlignment="textStart"
-                            android:textColor="@color/white"
+                            android:textColor="@android:color/holo_green_light"
                             android:textSize="20sp"
                             android:textStyle="bold" />
 
                         <TextView
-                            android:id="@+id/textViewCalories"
+                            android:id="@+id/textViewFiber"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:fontFamily="serif"
                             android:paddingStart="20dp"
-                            android:text="(150 Kcal)"
+                            android:text="(0.00 mg)"
                             android:textAlignment="textStart"
                             android:textColor="@color/cardview_dark_background"
-                            android:textSize="24sp"
+                            android:textSize="20sp"
                             android:textStyle="bold" />
                     </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal"
+                        android:paddingBottom="3dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="serif"
+                            android:paddingStart="20dp"
+                            android:text="         Sodium:"
+                            android:textAlignment="textStart"
+                            android:textColor="@color/teal_200"
+                            android:textSize="20sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/textViewSodium"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:fontFamily="serif"
+                            android:paddingStart="20dp"
+                            android:text="(0.00 mg)"
+                            android:textAlignment="textStart"
+                            android:textColor="@color/cardview_dark_background"
+                            android:textSize="20sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal"
+                        android:paddingBottom="3dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="serif"
+                            android:paddingStart="20dp"
+                            android:text="        Calcium:"
+                            android:textAlignment="textStart"
+                            android:textColor="@color/teal_200"
+                            android:textSize="20sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/textViewCalcium"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:fontFamily="serif"
+                            android:paddingStart="20dp"
+                            android:text="(0.00 mg)"
+                            android:textAlignment="textStart"
+                            android:textColor="@color/cardview_dark_background"
+                            android:textSize="20sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal"
+                        android:paddingBottom="3dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="serif"
+                            android:paddingStart="20dp"
+                            android:text="    Potassium:"
+                            android:textAlignment="textStart"
+                            android:textColor="@color/teal_200"
+                            android:textSize="20sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/textViewPotassium"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:fontFamily="serif"
+                            android:paddingStart="20dp"
+                            android:text="(0.00 mg)"
+                            android:textAlignment="textStart"
+                            android:textColor="@color/cardview_dark_background"
+                            android:textSize="20sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal"
+                        android:paddingBottom="3dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="serif"
+                            android:paddingStart="20dp"
+                            android:text="                Iron:"
+                            android:textAlignment="textStart"
+                            android:textColor="@color/teal_200"
+                            android:textSize="20sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/textViewIron"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:fontFamily="serif"
+                            android:paddingStart="20dp"
+                            android:text="(0.00 mg)"
+                            android:textAlignment="textStart"
+                            android:textColor="@color/cardview_dark_background"
+                            android:textSize="20sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal"
+                        android:paddingBottom="3dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="serif"
+                            android:paddingStart="20dp"
+                            android:text="     Viramin A:"
+                            android:textAlignment="textStart"
+                            android:textColor="@color/purple_200"
+                            android:textSize="20sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/textViewVitaminA"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:fontFamily="serif"
+                            android:paddingStart="20dp"
+                            android:text="(0.00 mg)"
+                            android:textAlignment="textStart"
+                            android:textColor="@color/cardview_dark_background"
+                            android:textSize="20sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal"
+                        android:paddingBottom="3dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="serif"
+                            android:paddingStart="20dp"
+                            android:text="      Vitamin C:"
+                            android:textAlignment="textStart"
+                            android:textColor="@color/purple_200"
+                            android:textSize="20sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/textViewVitaminC"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:fontFamily="serif"
+                            android:paddingStart="20dp"
+                            android:text="(0.00 mg)"
+                            android:textAlignment="textStart"
+                            android:textColor="@color/cardview_dark_background"
+                            android:textSize="20sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <View
+                        android:id="@+id/view2"
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp" />
 
                 </LinearLayout>
 
