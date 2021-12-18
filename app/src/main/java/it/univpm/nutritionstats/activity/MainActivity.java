@@ -3,23 +3,37 @@ package it.univpm.nutritionstats.activity;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.SuppressLint;
+import android.app.DatePickerDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Typeface;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.SoundPool;
+import android.os.Build;
 import android.os.Bundle;
+import android.text.InputType;
 import android.util.Log;
 import android.view.Display;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewTreeObserver;
+import android.widget.DatePicker;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
@@ -45,6 +59,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Map;
 
 import it.univpm.nutritionstats.R;
 import it.univpm.nutritionstats.api.APICommunication;
@@ -55,16 +70,30 @@ import it.univpm.nutritionstats.utility.Sound;
 public class MainActivity extends AppCompatActivity {
     public enum Diet {CLASSIC, PESCATARIAN, VEGETARIAN, VEGAN}
 
-    ;
+    public enum MealType {
+        BREAKFAST(0.20f),
+        LUNCH(0.40f),
+        SNACK(0.10f),
+        DINNER(0.30f);
+
+        float dailyNeed;
+
+        MealType(float dailyNeed) {
+            this.dailyNeed = dailyNeed;
+        }
+    }
 
     public enum Gender {MALE, FEMALE}
 
     ;
-    final        String TOKEN_PATH           = "token.dat";
-    final static int    REQUEST_CODE_SCANNER = 1;
-    final static int    REQUEST_CODE_LOGIN   = 2;
+    final        String TOKEN_PATH                    = "token.dat";
+    final static int    REQUEST_CODE_ADD              = 1;
+    final static int    REQUEST_CODE_LOGIN            = 2;
+    final static int    REQUEST_CODE_ADD_FOOD_BY_EAN  = 3;
+    final static int    REQUEST_CODE_ADD_FOOD_BY_NAME = 4;
 
-    public static ArrayList<JSONObject> resultList = new ArrayList<JSONObject>();
+    public static ArrayList<JSONObject> resultList    = new ArrayList<JSONObject>();
+    public static String                dateForValues = null;
 
     public static String token         = "";
     public static String userEmail     = "";
@@ -92,18 +121,25 @@ public class MainActivity extends AppCompatActivity {
     private ConstraintLayout menuDiary                               = null;
     private ConstraintLayout menuUser                                = null;
     private ImageView        imageViewUserPhoto, imageViewUserPhoto2 = null;
-    private PieChart pieChartCPG         = null;
-    private TextView textViewCalories    = null;
-    private TextView textViewCarboydrats = null;
-    private TextView textViewProteins    = null;
-    private TextView textViewLipids      = null;
-    private TextView textViewFiber       = null;
-    private TextView textViewSodium      = null;
-    private TextView textViewCalcium     = null;
-    private TextView textViewPotassium   = null;
-    private TextView textViewIron        = null;
-    private TextView textViewVitaminA    = null;
-    private TextView textViewVitaminC    = null;
+    private PieChart     pieChartCPG         = null;
+    private TextView     textViewCalories    = null;
+    private TextView     textViewCarboydrats = null;
+    private TextView     textViewProteins    = null;
+    private TextView     textViewLipids      = null;
+    private TextView     textViewFiber       = null;
+    private TextView     textViewSodium      = null;
+    private TextView     textViewCalcium     = null;
+    private TextView     textViewPotassium   = null;
+    private TextView     textViewIron        = null;
+    private TextView     textViewVitaminA    = null;
+    private TextView     textViewVitaminC    = null;
+    private ProgressBar  progressBarWater    = null;
+    private TextView     textViewWaterCount  = null;
+    private PieChart     pieChartWater       = null;
+    private LinearLayout breakfastFoodList   = null;
+    private LinearLayout lunchFoodList       = null;
+    private LinearLayout snackFoodList       = null;
+    private LinearLayout dinnerFoodList      = null;
 
     private ImageView imageViewAddButton    = null;
     private ImageView imageViewAddBreakfast = null;
@@ -121,11 +157,17 @@ public class MainActivity extends AppCompatActivity {
     private ImageView imageViewGender  = null;
     private ImageView imageViewDiet    = null;
 
+    private ScrollView scrollViewMenuDiary = null;
+    private ImageView  imageViewCalendar   = null;
+    private ImageView  imageViewHome       = null;
+    private TextView textViewTitle=null;
+
     private int     actualTab        = 0;
     private boolean addButtonPressed = false;
     Circle circleAddButton = null;
     private int addButtonSelected = 0;
-    long  startTime;
+    long startTime;
+    private boolean pieChartWaterAnimated = false;
     Point screenSize;
     Point movementStart;
     Point movementEnd;
@@ -137,6 +179,13 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         AndroidThreeTen.init(this);
+        getWindow().getDecorView().setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_FULLSCREEN
+                        | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
 
         Display display = getWindowManager().getDefaultDisplay();
         Point size = new Point();
@@ -159,6 +208,13 @@ public class MainActivity extends AppCompatActivity {
         textViewIron = findViewById(R.id.textViewIron);
         textViewVitaminA = findViewById(R.id.textViewVitaminA);
         textViewVitaminC = findViewById(R.id.textViewVitaminC);
+        progressBarWater = findViewById(R.id.progressBarWater);
+        textViewWaterCount = findViewById(R.id.textViewWaterCount);
+        pieChartWater = findViewById(R.id.pieChartWater);
+        breakfastFoodList = findViewById(R.id.BreakfastFoodList);
+        lunchFoodList = findViewById(R.id.LunchFoodList);
+        snackFoodList = findViewById(R.id.SnackFoodList);
+        dinnerFoodList = findViewById(R.id.DinnerFoodList);
 
         imageViewAddButton = findViewById(R.id.imageViewAddButton);
         imageViewAddBreakfast = findViewById(R.id.imageViewAddBreakfast);
@@ -177,15 +233,10 @@ public class MainActivity extends AppCompatActivity {
         textViewHeight = findViewById(R.id.textViewHeight);
         imageViewGender = findViewById(R.id.imageViewGender);
         imageViewDiet = findViewById(R.id.imageViewDiet);
-
-        /*buttonScanner.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent i = (new Intent(MainActivity.this, Scanner.class));
-                i.putExtra("ip", API_BASE_URL);
-                startActivityForResult(i, REQUEST_CODE_SCANNER);
-            }
-        });*/
+        scrollViewMenuDiary = findViewById(R.id.scrollViewMenuDiary);
+        imageViewCalendar = findViewById(R.id.imageViewCalendar);
+        imageViewHome = findViewById(R.id.imageViewHome);
+        textViewTitle=findViewById(R.id.textViewTitle);
 
         if (isLogged()) {
             String savedLogin = new InputOutputImpl(getApplicationContext(), TOKEN_PATH).readFile();
@@ -198,6 +249,12 @@ public class MainActivity extends AppCompatActivity {
             imageViewUser.animate().alpha(0.5f).scaleX(0.6f).scaleY(0.6f).setDuration(400).start();
             loadPieChartData();
         } else signUp();
+
+        if (dateForValues != null) {
+            imageViewHome.setVisibility(View.VISIBLE);
+            textViewTitle.setText(dateForValues.replace("-","/")+" VALUES:");
+        }
+
 
         imageViewDiary.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -273,6 +330,7 @@ public class MainActivity extends AppCompatActivity {
                         addMealList[1].setImageDrawable(getResources().getDrawable(R.drawable.lunch_hover));
                         addMealList[2].setImageDrawable(getResources().getDrawable(R.drawable.snack));
                         addMealList[3].setImageDrawable(getResources().getDrawable(R.drawable.dinner));
+
                     } else if (angle > 105) {
                         if (addButtonSelected == 3) return true;
                         makeSound(Sound.Sounds.valueOf("BIP_" + ((int) (Math.random() * 13) + 1)));
@@ -285,6 +343,7 @@ public class MainActivity extends AppCompatActivity {
                         addMealList[1].setImageDrawable(getResources().getDrawable(R.drawable.lunch));
                         addMealList[2].setImageDrawable(getResources().getDrawable(R.drawable.snack_hover));
                         addMealList[3].setImageDrawable(getResources().getDrawable(R.drawable.dinner));
+
                     } else if (angle > 75) {
                         if (addButtonSelected == 4) return true;
                         makeSound(Sound.Sounds.valueOf("BIP_" + ((int) (Math.random() * 13) + 1)));
@@ -297,6 +356,7 @@ public class MainActivity extends AppCompatActivity {
                         addMealList[1].setImageDrawable(getResources().getDrawable(R.drawable.lunch));
                         addMealList[2].setImageDrawable(getResources().getDrawable(R.drawable.snack));
                         addMealList[3].setImageDrawable(getResources().getDrawable(R.drawable.dinner_hover));
+
                     }
                 }
                 if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
@@ -314,12 +374,78 @@ public class MainActivity extends AppCompatActivity {
                     addMealList[1].setImageDrawable(getResources().getDrawable(R.drawable.lunch));
                     addMealList[2].setImageDrawable(getResources().getDrawable(R.drawable.snack));
                     addMealList[3].setImageDrawable(getResources().getDrawable(R.drawable.dinner));
+
+                    if(addButtonSelected>0) {
+                        AddFood.mealType = MealType.values()[addButtonSelected - 1];
+                        Intent i = (new Intent(MainActivity.this, AddFood.class));
+                        startActivityForResult(i, REQUEST_CODE_ADD);
+                    }
                 }
                 return true;
             }
         });
+
+        APICommunication.requestFoodList(token);
+
+        scrollViewMenuDiary.getViewTreeObserver().addOnScrollChangedListener(new ViewTreeObserver.OnScrollChangedListener() {
+            @Override
+            public void onScrollChanged() {
+                System.out.println(scrollViewMenuDiary.getScrollY());
+                if (!pieChartWaterAnimated && scrollViewMenuDiary.getScrollY() > 630) {
+                    pieChartWater.animateY(3200, Easing.EaseInSine);
+                    pieChartWaterAnimated = true;
+                }
+                // DO SOMETHING WITH THE SCROLL COORDINATES
+            }
+        });
+
+        imageViewCalendar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                DatePickerDialog.OnDateSetListener date = new DatePickerDialog.OnDateSetListener() {
+                    @Override
+                    public void onDateSet(DatePicker view, int year, int monthOfYear,
+                                          int dayOfMonth) {
+                        String dayId =
+                                String.valueOf(dayOfMonth) + "-" +
+                                        String.valueOf(monthOfYear + 1) + "-" +
+                                        String.valueOf(year);
+                        dateForValues = dayId;
+                        imageViewHome.setVisibility(View.VISIBLE);
+
+                        Intent intent = getIntent();
+                        finish();
+                        startActivity(intent);
+                    }
+
+                };
+                if (dateForValues == null) {
+                    new DatePickerDialog(MainActivity.this, date,
+                            LocalDate.now().getYear(),
+                            LocalDate.now().getMonthValue() - 1,
+                            LocalDate.now().getDayOfMonth()).show();
+                } else
+                    new DatePickerDialog(MainActivity.this, date,
+                            Integer.parseInt(dateForValues.split("-")[2]),
+                            Integer.parseInt(dateForValues.split("-")[1])-1,
+                            Integer.parseInt(dateForValues.split("-")[0])).show();
+
+            }
+        });
+
+        imageViewHome.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dateForValues = null;
+
+                Intent intent = getIntent();
+                finish();
+                startActivity(intent);
+            }
+        });
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     private void loadPieChartData() {
         loadTodayValues();
 
@@ -327,10 +453,6 @@ public class MainActivity extends AppCompatActivity {
         entries.add(new PieEntry((carbohydrates * 4f) / calories, "Carbohydrates"));
         entries.add(new PieEntry((proteins * 4f) / calories, "Proteins"));
         entries.add(new PieEntry((lipids * 9f) / calories, "Lipids"));
-
-        /*entries.add(new PieEntry(0.33f, "Carbohydrates"));
-        entries.add(new PieEntry(0.33f, "Proteins"));
-        entries.add(new PieEntry(0.33f, "Lipids"));*/
 
         ArrayList<Integer> colors = new ArrayList<>();
         for (int color : ColorTemplate.MATERIAL_COLORS) {
@@ -362,21 +484,10 @@ public class MainActivity extends AppCompatActivity {
         pieChartCPG.setEntryLabelTextSize(16f);
         pieChartCPG.setClickable(true);
 
-        pieChartCPG.animateY(1000, Easing.EaseInOutElastic);
+        pieChartCPG.animateY(3200, Easing.EaseInOutSine);
 
         Legend l = pieChartCPG.getLegend();
         l.setEnabled(false);
-        /*l.setVerticalAlignment(Legend.LegendVerticalAlignment.CENTER);
-        l.setHorizontalAlignment(Legend.LegendHorizontalAlignment.CENTER);
-        l.setOrientation(Legend.LegendOrientation.VERTICAL);
-        l.setDrawInside(true);
-        l.setXEntrySpace(7f);
-        l.setYEntrySpace(0f);
-        l.setYOffset(0f);
-        l.setTextColor(Color.WHITE);
-        l.setTypeface(Typeface.DEFAULT_BOLD);
-        l.setTextSize(12);*/
-        Log.e("MY", "load" + String.valueOf((System.nanoTime() - startTime) / 1000000f));
     }
 
     private void fromUserToDiary() {
@@ -423,7 +534,17 @@ public class MainActivity extends AppCompatActivity {
         actualTab = 1;
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     private void loadTodayValues() {
+        breakfastFoodList.removeAllViews();
+        lunchFoodList.removeAllViews();
+        snackFoodList.removeAllViews();
+        dinnerFoodList.removeAllViews();
+        carbohydrates = 0f;
+        proteins = 0f;
+        lipids = 0f;
+        calories = 0f;
+
         JSONObject response = APICommunication.requestTodayValues(token);
         if (response.keySet().contains("result") && response.get("result").toString().contains("error")) {
             Toast.makeText(getApplicationContext(), response.get("result").toString(), Toast.LENGTH_SHORT).show();
@@ -432,9 +553,9 @@ public class MainActivity extends AppCompatActivity {
 
         if (response.keySet().contains("result") && response.get("result").equals("day not found"))
             return;
-        carbohydrates = ((Number) response.get("carbohydrates")).floatValue();
-        proteins = ((Number) response.get("proteins")).floatValue();
-        lipids = ((Number) response.get("lipids")).floatValue();
+        carbohydrates = ((Number) response.get("carbohydrate")).floatValue();
+        proteins = ((Number) response.get("protein")).floatValue();
+        lipids = ((Number) response.get("lipid")).floatValue();
         calories = ((Number) response.get("calories")).floatValue();
         water = ((Number) response.get("water")).floatValue();
         fiber = ((Number) response.get("fiber")).floatValue();
@@ -442,14 +563,14 @@ public class MainActivity extends AppCompatActivity {
         sodium = ((Number) response.get("sodium")).floatValue();
         potassium = ((Number) response.get("potassium")).floatValue();
         iron = ((Number) response.get("iron")).floatValue();
-        vitaminA = ((Number) response.get("vitamin_a")).floatValue();
-        vitaminC = ((Number) response.get("vitamin_c")).floatValue();
+        vitaminA = ((Number) response.get("vitamina")).floatValue();
+        vitaminC = ((Number) response.get("vitaminc")).floatValue();
 
-        textViewCalories.setText("(" + String.format("%.2f", calories) + " gr)");
+        textViewCalories.setText("(" + String.valueOf((int) calories) + " kcal)");
         textViewCarboydrats.setText("(" + String.format("%.2f", carbohydrates) + " gr)");
         textViewProteins.setText("(" + String.format("%.2f", proteins) + " gr)");
         textViewLipids.setText("(" + String.format("%.2f", lipids) + " gr)");
-        textViewFiber.setText("(" + String.format("%.2f", fiber * 1000) + " mg)");
+        textViewFiber.setText("(" + String.format("%.2f", fiber) + " gr)");
         textViewSodium.setText("(" + String.format("%.2f", sodium * 1000) + " mg)");
         textViewCalcium.setText("(" + String.format("%.2f", calcium * 1000) + " mg)");
         textViewPotassium.setText("(" + String.format("%.2f", potassium * 1000) + " mg)");
@@ -457,7 +578,79 @@ public class MainActivity extends AppCompatActivity {
         textViewVitaminA.setText("(" + String.format("%.2f", vitaminA * 1000) + " mg)");
         textViewVitaminC.setText("(" + String.format("%.2f", vitaminC * 1000) + " mg)");
 
-        Log.e("MY", "loadTodayValues" + String.valueOf((System.nanoTime() - startTime) / 1000000f));
+        float progress = water / 2000;
+        if (progress > 1f)
+            progress = 1f;
+        progressBarWater.setMax(100);
+        progressBarWater.setProgress((int) (progress * 100));
+        int color =
+                Color.rgb((3 + (progress - 0.5f) * 2 * 15) / 255f, 244f / 255, (244 - 240 * (progress - 0.5f) * 2) / 255f);
+        if (progress < 0.5f)
+            color = Color.rgb(3, 120 + 124 * progress * 2, 244);
+        else
+            color =
+                    Color.rgb((3 + (progress - 0.5f) * 2 * 15) / 255f, 244f / 255, (244 - 240 * (progress - 0.5f) * 2) / 255f);
+
+        progressBarWater.setProgressTintList(ColorStateList.valueOf(color));
+        textViewWaterCount.setText(String.valueOf((int) water) + "ml / 2000ml");
+
+        ArrayList<PieEntry> entries = new ArrayList<>();
+        entries.add(new PieEntry(progress, "Water"));
+        entries.add(new PieEntry(1-progress, ""));
+
+        PieDataSet dataSet = new PieDataSet(entries, "");
+        int finalColor = color;
+        dataSet.setColors(new ArrayList<Integer>() {{
+            add(finalColor);
+            add(Color.TRANSPARENT);
+        }});
+        PieData data = new PieData(dataSet);
+        data.setDrawValues(false);
+        data.setValueFormatter(new PercentFormatter(pieChartWater));
+        data.setValueTextSize(20f);
+        data.setValueTextColor(Color.BLACK);
+        data.setValueTypeface(Typeface.DEFAULT_BOLD);
+
+        pieChartWater.setData(data);
+        pieChartWater.setHoleRadius(0f);
+        pieChartWater.setUsePercentValues(true);
+        pieChartWater.invalidate();
+        pieChartWater.setHoleColor(Color.TRANSPARENT);
+        pieChartWater.setEntryLabelTypeface(Typeface.MONOSPACE);
+        pieChartWater.setEntryLabelColor(Color.GRAY);
+        pieChartWater.setEntryLabelTextSize(20f);
+        pieChartWater.setClickable(true);
+
+        Legend l = pieChartWater.getLegend();
+        l.setEnabled(false);
+
+        HashMap<MainActivity.MealType, ArrayList<String>> foodList =
+                APICommunication.requestFoodList(token);
+        for (Map.Entry<?, ?> entry : foodList.entrySet()) {
+            for (String name : (ArrayList<String>) entry.getValue()) {
+                TextView food = new TextView(getApplicationContext());
+                food.setText(name);
+                food.setTextColor(Color.WHITE);
+                food.setTextSize(18);
+                food.setTypeface(Typeface.MONOSPACE);
+                LinearLayout parent = null;
+                switch ((MainActivity.MealType) entry.getKey()) {
+                    case BREAKFAST:
+                        parent = breakfastFoodList;
+                        break;
+                    case LUNCH:
+                        parent = lunchFoodList;
+                        break;
+                    case SNACK:
+                        parent = snackFoodList;
+                        break;
+                    case DINNER:
+                        parent = dinnerFoodList;
+                        break;
+                }
+                parent.addView(food);
+            }
+        }
     }
 
     private boolean isLogged() {
@@ -508,9 +701,7 @@ public class MainActivity extends AppCompatActivity {
         Object[] weights =
                 ((HashMap<LocalDate, Integer>) response.get("weight")).values().toArray();
         textViewWeight.setText(weights[weights.length - 1].toString());
-        Object[] heights =
-                ((HashMap<LocalDate, Integer>) response.get("height")).values().toArray();
-        textViewHeight.setText(heights[heights.length - 1].toString());
+        textViewHeight.setText(response.get("height").toString());
         switch (Diet.valueOf(response.get("diet").toString())) {
             case CLASSIC:
                 imageViewDiet.setImageDrawable(getResources().getDrawable(R.drawable.meat));
@@ -572,12 +763,13 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
-            case REQUEST_CODE_SCANNER:
-                if (!resultList.isEmpty()) {
-                    //textViewOutput.setText(resultList.get(0).toJSONString());
-                    resultList.remove(0);
-                }
+
+            case REQUEST_CODE_ADD:
+                Intent intent = getIntent();
+                finish();
+                startActivity(intent);
                 break;
+
             case REQUEST_CODE_LOGIN:
                 JSONObject response =
                         new APICommunication().requestSignUp(userName, userEmail, birth, diet, weight, height, gender);
@@ -593,6 +785,7 @@ public class MainActivity extends AppCompatActivity {
                 fromUserToDiary();
                 loadPieChartData();
                 break;
+
         }
     }
 
@@ -618,6 +811,8 @@ public class MainActivity extends AppCompatActivity {
         }
 
         if (event.getAction() == MotionEvent.ACTION_MOVE) {
+            if (movementStart == null)
+                return super.dispatchTouchEvent(event);
             if (actualTab == 0 && (float) movementStart.x / screenSize.x > 0.85) {
                 menuUser.setTranslationX(event.getX());
                 menuUser.setAlpha(1 - (event.getX() / screenSize.x));
@@ -637,6 +832,8 @@ public class MainActivity extends AppCompatActivity {
         }
 
         if (event.getAction() == MotionEvent.ACTION_UP) {
+            if (movementStart == null)
+                return true;
             movementEnd = new Point((int) event.getX(), (int) event.getY());
 
             if (actualTab == 0) {

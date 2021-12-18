@@ -15,7 +15,13 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.NutritionStats"
         android:usesCleartextTraffic="true">
-        <activity android:name=".activity.Login"></activity>
+        <activity
+            android:name=".activity.AddFoodByName"
+            android:exported="false" />
+        <activity
+            android:name=".activity.AddFood"
+            android:exported="false" />
+        <activity android:name=".activity.Login" />
         <activity android:name=".activity.Scanner" />
         <activity
             android:name=".activity.MainActivity"

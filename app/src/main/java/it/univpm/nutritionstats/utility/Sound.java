@@ -24,7 +24,9 @@ public class Sound {
         BIP_10(R.raw.other_blip_select10),
         BIP_11(R.raw.other_blip_select11),
         BIP_12(R.raw.other_blip_select12),
-        BIP_13(R.raw.other_blip_select13);
+        BIP_13(R.raw.other_blip_select13),
+        PICKUP_COIN(R.raw.other_pickup_coin),
+        WATER_SPLASH(R.raw.water_splash);
 
         public int res;
 

@@ -1,16 +1,20 @@
 package it.univpm.nutritionstats.activity;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.text.InputType;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import com.budiyev.android.codescanner.AutoFocusMode;
@@ -30,6 +34,7 @@ public class Scanner extends AppCompatActivity {
     private CodeScanner myCodeScanner;
     private CodeScannerView  scanner_view;
     private APICommunication apiCommunication;
+    private boolean scanned=false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,11 +60,35 @@ public class Scanner extends AppCompatActivity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+                        if(scanned)return;
+                        scanned=true;
                         Toast.makeText(Scanner.this, result.getText(), Toast.LENGTH_SHORT).show();
-                        MainActivity.resultList.add(apiCommunication.getInfoFromEan(result.getText()));
-                        Intent resultIntent = new Intent();
-                        setResult(Activity.RESULT_OK, resultIntent);
-                        finish();
+
+                        AlertDialog.Builder builder = new AlertDialog.Builder(Scanner.this);
+                        builder.setTitle("Please specify portion weight:");
+                        final EditText input = new EditText(getApplicationContext());
+                        input.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_TEXT_VARIATION_NORMAL);
+                        builder.setView(input);
+                        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                int inputNum=Integer.parseInt(input.getText().toString());
+
+                                APICommunication.requestAddFoodByEan(MainActivity.token,AddFood.mealType,
+                                        Long.parseLong(result.getText()),inputNum);
+                                Intent resultIntent = new Intent();
+                                setResult(Activity.RESULT_OK, resultIntent);
+                                finish();
+                            }
+                        });
+                        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.cancel();
+                            }
+                        });
+
+                        builder.show();
                     }
                 });
             }
