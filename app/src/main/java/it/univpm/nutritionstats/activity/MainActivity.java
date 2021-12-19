@@ -51,11 +51,13 @@ import com.squareup.picasso.Picasso;
 import org.json.simple.JSONObject;
 import org.threeten.bp.LocalDate;
 
+import java.lang.reflect.Array;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -173,6 +175,7 @@ public class MainActivity extends AppCompatActivity {
     Point movementEnd;
 
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         startTime = System.nanoTime();
@@ -536,6 +539,7 @@ public class MainActivity extends AppCompatActivity {
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     private void loadTodayValues() {
+        pieChartWater.setVisibility(View.INVISIBLE);
         breakfastFoodList.removeAllViews();
         lunchFoodList.removeAllViews();
         snackFoodList.removeAllViews();
@@ -551,13 +555,13 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        if (response.keySet().contains("result") && response.get("result").equals("day not found"))
+        if (response.keySet().contains("result") && response.get("result").equals("nothing to show on this day..."))
             return;
         carbohydrates = ((Number) response.get("carbohydrate")).floatValue();
         proteins = ((Number) response.get("protein")).floatValue();
         lipids = ((Number) response.get("lipid")).floatValue();
         calories = ((Number) response.get("calories")).floatValue();
-        water = ((Number) response.get("water")).floatValue();
+        water = ((Number) response.get("water")).floatValue()+((Number) response.get("waterfromfood")).floatValue();
         fiber = ((Number) response.get("fiber")).floatValue();
         calcium = ((Number) response.get("calcium")).floatValue();
         sodium = ((Number) response.get("sodium")).floatValue();
@@ -620,6 +624,7 @@ public class MainActivity extends AppCompatActivity {
         pieChartWater.setEntryLabelColor(Color.GRAY);
         pieChartWater.setEntryLabelTextSize(20f);
         pieChartWater.setClickable(true);
+        pieChartWater.setVisibility(View.VISIBLE);
 
         Legend l = pieChartWater.getLegend();
         l.setEnabled(false);
@@ -684,10 +689,11 @@ public class MainActivity extends AppCompatActivity {
 
     @SuppressLint("SimpleDateFormat")
     private void login(JSONObject response) {
+        response=(JSONObject)response.get("user");
         textViewEmail.setText(response.get("email").toString());
         textViewNickname.setText(response.get("nickname").toString());
         try {
-            birth = new SimpleDateFormat("yyyy-MM-dd").parse(response.get("birth").toString());
+            birth = new SimpleDateFormat("yyyy-MM-dd").parse(response.get("yearOfBirth").toString());
         } catch (ParseException e) {
             e.printStackTrace();
         }
@@ -759,6 +765,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);

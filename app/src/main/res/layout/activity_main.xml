@@ -524,7 +524,7 @@
                                 android:layout_marginRight="18dp"
                                 android:fontFamily="serif"
                                 android:paddingStart="20dp"
-                                android:text="756ml / 2000ml"
+                                android:text="0ml / 2000ml"
                                 android:textAlignment="textEnd"
                                 android:textColor="@color/white"
                                 android:textSize="14sp"

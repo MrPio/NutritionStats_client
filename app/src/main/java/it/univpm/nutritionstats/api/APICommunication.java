@@ -28,6 +28,7 @@ import it.univpm.nutritionstats.activity.MainActivity;
 public class APICommunication {
     public final static String       API_BASE_URL              = "http://192.168.1.16:5000";
     final static        String       ENDPOINT_EAN              = "/api/ean/";
+    final static        String       ENDPOINT_NAME              = "/api/name/";
     final static        String       ENDPOINT_SIGNUP           = "/signup";
     final static        String       ENDPOINT_LOGIN            = "/login";
     final static        String       ENDPOINT_TODAY_VALUES     = "/diary/";
@@ -41,6 +42,21 @@ public class APICommunication {
         HttpURLConnection conn = null;
         try {
             conn = (HttpURLConnection) new URL(API_BASE_URL + ENDPOINT_EAN + ean).openConnection();
+            conn.setRequestMethod("GET");
+        } catch (IOException e) {
+            HashMap<String, String> response = new HashMap<>();
+            response.put("result", "error: " + e.getMessage());
+            return new JSONObject(response);
+        }
+        return makeRequest(conn);
+    }
+
+    public static JSONObject getInfoFromFoodName(String foodName, int weight, String measure) {
+        HttpURLConnection conn = null;
+        try {
+            conn = (HttpURLConnection) new URL(API_BASE_URL + ENDPOINT_NAME + foodName
+                    + "?portion_weight=" + weight
+                    + "&unit_of_measure=" + measure).openConnection();
             conn.setRequestMethod("GET");
         } catch (IOException e) {
             HashMap<String, String> response = new HashMap<>();
