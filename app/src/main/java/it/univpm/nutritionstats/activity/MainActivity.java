@@ -3,15 +3,17 @@ package it.univpm.nutritionstats.activity;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.DatePickerDialog;
-import android.content.Context;
+import android.app.Dialog;
+import android.app.TimePickerDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Typeface;
-import android.media.AudioManager;
+import android.graphics.drawable.GradientDrawable;
 import android.media.MediaPlayer;
 import android.media.SoundPool;
 import android.os.Build;
@@ -22,54 +24,77 @@ import android.view.Display;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.NumberPicker;
 import android.widget.ProgressBar;
 import android.widget.ScrollView;
+import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
-import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.LinearLayoutCompat;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.github.mikephil.charting.animation.Easing;
+import com.github.mikephil.charting.charts.BarChart;
+import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.charts.PieChart;
+import com.github.mikephil.charting.components.AxisBase;
+import com.github.mikephil.charting.components.Description;
 import com.github.mikephil.charting.components.Legend;
+import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.data.BarData;
+import com.github.mikephil.charting.data.BarDataSet;
+import com.github.mikephil.charting.data.BarEntry;
+import com.github.mikephil.charting.data.DataSet;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineData;
+import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
 import com.github.mikephil.charting.formatter.PercentFormatter;
+import com.github.mikephil.charting.formatter.ValueFormatter;
+import com.github.mikephil.charting.highlight.Highlight;
+import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import com.github.mikephil.charting.utils.ColorTemplate;
 import com.jakewharton.threetenabp.AndroidThreeTen;
 import com.squareup.picasso.Picasso;
 
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.threeten.bp.LocalDate;
+import org.threeten.bp.format.DateTimeFormatter;
 
-import java.lang.reflect.Array;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.Period;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 import it.univpm.nutritionstats.R;
 import it.univpm.nutritionstats.api.APICommunication;
 import it.univpm.nutritionstats.utility.Circle;
+import it.univpm.nutritionstats.utility.DrinkType;
+import it.univpm.nutritionstats.utility.EasingFunctionSine;
 import it.univpm.nutritionstats.utility.InputOutputImpl;
 import it.univpm.nutritionstats.utility.Sound;
+import it.univpm.nutritionstats.utility.Utilities;
 
 public class MainActivity extends AppCompatActivity {
+
     public enum Diet {CLASSIC, PESCATARIAN, VEGETARIAN, VEGAN}
 
     public enum MealType {
@@ -97,29 +122,32 @@ public class MainActivity extends AppCompatActivity {
     public static ArrayList<JSONObject> resultList    = new ArrayList<JSONObject>();
     public static String                dateForValues = null;
 
-    public static String token         = "";
-    public static String userEmail     = "";
-    public static String userName      = "";
-    public static Diet   diet          = null;
-    public static int    weight        = 0;
-    public static int    height        = 0;
-    public static Gender gender        = null;
-    public static Date   birth         = null;
-    //Current Values
-    public static float  carbohydrates = 0;
-    public static float  proteins      = 0;
-    public static float  lipids        = 0;
-    public static float  calories      = 0;
-    public static float  water         = 0;
-    public static float  fiber         = 0;
-    public static float  sodium        = 0;
-    public static float  calcium       = 0;
-    public static float  potassium     = 0;
-    public static float  iron          = 0;
-    public static float  vitaminA      = 0;
-    public static float  vitaminC      = 0;
+    public static String                    token         = "";
+    public static String                    userEmail     = "";
+    public static String                    userName      = "";
+    public static Diet                      diet          = null;
+    public static int                       weight        = 0;
+    private       TreeMap<LocalDate, Float> weightMap     = new TreeMap<>();
+    public static int                       height        = 0;
+    public static Gender                    gender        = null;
+    public static Date                      birth         = null;
+    public static int                       caloricIntake = 0;
 
-    MediaPlayer mPlayer = new MediaPlayer();
+
+    //Current Values
+    public static float carbohydrates = 0;
+    public static float proteins      = 0;
+    public static float lipids        = 0;
+    public static float calories      = 0;
+    public static float water         = 0;
+    public static float fiber         = 0;
+    public static float sodium        = 0;
+    public static float calcium       = 0;
+    public static float potassium     = 0;
+    public static float iron          = 0;
+    public static float vitaminA      = 0;
+    public static float vitaminC      = 0;
+
     private ConstraintLayout menuDiary                               = null;
     private ConstraintLayout menuUser                                = null;
     private ImageView        imageViewUserPhoto, imageViewUserPhoto2 = null;
@@ -148,6 +176,8 @@ public class MainActivity extends AppCompatActivity {
     private ImageView imageViewAddLunch     = null;
     private ImageView imageViewAddSnack     = null;
     private ImageView imageViewAddDinner    = null;
+    private ImageView imageViewAddWater     = null;
+    private ImageView imageViewAddRuler     = null;
 
     private ImageView imageViewDiary   = null;
     private ImageView imageViewUser    = null;
@@ -158,11 +188,12 @@ public class MainActivity extends AppCompatActivity {
     private TextView  textViewHeight   = null;
     private ImageView imageViewGender  = null;
     private ImageView imageViewDiet    = null;
+    private LineChart lineChartWeight  = null;
 
     private ScrollView scrollViewMenuDiary = null;
     private ImageView  imageViewCalendar   = null;
     private ImageView  imageViewHome       = null;
-    private TextView textViewTitle=null;
+    private TextView   textViewTitle       = null;
 
     private int     actualTab        = 0;
     private boolean addButtonPressed = false;
@@ -173,6 +204,8 @@ public class MainActivity extends AppCompatActivity {
     Point screenSize;
     Point movementStart;
     Point movementEnd;
+    private boolean measureSelected = false;
+    private boolean updateWeightValueDisplayed;
 
 
     @RequiresApi(api = Build.VERSION_CODES.O)
@@ -224,6 +257,8 @@ public class MainActivity extends AppCompatActivity {
         imageViewAddLunch = findViewById(R.id.imageViewAddLunch);
         imageViewAddSnack = findViewById(R.id.imageViewAddSnack);
         imageViewAddDinner = findViewById(R.id.imageViewAddDinner);
+        imageViewAddWater = findViewById(R.id.imageViewAddWater);
+        imageViewAddRuler = findViewById(R.id.imageViewAddRuler);
         ImageView[] addMealList =
                 {imageViewAddBreakfast, imageViewAddLunch, imageViewAddSnack, imageViewAddDinner};
 
@@ -236,10 +271,12 @@ public class MainActivity extends AppCompatActivity {
         textViewHeight = findViewById(R.id.textViewHeight);
         imageViewGender = findViewById(R.id.imageViewGender);
         imageViewDiet = findViewById(R.id.imageViewDiet);
+        lineChartWeight = findViewById(R.id.lineChartWeight);
+
         scrollViewMenuDiary = findViewById(R.id.scrollViewMenuDiary);
         imageViewCalendar = findViewById(R.id.imageViewCalendar);
         imageViewHome = findViewById(R.id.imageViewHome);
-        textViewTitle=findViewById(R.id.textViewTitle);
+        textViewTitle = findViewById(R.id.textViewTitle);
 
         if (isLogged()) {
             String savedLogin = new InputOutputImpl(getApplicationContext(), TOKEN_PATH).readFile();
@@ -255,7 +292,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (dateForValues != null) {
             imageViewHome.setVisibility(View.VISIBLE);
-            textViewTitle.setText(dateForValues.replace("-","/")+" VALUES:");
+            textViewTitle.setText(dateForValues.replace("-", "/") + " VALUES:");
         }
 
 
@@ -294,7 +331,6 @@ public class MainActivity extends AppCompatActivity {
                     makeSound(Sound.Sounds.BIP_13);
                     imageViewAddButton.setImageDrawable(getResources().getDrawable(R.drawable.add_button_hover));
 
-
                     addMealList[0].animate().alpha(1.0f).scaleX(1f).scaleY(1f)
                             .translationX(circleAddButton.getPointFromAngle(180f).x).translationY(-circleAddButton.getPointFromAngle(180f).y).start();
                     addMealList[1].animate().alpha(1.0f).scaleX(1f).scaleY(1f)
@@ -303,70 +339,119 @@ public class MainActivity extends AppCompatActivity {
                             .translationX(circleAddButton.getPointFromAngle(120f).x).translationY(-circleAddButton.getPointFromAngle(120f).y).start();
                     addMealList[3].animate().alpha(1.0f).scaleX(1f).scaleY(1f)
                             .translationX(circleAddButton.getPointFromAngle(90f).x).translationY(-circleAddButton.getPointFromAngle(90f).y).start();
+
+                    imageViewAddWater.setAlpha(0f);
+                    imageViewAddWater.setVisibility(View.VISIBLE);
+                    imageViewAddWater.animate().scaleX(1.35f).scaleY(1.35f).alpha(1.0f).start();
+                    imageViewAddButton.animate().alpha(0.0f).start();
                 }
                 if (motionEvent.getAction() == MotionEvent.ACTION_MOVE) {
-                    float angle =
-                            circleAddButton.getAngleByPoint(new Point((int) motionEvent.getRawX(), (int) motionEvent.getRawY()));
-                    if (circleAddButton.getDistaceFromCenter(new Point((int) motionEvent.getRawX(), (int) motionEvent.getRawY())) < 170)
-                        return true;
-                    if (angle > 165f) {
-                        if (addButtonSelected == 1) return true;
-                        makeSound(Sound.Sounds.valueOf("BIP_" + ((int) (Math.random() * 13) + 1)));
-                        addButtonSelected = 1;
-                        addMealList[0].animate().scaleX(1.35f).scaleY(1.35f).setDuration(120).start();
-                        addMealList[1].animate().scaleX(1f).scaleY(1f).setDuration(120).start();
-                        addMealList[2].animate().scaleX(1f).scaleY(1f).setDuration(120).start();
-                        addMealList[3].animate().scaleX(1f).scaleY(1f).setDuration(120).start();
-                        addMealList[0].setImageDrawable(getResources().getDrawable(R.drawable.breakfast_hover));
-                        addMealList[1].setImageDrawable(getResources().getDrawable(R.drawable.lunch));
-                        addMealList[2].setImageDrawable(getResources().getDrawable(R.drawable.snack));
-                        addMealList[3].setImageDrawable(getResources().getDrawable(R.drawable.dinner));
-                    } else if (angle > 135f) {
-                        if (addButtonSelected == 2) return true;
-                        makeSound(Sound.Sounds.valueOf("BIP_" + ((int) (Math.random() * 13) + 1)));
-                        addButtonSelected = 2;
-                        addMealList[0].animate().scaleX(1f).scaleY(1f).setDuration(120).start();
-                        addMealList[1].animate().scaleX(1.35f).scaleY(1.35f).setDuration(120).start();
-                        addMealList[2].animate().scaleX(1f).scaleY(1f).setDuration(120).start();
-                        addMealList[3].animate().scaleX(1f).scaleY(1f).setDuration(120).start();
-                        addMealList[0].setImageDrawable(getResources().getDrawable(R.drawable.breakfast));
-                        addMealList[1].setImageDrawable(getResources().getDrawable(R.drawable.lunch_hover));
-                        addMealList[2].setImageDrawable(getResources().getDrawable(R.drawable.snack));
-                        addMealList[3].setImageDrawable(getResources().getDrawable(R.drawable.dinner));
+                    int radius = view.getMeasuredWidth();
+                    Point center = new Point(radius, radius);
+                    Circle hit = new Circle(center);
+                    float distance =
+                            hit.getDistaceFromCenter(new Point((int) motionEvent.getX(), (int) motionEvent.getY()));
 
-                    } else if (angle > 105) {
-                        if (addButtonSelected == 3) return true;
-                        makeSound(Sound.Sounds.valueOf("BIP_" + ((int) (Math.random() * 13) + 1)));
-                        addButtonSelected = 3;
-                        addMealList[0].animate().scaleX(1f).scaleY(1f).setDuration(120).start();
-                        addMealList[1].animate().scaleX(1f).scaleY(1f).setDuration(120).start();
-                        addMealList[2].animate().scaleX(1.35f).scaleY(1.35f).setDuration(120).start();
-                        addMealList[3].animate().scaleX(1f).scaleY(1f).setDuration(120).start();
-                        addMealList[0].setImageDrawable(getResources().getDrawable(R.drawable.breakfast));
-                        addMealList[1].setImageDrawable(getResources().getDrawable(R.drawable.lunch));
-                        addMealList[2].setImageDrawable(getResources().getDrawable(R.drawable.snack_hover));
-                        addMealList[3].setImageDrawable(getResources().getDrawable(R.drawable.dinner));
-
-                    } else if (angle > 75) {
-                        if (addButtonSelected == 4) return true;
-                        makeSound(Sound.Sounds.valueOf("BIP_" + ((int) (Math.random() * 13) + 1)));
-                        addButtonSelected = 4;
+                    if (distance > 580) {
+                        if (addButtonSelected == -1)
+                            return false;
+                        addButtonSelected = -1;
                         addMealList[0].animate().scaleX(1f).scaleY(1f).setDuration(120).start();
                         addMealList[1].animate().scaleX(1f).scaleY(1f).setDuration(120).start();
                         addMealList[2].animate().scaleX(1f).scaleY(1f).setDuration(120).start();
-                        addMealList[3].animate().scaleX(1.35f).scaleY(1.35f).setDuration(120).start();
+                        addMealList[3].animate().scaleX(1f).scaleY(1f).setDuration(120).start();
                         addMealList[0].setImageDrawable(getResources().getDrawable(R.drawable.breakfast));
                         addMealList[1].setImageDrawable(getResources().getDrawable(R.drawable.lunch));
                         addMealList[2].setImageDrawable(getResources().getDrawable(R.drawable.snack));
-                        addMealList[3].setImageDrawable(getResources().getDrawable(R.drawable.dinner_hover));
+                        addMealList[3].setImageDrawable(getResources().getDrawable(R.drawable.dinner));
 
+                        imageViewAddWater.animate().scaleX(1f).scaleY(1f).setDuration(120).start();
+                    } else {
+
+                        float angle =
+                                circleAddButton.getAngleByPoint(new Point((int) motionEvent.getRawX(), (int) motionEvent.getRawY()));
+                        if (circleAddButton.getDistaceFromCenter(new Point((int) motionEvent.getRawX(), (int) motionEvent.getRawY())) < 170) {
+                            if (addButtonSelected == 0) return true;
+                            makeSound(Sound.Sounds.BIP_2);
+                            addButtonSelected = 0;
+                            addMealList[0].animate().scaleX(1f).scaleY(1f).setDuration(120).start();
+                            addMealList[1].animate().scaleX(1f).scaleY(1f).setDuration(120).start();
+                            addMealList[2].animate().scaleX(1f).scaleY(1f).setDuration(120).start();
+                            addMealList[3].animate().scaleX(1f).scaleY(1f).setDuration(120).start();
+                            addMealList[0].setImageDrawable(getResources().getDrawable(R.drawable.breakfast));
+                            addMealList[1].setImageDrawable(getResources().getDrawable(R.drawable.lunch));
+                            addMealList[2].setImageDrawable(getResources().getDrawable(R.drawable.snack));
+                            addMealList[3].setImageDrawable(getResources().getDrawable(R.drawable.dinner));
+
+                            imageViewAddWater.animate().scaleX(1.35f).scaleY(1.35f).setDuration(120).start();
+                            return true;
+                        }
+                        if (angle > 165f) {
+                            if (addButtonSelected == 1) return true;
+                            makeSound(Sound.Sounds.BIP_5);
+                            addButtonSelected = 1;
+                            addMealList[0].animate().scaleX(1.35f).scaleY(1.35f).setDuration(120).start();
+                            addMealList[1].animate().scaleX(1f).scaleY(1f).setDuration(120).start();
+                            addMealList[2].animate().scaleX(1f).scaleY(1f).setDuration(120).start();
+                            addMealList[3].animate().scaleX(1f).scaleY(1f).setDuration(120).start();
+                            addMealList[0].setImageDrawable(getResources().getDrawable(R.drawable.breakfast_hover));
+                            addMealList[1].setImageDrawable(getResources().getDrawable(R.drawable.lunch));
+                            addMealList[2].setImageDrawable(getResources().getDrawable(R.drawable.snack));
+                            addMealList[3].setImageDrawable(getResources().getDrawable(R.drawable.dinner));
+
+                            imageViewAddWater.animate().scaleX(1f).scaleY(1f).setDuration(120).start();
+                        } else if (angle > 135f) {
+                            if (addButtonSelected == 2) return true;
+                            makeSound(Sound.Sounds.BIP_3);
+                            addButtonSelected = 2;
+                            addMealList[0].animate().scaleX(1f).scaleY(1f).setDuration(120).start();
+                            addMealList[1].animate().scaleX(1.35f).scaleY(1.35f).setDuration(120).start();
+                            addMealList[2].animate().scaleX(1f).scaleY(1f).setDuration(120).start();
+                            addMealList[3].animate().scaleX(1f).scaleY(1f).setDuration(120).start();
+                            addMealList[0].setImageDrawable(getResources().getDrawable(R.drawable.breakfast));
+                            addMealList[1].setImageDrawable(getResources().getDrawable(R.drawable.lunch_hover));
+                            addMealList[2].setImageDrawable(getResources().getDrawable(R.drawable.snack));
+                            addMealList[3].setImageDrawable(getResources().getDrawable(R.drawable.dinner));
+
+                        } else if (angle > 105) {
+                            if (addButtonSelected == 3) return true;
+                            makeSound(Sound.Sounds.BIP_4);
+                            addButtonSelected = 3;
+                            addMealList[0].animate().scaleX(1f).scaleY(1f).setDuration(120).start();
+                            addMealList[1].animate().scaleX(1f).scaleY(1f).setDuration(120).start();
+                            addMealList[2].animate().scaleX(1.35f).scaleY(1.35f).setDuration(120).start();
+                            addMealList[3].animate().scaleX(1f).scaleY(1f).setDuration(120).start();
+                            addMealList[0].setImageDrawable(getResources().getDrawable(R.drawable.breakfast));
+                            addMealList[1].setImageDrawable(getResources().getDrawable(R.drawable.lunch));
+                            addMealList[2].setImageDrawable(getResources().getDrawable(R.drawable.snack_hover));
+                            addMealList[3].setImageDrawable(getResources().getDrawable(R.drawable.dinner));
+
+                        } else if (angle > 75) {
+                            if (addButtonSelected == 4) return true;
+                            makeSound(Sound.Sounds.BIP_6);
+                            addButtonSelected = 4;
+                            addMealList[0].animate().scaleX(1f).scaleY(1f).setDuration(120).start();
+                            addMealList[1].animate().scaleX(1f).scaleY(1f).setDuration(120).start();
+                            addMealList[2].animate().scaleX(1f).scaleY(1f).setDuration(120).start();
+                            addMealList[3].animate().scaleX(1.35f).scaleY(1.35f).setDuration(120).start();
+                            addMealList[0].setImageDrawable(getResources().getDrawable(R.drawable.breakfast));
+                            addMealList[1].setImageDrawable(getResources().getDrawable(R.drawable.lunch));
+                            addMealList[2].setImageDrawable(getResources().getDrawable(R.drawable.snack));
+                            addMealList[3].setImageDrawable(getResources().getDrawable(R.drawable.dinner_hover));
+
+                            imageViewAddWater.animate().scaleX(1f).scaleY(1f).setDuration(120).start();
+
+                        }
                     }
                 }
                 if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
                     addButtonPressed = false;
                     imageViewAddButton.animate().scaleX(1f).scaleY(1f).setDuration(160).start();
                     imageViewAddButton.setImageDrawable(getResources().getDrawable(R.drawable.add_button));
-                    makeSound(Sound.Sounds.BIP_3);
+                    if (addButtonSelected == -1)
+                        Sound.makeSound(getApplicationContext(), Sound.Sounds.NO_BUY);
+                    else
+                        makeSound(Sound.Sounds.BIP_3);
 
                     addMealList[0].animate().alpha(0f).scaleX(0.2f).scaleY(0.2f).translationX(0).translationY(0).start();
                     addMealList[1].animate().alpha(0f).scaleX(0.2f).scaleY(0.2f).translationX(0).translationY(0).start();
@@ -378,10 +463,41 @@ public class MainActivity extends AppCompatActivity {
                     addMealList[2].setImageDrawable(getResources().getDrawable(R.drawable.snack));
                     addMealList[3].setImageDrawable(getResources().getDrawable(R.drawable.dinner));
 
-                    if(addButtonSelected>0) {
+                    imageViewAddWater.animate().alpha(0.0f).start();
+                    imageViewAddButton.animate().alpha(1.0f).start();
+
+                    if (addButtonSelected > 0) {
                         AddFood.mealType = MealType.values()[addButtonSelected - 1];
                         Intent i = (new Intent(MainActivity.this, AddFood.class));
                         startActivityForResult(i, REQUEST_CODE_ADD);
+                    } else if (addButtonSelected == 0) {
+                        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                        builder.setTitle("Please the amount of water you drank [mL]:");
+                        final Spinner input = new Spinner(getApplicationContext());
+                        input.setAdapter(new ArrayAdapter<>(MainActivity.this, R.layout.spinner_drink_type, DrinkType.values()));
+                        input.setPadding(50, 50, 0, 0);
+                        builder.setView(input);
+                        builder.setPositiveButton("OK", (dialog, which) -> {
+                            new Thread(() -> {
+                                APICommunication.requestAddWater(MainActivity.token, (int) ((DrinkType) input.getSelectedItem()).getValue());
+                            }).start();
+
+                            Toast.makeText(MainActivity.this, "Water successfully added!", Toast.LENGTH_SHORT).show();
+                            makeSound(Sound.Sounds.WATER_SPLASH);
+
+                            EasingFunctionSine.delay = water / 2000f;
+                            water += (int) ((DrinkType) input.getSelectedItem()).getValue();
+                            loadWaterChart();
+                            pieChartWater.animateY(1000, EasingFunctionSine.EaseOutSineDelay);
+                        });
+                        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.cancel();
+                            }
+                        });
+
+                        builder.show();
                     }
                 }
                 return true;
@@ -393,7 +509,6 @@ public class MainActivity extends AppCompatActivity {
         scrollViewMenuDiary.getViewTreeObserver().addOnScrollChangedListener(new ViewTreeObserver.OnScrollChangedListener() {
             @Override
             public void onScrollChanged() {
-                System.out.println(scrollViewMenuDiary.getScrollY());
                 if (!pieChartWaterAnimated && scrollViewMenuDiary.getScrollY() > 630) {
                     pieChartWater.animateY(3200, Easing.EaseInSine);
                     pieChartWaterAnimated = true;
@@ -409,10 +524,14 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onDateSet(DatePicker view, int year, int monthOfYear,
                                           int dayOfMonth) {
-                        String dayId =
-                                String.valueOf(dayOfMonth) + "-" +
-                                        String.valueOf(monthOfYear + 1) + "-" +
-                                        String.valueOf(year);
+                        String dayId = dayOfMonth + "-" + (monthOfYear + 1) + "-" + year;
+                        String todayDayId = LocalDate.now().getDayOfMonth() + "-" +
+                                LocalDate.now().getMonthValue() + "-" + LocalDate.now().getYear();
+
+                        if (dayId.equals(todayDayId)) {
+                            imageViewHome.performClick();
+                            return;
+                        }
                         dateForValues = dayId;
                         imageViewHome.setVisibility(View.VISIBLE);
 
@@ -430,7 +549,7 @@ public class MainActivity extends AppCompatActivity {
                 } else
                     new DatePickerDialog(MainActivity.this, date,
                             Integer.parseInt(dateForValues.split("-")[2]),
-                            Integer.parseInt(dateForValues.split("-")[1])-1,
+                            Integer.parseInt(dateForValues.split("-")[1]) - 1,
                             Integer.parseInt(dateForValues.split("-")[0])).show();
 
             }
@@ -446,12 +565,69 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
+        imageViewAddRuler.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                System.out.println(motionEvent.getAction());
+
+                if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+                    measureSelected = true;
+                    imageViewAddRuler.animate().scaleX(1.35f).scaleY(1.35f).setDuration(120).start();
+                    Sound.makeSound(getApplicationContext(), Sound.Sounds.BIP_13);
+                    imageViewAddRuler.setImageDrawable(getResources().getDrawable(R.drawable.ruler_hover));
+                } else if (motionEvent.getAction() == MotionEvent.ACTION_MOVE) {
+                    int radius = view.getMeasuredWidth();
+                    Point center = new Point(radius, radius);
+                    Circle hit = new Circle(center);
+                    float distance =
+                            hit.getDistaceFromCenter(new Point((int) motionEvent.getX(), (int) motionEvent.getY()));
+
+                    if (measureSelected && distance > radius) {
+                        measureSelected = false;
+                        imageViewAddRuler.animate().scaleX(1f).scaleY(1f).setDuration(120).start();
+                        imageViewAddRuler.setImageDrawable(getResources().getDrawable(R.drawable.ruler));
+                    } else if (!measureSelected && distance < radius) {
+                        measureSelected = true;
+                        imageViewAddRuler.animate().scaleX(1.35f).scaleY(1.35f).setDuration(120).start();
+                        Sound.makeSound(getApplicationContext(), Sound.Sounds.BIP_13);
+                        imageViewAddRuler.setImageDrawable(getResources().getDrawable(R.drawable.ruler_hover));
+                    }
+                } else if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
+                    imageViewAddRuler.animate().scaleX(1f).scaleY(1f).setDuration(120).start();
+                    imageViewAddRuler.setImageDrawable(getResources().getDrawable(R.drawable.ruler));
+                    if (measureSelected) {
+                        measureSelected = false;
+                        updateWeightValue(weightMap.lastKey(), weightMap.lastEntry().getValue());
+                    }
+                }
+                return true;
+            }
+        });
+
+        lineChartWeight.setOnChartValueSelectedListener(new OnChartValueSelectedListener() {
+            @Override
+            public void onValueSelected(Entry e, Highlight h) {
+                if (!updateWeightValueDisplayed)
+                    updateWeightValue(LocalDate.ofEpochDay((long) e.getX()), e.getY());
+            }
+
+            @Override
+            public void onNothingSelected() {
+
+            }
+        });
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     private void loadPieChartData() {
         loadTodayValues();
 
+        loadCPGChart();
+        loadWaterChart();
+        loadWeightChart();
+    }
+
+    private void loadCPGChart() {
         ArrayList<PieEntry> entries = new ArrayList<>();
         entries.add(new PieEntry((carbohydrates * 4f) / calories, "Carbohydrates"));
         entries.add(new PieEntry((proteins * 4f) / calories, "Proteins"));
@@ -491,6 +667,339 @@ public class MainActivity extends AppCompatActivity {
 
         Legend l = pieChartCPG.getLegend();
         l.setEnabled(false);
+    }
+
+    private void loadWaterChart() {
+        float progress = water / 2000;
+        if (progress > 1f)
+            progress = 1f;
+        progressBarWater.setMax(100);
+        progressBarWater.setProgress((int) (progress * 100));
+        int color =
+                Color.rgb((3 + (progress - 0.5f) * 2 * 15) / 255f, 244f / 255, (244 - 240 * (progress - 0.5f) * 2) / 255f);
+        if (progress < 0.5f)
+            color = Color.rgb(3, 120 + 124 * progress * 2, 244);
+        else
+            color =
+                    Color.rgb((3 + (progress - 0.5f) * 2 * 15) / 255f, 244f / 255, (244 - 240 * (progress - 0.5f) * 2) / 255f);
+
+        progressBarWater.setProgressTintList(ColorStateList.valueOf(color));
+        textViewWaterCount.setText(String.valueOf((int) water) + "ml / 2000ml");
+
+        ArrayList<PieEntry> entries = new ArrayList<>();
+        entries.add(new PieEntry(progress, "Water"));
+        entries.add(new PieEntry(1 - progress, ""));
+
+        PieDataSet dataSet = new PieDataSet(entries, "");
+        int finalColor = color;
+        dataSet.setColors(new ArrayList<Integer>() {{
+            add(finalColor);
+            add(Color.TRANSPARENT);
+        }});
+        PieData data = new PieData(dataSet);
+        data.setDrawValues(false);
+        data.setValueFormatter(new PercentFormatter(pieChartWater));
+        data.setValueTextSize(20f);
+        data.setValueTextColor(Color.BLACK);
+        data.setValueTypeface(Typeface.DEFAULT_BOLD);
+
+        pieChartWater.setData(data);
+        pieChartWater.setHoleRadius(0f);
+        pieChartWater.setUsePercentValues(true);
+        pieChartWater.invalidate();
+        pieChartWater.setHoleColor(Color.TRANSPARENT);
+        pieChartWater.setEntryLabelTypeface(Typeface.MONOSPACE);
+        pieChartWater.setEntryLabelColor(Color.GRAY);
+        pieChartWater.setEntryLabelTextSize(20f);
+        pieChartWater.setClickable(true);
+        pieChartWater.setVisibility(View.VISIBLE);
+
+        Legend l = pieChartWater.getLegend();
+        l.setEnabled(false);
+    }
+
+    private void loadWeightChart() {
+        ArrayList<Entry> entriesW = new ArrayList<>();
+        int count = 0;
+        for (Map.Entry<LocalDate, Float> entry : weightMap.entrySet())
+            //TODO axis x
+            entriesW.add(new Entry(entry.getKey().toEpochDay(), entry.getValue()));
+
+        LineDataSet dataSetW = new LineDataSet(entriesW, "");
+        dataSetW.setColors(new ArrayList<Integer>() {{
+            add(Color.CYAN);
+        }});
+        dataSetW.setValueTextColor(Color.WHITE);
+        dataSetW.setValueTextSize(16);
+        dataSetW.setLineWidth(3.75f);
+        dataSetW.setCircleRadius(8f);
+        dataSetW.setCircleHoleRadius(4.8f);
+        dataSetW.setColor(Color.WHITE);
+        dataSetW.setCircleColor(Color.WHITE);
+        dataSetW.setHighLightColor(Color.WHITE);
+        dataSetW.setDrawValues(false);
+
+        LineData dataW = new LineData(dataSetW);//getData(10,5);
+        ((LineDataSet) dataW.getDataSetByIndex(0)).setCircleHoleColor(Color.rgb(137, 230, 81));
+
+        dataW.setDrawValues(true);
+        dataW.setValueTextSize(20f);
+        dataW.setValueTextColor(Color.WHITE);
+        dataW.setValueTypeface(Typeface.DEFAULT_BOLD);
+        dataW.setValueTextSize(16);
+
+
+        lineChartWeight.setDescription(new Description());
+        lineChartWeight.setData(dataW);
+        lineChartWeight.invalidate();
+        lineChartWeight.setClickable(true);
+        lineChartWeight.setVisibility(View.VISIBLE);
+
+        Legend l = lineChartWeight.getLegend();
+        l.setEnabled(true);
+    }
+
+    private void updateWeightValue(LocalDate defaultDate, float defaultValue) {
+        updateWeightValueDisplayed = true;
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        builder.setTitle("Update your weight value [KG]:");
+        builder.setIcon(getResources().getDrawable(R.drawable.ruler_anim));
+
+        final LinearLayout menu = new LinearLayout(getApplicationContext());
+        menu.setOrientation(LinearLayout.VERTICAL);
+        final TextView dateText = new TextView(getApplicationContext());
+        dateText.setInputType(InputType.TYPE_CLASS_DATETIME | InputType.TYPE_DATETIME_VARIATION_DATE);
+        dateText.setPadding(150, 100, 0, 0);
+        dateText.setTextColor(Color.WHITE);
+        dateText.setTypeface(Typeface.SERIF);
+        dateText.setText("Date:");
+        dateText.setTextSize(18f);
+        final EditText date = new EditText(getApplicationContext());
+        date.setInputType(InputType.TYPE_CLASS_DATETIME | InputType.TYPE_DATETIME_VARIATION_DATE);
+        date.setPadding(150, 80, 0, 0);
+        date.setTextColor(Color.WHITE);
+        date.setTypeface(Typeface.MONOSPACE);
+        date.setTextSize(18f);
+        date.setText(defaultDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+        final TextView weightText = new TextView(getApplicationContext());
+        weightText.setInputType(InputType.TYPE_CLASS_DATETIME | InputType.TYPE_DATETIME_VARIATION_DATE);
+        weightText.setPadding(150, 100, 0, 0);
+        weightText.setTextColor(Color.WHITE);
+        weightText.setTypeface(Typeface.SERIF);
+        weightText.setText("Weight Value:");
+        weightText.setTextSize(18f);
+        final EditText weight = new EditText(getApplicationContext());
+        weight.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_SIGNED);
+        weight.setPadding(150, 80, 0, 0);
+        weight.setTextColor(Color.WHITE);
+        weight.setTextSize(22f);
+        weight.setText(String.valueOf(defaultValue));
+        weight.setTextColor(Color.GREEN);
+        weight.setTypeface(Typeface.DEFAULT_BOLD);
+
+        weight.setOnKeyListener((view1, i, keyEvent) -> {
+            weight.setTextColor(Color.WHITE);
+            weight.setTypeface(Typeface.DEFAULT);
+            return false;
+        });
+
+        weight.setOnFocusChangeListener(((view, b) -> {
+            if (!b) return;
+
+            final Dialog d = new Dialog(MainActivity.this);
+            d.setTitle("Weight value:");
+            d.setContentView(R.layout.float_input_dialog);
+            Button b1 = (Button) d.findViewById(R.id.button1);
+            Button b2 = (Button) d.findViewById(R.id.button2);
+            final NumberPicker numberPickerDecimal =
+                    (NumberPicker) d.findViewById(R.id.numberPickerDecimal);
+            numberPickerDecimal.setMaxValue(300);
+            numberPickerDecimal.setMinValue(10);
+            numberPickerDecimal.setWrapSelectorWheel(false);
+            numberPickerDecimal.setTextSize(84);
+            numberPickerDecimal.setValue((int) defaultValue);
+            final NumberPicker numberPickerSigned =
+                    (NumberPicker) d.findViewById(R.id.numberPickerSigned);
+            numberPickerSigned.setMaxValue(9);
+            numberPickerSigned.setMinValue(0);
+            numberPickerSigned.setWrapSelectorWheel(false);
+            numberPickerSigned.setTextSize(84);
+            try {
+                numberPickerSigned.setValue(Integer.parseInt(String.valueOf(defaultValue).split("\\.")[1]));
+            } catch (Exception e) {
+            }
+            ;
+
+            b1.setOnClickListener(v -> {
+                if (!weight.getText().toString().equals(numberPickerDecimal.getValue() + "." + numberPickerSigned.getValue())) {
+                    weight.setTextColor(Color.WHITE);
+                    weight.setTypeface(Typeface.DEFAULT);
+                }
+                weight.setText(numberPickerDecimal.getValue() + "." + numberPickerSigned.getValue());
+                d.dismiss();
+            });
+            b2.setOnClickListener(v -> d.dismiss());
+            d.show();
+        }));
+
+        date.setOnFocusChangeListener((view1, b) -> {
+            if (!b) return;
+            DatePickerDialog.OnDateSetListener datePicker =
+                    (view2, year, monthOfYear, dayOfMonth) -> {
+                        String dayId =
+                                String.format("%02d", dayOfMonth) + "/" + String.format("%02d", (monthOfYear + 1)) + "/" + year;
+                        date.setText(dayId);
+                        final DateTimeFormatter formatter =
+                                DateTimeFormatter.ofPattern("dd/MM/yyyy");
+                        final LocalDate localDate = LocalDate.parse(dayId, formatter);
+                        if (weightMap.containsKey(localDate)) {
+                            weight.setText(weightMap.get(localDate).toString());
+                            weight.setTextColor(Color.GREEN);
+                            weight.setTypeface(Typeface.DEFAULT_BOLD);
+                        }
+                    };
+            if (date.getText().toString().isEmpty()) {
+                new DatePickerDialog(MainActivity.this, datePicker,
+                        LocalDate.now().getYear(),
+                        LocalDate.now().getMonthValue() - 1,
+                        LocalDate.now().getDayOfMonth()).show();
+            } else
+                new DatePickerDialog(MainActivity.this, datePicker,
+                        Integer.parseInt(date.getText().toString().split("/")[2]),
+                        Integer.parseInt(date.getText().toString().split("/")[1]) - 1,
+                        Integer.parseInt(date.getText().toString().split("/")[0])).show();
+        });
+
+        menu.addView(dateText);
+        menu.addView(date);
+        menu.addView(weightText);
+        menu.addView(weight);
+        builder.setView(menu);
+        builder.setPositiveButton("OK", (dialog, which) -> {
+            new Thread(() -> {
+                if (!date.getText().toString().isEmpty() && !weight.getText().toString().isEmpty()) {
+                    APICommunication.requestUpdateWeight(MainActivity.token, date.getText().toString(),
+                            Float.valueOf(weight.getText().toString()));
+                }
+            }).start();
+
+            Toast.makeText(MainActivity.this, "Weight data updated successfully!", Toast.LENGTH_SHORT).show();
+
+            weightMap.put(LocalDate.parse(date.getText().toString(), DateTimeFormatter.ofPattern("dd/MM/yyyy")),
+                    Float.valueOf(weight.getText().toString()));
+            loadWeightChart();
+            lineChartWeight.animateX(1500, Easing.EaseInSine);
+            updateWeightValueDisplayed = false;
+        });
+        builder.setNegativeButton("Cancel", (dialog, which) -> {
+            dialog.cancel();
+            updateWeightValueDisplayed = false;
+        });
+        builder.setOnCancelListener((dialogInterface)->updateWeightValueDisplayed = false);
+
+        builder.show();
+    }
+
+    private LineData getData(int count, float range) {
+
+        ArrayList<Entry> values = new ArrayList<>();
+
+        for (int i = 0; i < count; i++) {
+            float val = (float) (Math.random() * range) + 3;
+            values.add(new Entry(i, val));
+        }
+
+        // create a dataset and give it a type
+        LineDataSet set1 = new LineDataSet(values, "DataSet 1");
+        // set1.setFillAlpha(110);
+        // set1.setFillColor(Color.RED);
+
+        set1.setLineWidth(1.75f);
+        set1.setCircleRadius(5f);
+        set1.setCircleHoleRadius(2.5f);
+        set1.setColor(Color.WHITE);
+        set1.setCircleColor(Color.WHITE);
+        set1.setHighLightColor(Color.WHITE);
+        set1.setDrawValues(false);
+
+        // create a data object with the data sets
+        return new LineData(set1);
+    }
+
+    private void loadTodayValues() {
+        pieChartWater.setVisibility(View.INVISIBLE);
+        breakfastFoodList.removeAllViews();
+        lunchFoodList.removeAllViews();
+        snackFoodList.removeAllViews();
+        dinnerFoodList.removeAllViews();
+        carbohydrates = 0f;
+        proteins = 0f;
+        lipids = 0f;
+        calories = 0f;
+        water = 0f;
+
+        JSONObject response = APICommunication.requestTodayValues(token);
+        if (response.keySet().contains("result") && response.get("result").toString().contains("error")) {
+            Toast.makeText(getApplicationContext(), response.get("result").toString(), Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (response.keySet().contains("result") && response.get("result").equals("nothing to show on this day..."))
+            return;
+        carbohydrates = ((Number) response.get("carbohydrate")).floatValue();
+        proteins = ((Number) response.get("protein")).floatValue();
+        lipids = ((Number) response.get("lipid")).floatValue();
+        calories = ((Number) response.get("calories")).floatValue();
+        water =
+                ((Number) response.get("water")).floatValue() + ((Number) response.get("waterfromfood")).floatValue();
+        fiber = ((Number) response.get("fiber")).floatValue() / 1000f;
+        calcium = ((Number) response.get("calcium")).floatValue();
+        sodium = ((Number) response.get("sodium")).floatValue();
+        potassium = ((Number) response.get("potassium")).floatValue();
+        iron = ((Number) response.get("iron")).floatValue();
+        vitaminA = ((Number) response.get("vitamina")).floatValue();
+        vitaminC = ((Number) response.get("vitaminc")).floatValue();
+
+        textViewCalories.setText("(" + String.valueOf((int) calories) + " kcal)");
+        textViewCarboydrats.setText("(" + String.format("%.2f", carbohydrates) + " gr)");
+        textViewProteins.setText("(" + String.format("%.2f", proteins) + " gr)");
+        textViewLipids.setText("(" + String.format("%.2f", lipids) + " gr)");
+        textViewFiber.setText("(" + String.format("%.3f", fiber) + " gr)");
+        textViewSodium.setText("(" + String.format("%.2f", sodium * 1000) + " mg)");
+        textViewCalcium.setText("(" + String.format("%.2f", calcium * 1000) + " mg)");
+        textViewPotassium.setText("(" + String.format("%.2f", potassium * 1000) + " mg)");
+        textViewIron.setText("(" + String.format("%.2f", iron * 1000) + " mg)");
+        textViewVitaminA.setText("(" + String.format("%.2f", vitaminA * 1000) + " mg)");
+        textViewVitaminC.setText("(" + String.format("%.2f", vitaminC * 1000) + " mg)");
+
+        HashMap<MainActivity.MealType, ArrayList<String>> foodList =
+                APICommunication.requestFoodList(token);
+        for (Map.Entry<?, ?> entry : foodList.entrySet()) {
+            for (String name : (ArrayList<String>) entry.getValue()) {
+                TextView food = new TextView(getApplicationContext());
+                food.setText(name);
+                food.setTextColor(Color.WHITE);
+                food.setTextSize(18);
+                food.setTypeface(Typeface.MONOSPACE);
+                LinearLayout parent = null;
+                switch ((MainActivity.MealType) entry.getKey()) {
+                    case BREAKFAST:
+                        parent = breakfastFoodList;
+                        break;
+                    case LUNCH:
+                        parent = lunchFoodList;
+                        break;
+                    case SNACK:
+                        parent = snackFoodList;
+                        break;
+                    case DINNER:
+                        parent = dinnerFoodList;
+                        break;
+                }
+                parent.addView(food);
+            }
+        }
     }
 
     private void fromUserToDiary() {
@@ -535,127 +1044,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }).start();
         actualTab = 1;
-    }
-
-    @RequiresApi(api = Build.VERSION_CODES.O)
-    private void loadTodayValues() {
-        pieChartWater.setVisibility(View.INVISIBLE);
-        breakfastFoodList.removeAllViews();
-        lunchFoodList.removeAllViews();
-        snackFoodList.removeAllViews();
-        dinnerFoodList.removeAllViews();
-        carbohydrates = 0f;
-        proteins = 0f;
-        lipids = 0f;
-        calories = 0f;
-
-        JSONObject response = APICommunication.requestTodayValues(token);
-        if (response.keySet().contains("result") && response.get("result").toString().contains("error")) {
-            Toast.makeText(getApplicationContext(), response.get("result").toString(), Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        if (response.keySet().contains("result") && response.get("result").equals("nothing to show on this day..."))
-            return;
-        carbohydrates = ((Number) response.get("carbohydrate")).floatValue();
-        proteins = ((Number) response.get("protein")).floatValue();
-        lipids = ((Number) response.get("lipid")).floatValue();
-        calories = ((Number) response.get("calories")).floatValue();
-        water = ((Number) response.get("water")).floatValue()+((Number) response.get("waterfromfood")).floatValue();
-        fiber = ((Number) response.get("fiber")).floatValue();
-        calcium = ((Number) response.get("calcium")).floatValue();
-        sodium = ((Number) response.get("sodium")).floatValue();
-        potassium = ((Number) response.get("potassium")).floatValue();
-        iron = ((Number) response.get("iron")).floatValue();
-        vitaminA = ((Number) response.get("vitamina")).floatValue();
-        vitaminC = ((Number) response.get("vitaminc")).floatValue();
-
-        textViewCalories.setText("(" + String.valueOf((int) calories) + " kcal)");
-        textViewCarboydrats.setText("(" + String.format("%.2f", carbohydrates) + " gr)");
-        textViewProteins.setText("(" + String.format("%.2f", proteins) + " gr)");
-        textViewLipids.setText("(" + String.format("%.2f", lipids) + " gr)");
-        textViewFiber.setText("(" + String.format("%.2f", fiber) + " gr)");
-        textViewSodium.setText("(" + String.format("%.2f", sodium * 1000) + " mg)");
-        textViewCalcium.setText("(" + String.format("%.2f", calcium * 1000) + " mg)");
-        textViewPotassium.setText("(" + String.format("%.2f", potassium * 1000) + " mg)");
-        textViewIron.setText("(" + String.format("%.2f", iron * 1000) + " mg)");
-        textViewVitaminA.setText("(" + String.format("%.2f", vitaminA * 1000) + " mg)");
-        textViewVitaminC.setText("(" + String.format("%.2f", vitaminC * 1000) + " mg)");
-
-        float progress = water / 2000;
-        if (progress > 1f)
-            progress = 1f;
-        progressBarWater.setMax(100);
-        progressBarWater.setProgress((int) (progress * 100));
-        int color =
-                Color.rgb((3 + (progress - 0.5f) * 2 * 15) / 255f, 244f / 255, (244 - 240 * (progress - 0.5f) * 2) / 255f);
-        if (progress < 0.5f)
-            color = Color.rgb(3, 120 + 124 * progress * 2, 244);
-        else
-            color =
-                    Color.rgb((3 + (progress - 0.5f) * 2 * 15) / 255f, 244f / 255, (244 - 240 * (progress - 0.5f) * 2) / 255f);
-
-        progressBarWater.setProgressTintList(ColorStateList.valueOf(color));
-        textViewWaterCount.setText(String.valueOf((int) water) + "ml / 2000ml");
-
-        ArrayList<PieEntry> entries = new ArrayList<>();
-        entries.add(new PieEntry(progress, "Water"));
-        entries.add(new PieEntry(1-progress, ""));
-
-        PieDataSet dataSet = new PieDataSet(entries, "");
-        int finalColor = color;
-        dataSet.setColors(new ArrayList<Integer>() {{
-            add(finalColor);
-            add(Color.TRANSPARENT);
-        }});
-        PieData data = new PieData(dataSet);
-        data.setDrawValues(false);
-        data.setValueFormatter(new PercentFormatter(pieChartWater));
-        data.setValueTextSize(20f);
-        data.setValueTextColor(Color.BLACK);
-        data.setValueTypeface(Typeface.DEFAULT_BOLD);
-
-        pieChartWater.setData(data);
-        pieChartWater.setHoleRadius(0f);
-        pieChartWater.setUsePercentValues(true);
-        pieChartWater.invalidate();
-        pieChartWater.setHoleColor(Color.TRANSPARENT);
-        pieChartWater.setEntryLabelTypeface(Typeface.MONOSPACE);
-        pieChartWater.setEntryLabelColor(Color.GRAY);
-        pieChartWater.setEntryLabelTextSize(20f);
-        pieChartWater.setClickable(true);
-        pieChartWater.setVisibility(View.VISIBLE);
-
-        Legend l = pieChartWater.getLegend();
-        l.setEnabled(false);
-
-        HashMap<MainActivity.MealType, ArrayList<String>> foodList =
-                APICommunication.requestFoodList(token);
-        for (Map.Entry<?, ?> entry : foodList.entrySet()) {
-            for (String name : (ArrayList<String>) entry.getValue()) {
-                TextView food = new TextView(getApplicationContext());
-                food.setText(name);
-                food.setTextColor(Color.WHITE);
-                food.setTextSize(18);
-                food.setTypeface(Typeface.MONOSPACE);
-                LinearLayout parent = null;
-                switch ((MainActivity.MealType) entry.getKey()) {
-                    case BREAKFAST:
-                        parent = breakfastFoodList;
-                        break;
-                    case LUNCH:
-                        parent = lunchFoodList;
-                        break;
-                    case SNACK:
-                        parent = snackFoodList;
-                        break;
-                    case DINNER:
-                        parent = dinnerFoodList;
-                        break;
-                }
-                parent.addView(food);
-            }
-        }
+        lineChartWeight.animateX(1000);
     }
 
     private boolean isLogged() {
@@ -683,17 +1072,16 @@ public class MainActivity extends AppCompatActivity {
             login(response);
             return true;
         }
-
-
     }
 
     @SuppressLint("SimpleDateFormat")
     private void login(JSONObject response) {
-        response=(JSONObject)response.get("user");
+        response = (JSONObject) response.get("user");
         textViewEmail.setText(response.get("email").toString());
         textViewNickname.setText(response.get("nickname").toString());
         try {
-            birth = new SimpleDateFormat("yyyy-MM-dd").parse(response.get("yearOfBirth").toString());
+            birth =
+                    new SimpleDateFormat("yyyy-MM-dd").parse(response.get("yearOfBirth").toString());
         } catch (ParseException e) {
             e.printStackTrace();
         }
@@ -704,8 +1092,10 @@ public class MainActivity extends AppCompatActivity {
             age--;
         textViewAge.setText(String.valueOf(age));
         //textViewAge.setText();
-        Object[] weights =
-                ((HashMap<LocalDate, Integer>) response.get("weight")).values().toArray();
+        weightMap = new TreeMap<>();
+        for (Object obj : ((JSONObject) response.get("weight")).entrySet())
+            weightMap.put(LocalDate.parse(((Map.Entry<String, Number>) obj).getKey()), ((Map.Entry<String, Number>) obj).getValue().floatValue());
+        Object[] weights = weightMap.values().toArray();
         textViewWeight.setText(weights[weights.length - 1].toString());
         textViewHeight.setText(response.get("height").toString());
         switch (Diet.valueOf(response.get("diet").toString())) {
@@ -730,6 +1120,7 @@ public class MainActivity extends AppCompatActivity {
                 imageViewGender.setImageDrawable(getResources().getDrawable(R.drawable.female));
                 break;
         }
+        caloricIntake = ((Number) response.get("dailyCaloricIntake")).intValue();
 
         String photoUri = new InputOutputImpl(getApplicationContext(), "user_image").readFile();
         Picasso.get().load(photoUri).into(imageViewUserPhoto);
@@ -858,6 +1249,7 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }).start();
                     actualTab = 1;
+                    lineChartWeight.animateX(1000);
                     imageViewDiary.animate().alpha(0.5f).scaleX(0.6f).scaleY(0.6f).setDuration(400).start();
                     imageViewUser.animate().alpha(1f).scaleX(0.75f).scaleY(0.75f).setDuration(400).start();
 

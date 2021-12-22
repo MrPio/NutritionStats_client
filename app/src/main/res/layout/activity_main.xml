@@ -24,7 +24,8 @@
         app:layout_constraintBottom_toBottomOf="@+id/imageView5"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="gone">
 
         <ScrollView
             android:id="@+id/scrollViewMenuDiary"
@@ -755,6 +756,17 @@
             app:srcCompat="@drawable/add_button_anim" />
 
         <ImageView
+            android:id="@+id/imageViewAddWater"
+            android:layout_width="58dp"
+            android:layout_height="58dp"
+            android:layout_marginEnd="24dp"
+            android:layout_marginBottom="32dp"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:srcCompat="@drawable/add_drop_anim" />
+
+        <ImageView
             android:id="@+id/imageViewCalendar"
             android:layout_width="50dp"
             android:layout_height="50dp"
@@ -785,7 +797,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:visibility="invisible">
+        tools:visibility="visible">
 
         <ScrollView
             android:layout_width="0dp"
@@ -814,6 +826,7 @@
                     android:background="@color/col_3"
                     android:orientation="vertical">
 
+
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
@@ -838,7 +851,6 @@
                             android:layout_weight="1"
                             android:fontFamily="serif"
                             android:paddingStart="20dp"
-                            android:text="valeriomorelli50@gmail.com"
                             android:textAlignment="textStart"
                             android:textColor="@color/cardview_dark_background"
                             android:textSize="16sp"
@@ -870,7 +882,6 @@
                             android:layout_weight="1"
                             android:fontFamily="serif"
                             android:paddingStart="20dp"
-                            android:text="Valerio_Morelli"
                             android:textAlignment="textStart"
                             android:textColor="@color/cardview_dark_background"
                             android:textSize="16sp"
@@ -901,7 +912,6 @@
                             android:layout_weight="1"
                             android:fontFamily="serif"
                             android:paddingStart="20dp"
-                            android:text="20"
                             android:textAlignment="textStart"
                             android:textColor="@color/cardview_dark_background"
                             android:textSize="20sp"
@@ -912,7 +922,8 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:orientation="horizontal"
-                        android:paddingBottom="3dp">
+                        android:paddingBottom="3dp"
+                        android:visibility="gone">
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -963,7 +974,6 @@
                             android:layout_weight="1"
                             android:fontFamily="serif"
                             android:paddingStart="20dp"
-                            android:text="180 cm"
                             android:textAlignment="textStart"
                             android:textColor="@color/cardview_dark_background"
                             android:textSize="20sp"
@@ -1024,9 +1034,54 @@
 
                     </LinearLayout>
 
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:paddingBottom="3dp">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="30dp"
+                            android:fontFamily="serif"
+                            android:paddingStart="20dp"
+                            android:text="Weight graph:"
+                            android:textAlignment="center"
+                            android:textColor="@color/white"
+                            android:textSize="20sp"
+                            android:textStyle="bold" />
+
+                        <androidx.constraintlayout.widget.ConstraintLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content">
+
+                            <com.github.mikephil.charting.charts.LineChart
+                                android:id="@+id/lineChartWeight"
+                                android:layout_width="match_parent"
+                                android:layout_height="220dp"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintEnd_toEndOf="parent"
+                                app:layout_constraintStart_toStartOf="parent"
+                                app:layout_constraintTop_toTopOf="parent" />
+                        </androidx.constraintlayout.widget.ConstraintLayout>
+
+                    </LinearLayout>
+
                 </LinearLayout>
             </LinearLayout>
         </ScrollView>
+
+        <ImageView
+            android:id="@+id/imageViewAddRuler"
+            android:layout_width="58dp"
+            android:layout_height="58dp"
+            android:layout_marginEnd="24dp"
+            android:layout_marginBottom="32dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:srcCompat="@drawable/ruler_anim" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <ImageView

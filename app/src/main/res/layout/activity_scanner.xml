@@ -20,5 +20,7 @@
         app:frameCornersSize="50dp"
         app:frameSize="0.85"
         app:frameThickness="14dp"
-        app:maskColor="#77000000" />
+        app:maskColor="#77000000" >
+
+    </com.budiyev.android.codescanner.CodeScannerView>
 </FrameLayout>

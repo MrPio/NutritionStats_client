@@ -26,7 +26,11 @@ public class Sound {
         BIP_12(R.raw.other_blip_select12),
         BIP_13(R.raw.other_blip_select13),
         PICKUP_COIN(R.raw.other_pickup_coin),
-        WATER_SPLASH(R.raw.water_splash);
+        WATER_SPLASH(R.raw.water_splash),
+        FOOD_1(R.raw.food1),
+        FOOD_2(R.raw.food2),
+        BADGE(R.raw.fx_badge),
+        NO_BUY(R.raw.fx_no_buy);
 
         public int res;
 
@@ -34,7 +38,15 @@ public class Sound {
             this.res = res;
         }
     }
-    public void makeSound(Context context, Sounds sound){
-
+    public static void makeSound(Context context,Sound.Sounds sound) {
+        new Thread(() -> {
+            final MediaPlayer[] mPlayer =
+                    {MediaPlayer.create(context, sound.res)};
+            mPlayer[0].setOnCompletionListener(mpd -> {
+                mPlayer[0].release();
+                mPlayer[0] = null;
+            });
+            mPlayer[0].start();
+        }).start();
     }
 }

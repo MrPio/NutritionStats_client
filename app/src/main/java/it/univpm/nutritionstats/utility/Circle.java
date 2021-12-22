@@ -10,6 +10,10 @@ public class Circle {
         this.radius = radius;
         this.center = center;
     }
+    public Circle(Point center) {
+        this.radius = 0f;
+        this.center = center;
+    }
 
     public Point getPointFromAngle(float angleDegree){
         float angleRadiants=angleDegree/180*(float)Math.PI;

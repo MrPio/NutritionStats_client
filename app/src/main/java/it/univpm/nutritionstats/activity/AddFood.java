@@ -10,12 +10,15 @@ import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.text.InputType;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import it.univpm.nutritionstats.R;
 import it.univpm.nutritionstats.api.APICommunication;
+import it.univpm.nutritionstats.utility.DrinkType;
 import it.univpm.nutritionstats.utility.Sound;
 
 public class AddFood extends AppCompatActivity {
@@ -58,18 +61,16 @@ public class AddFood extends AppCompatActivity {
                 makeSound(Sound.Sounds.PICKUP_COIN);
                 AlertDialog.Builder builder = new AlertDialog.Builder(AddFood.this);
                 builder.setTitle("Please the amount of water you drank [mL]:");
-                final EditText input = new EditText(getApplicationContext());
-                input.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_TEXT_VARIATION_NORMAL);
+                final Spinner input = new Spinner(getApplicationContext());
+                input.setAdapter(new ArrayAdapter<>(AddFood.this, R.layout.spinner_drink_type, DrinkType.values()));
+                input.setPadding(50,50,0,0);
                 builder.setView(input);
                 builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        int inputNum=Integer.parseInt(input.getText().toString());
-
-                        APICommunication.requestAddWater(MainActivity.token,inputNum);
+                        APICommunication.requestAddWater(MainActivity.token,(int)((DrinkType)input.getSelectedItem()).getValue());
 
                         Toast.makeText(AddFood.this, "Water successfully added!", Toast.LENGTH_SHORT).show();
-
                         makeSound(Sound.Sounds.WATER_SPLASH);
 
                         Intent resultIntent = new Intent();

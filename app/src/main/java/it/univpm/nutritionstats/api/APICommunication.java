@@ -26,6 +26,7 @@ import java.util.Objects;
 import it.univpm.nutritionstats.activity.MainActivity;
 
 public class APICommunication {
+    //public final static String       API_BASE_URL              = "https://nutritionstatsoop.herokuapp.com";
     public final static String       API_BASE_URL              = "http://192.168.1.16:5000";
     final static        String       ENDPOINT_EAN              = "/api/ean/";
     final static        String       ENDPOINT_NAME              = "/api/name/";
@@ -36,6 +37,7 @@ public class APICommunication {
     final static        String       ENDPOINT_ADD_FOOD_BY_NAME = "/add/food/by_name";
     final static        String       ENDPOINT_ADD_WATER        = "/add/water";
     final static        String       ENDPOINT_DIARY_INFO       = "/diary";
+    final static        String       ENDPOINT_UPDATE_WEIGHT        = "/update_weight";
     static              JSONObject[] outputJson                = {null};
 
     public static JSONObject getInfoFromEan(String ean) {
@@ -229,8 +231,26 @@ public class APICommunication {
         return foodList;
     }
 
+    public static JSONObject requestUpdateWeight(String token, String data, Float weight) {
+        String url = API_BASE_URL + ENDPOINT_UPDATE_WEIGHT
+                + "?token=" + token
+                + "&weight=" + weight
+                + "&date=" + data;
+        HttpURLConnection conn = null;
+        try {
+            conn = (HttpURLConnection) new URL(url).openConnection();
+            conn.setRequestMethod("PUT");
+        } catch (IOException e) {
+            HashMap<String, String> response = new HashMap<>();
+            response.put("result", "error: " + e.getMessage());
+            return new JSONObject(response);
+        }
+        return makeRequest(conn);
+    }
 
-    private static String generateTodayId() {
+
+
+        private static String generateTodayId() {
         String dayId;
         if(MainActivity.dateForValues==null) {
             dayId = String.valueOf(LocalDate.now().getDayOfMonth()) + "-" +
@@ -291,7 +311,7 @@ public class APICommunication {
         //se non trova il server continua ad aspettare per 15-20 min la risposta;
         long timer = 0;
         while (in[0] == null) {
-            if (timer > 5000)
+                if (timer > 11000)
                 return "{\"result\":\"error: request timeout\"}";
             try {
                 Thread.sleep(100);
