@@ -62,6 +62,7 @@ import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
+import com.github.mikephil.charting.formatter.DefaultAxisValueFormatter;
 import com.github.mikephil.charting.formatter.PercentFormatter;
 import com.github.mikephil.charting.formatter.ValueFormatter;
 import com.github.mikephil.charting.highlight.Highlight;
@@ -75,6 +76,7 @@ import org.json.simple.JSONObject;
 import org.threeten.bp.LocalDate;
 import org.threeten.bp.format.DateTimeFormatter;
 
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -721,6 +723,7 @@ public class MainActivity extends AppCompatActivity {
     private void loadWeightChart() {
         ArrayList<Entry> entriesW = new ArrayList<>();
         int count = 0;
+        //DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
         for (Map.Entry<LocalDate, Float> entry : weightMap.entrySet())
             //TODO axis x
             entriesW.add(new Entry(entry.getKey().toEpochDay(), entry.getValue()));
@@ -748,12 +751,19 @@ public class MainActivity extends AppCompatActivity {
         dataW.setValueTypeface(Typeface.DEFAULT_BOLD);
         dataW.setValueTextSize(16);
 
-
         lineChartWeight.setDescription(new Description());
         lineChartWeight.setData(dataW);
         lineChartWeight.invalidate();
         lineChartWeight.setClickable(true);
         lineChartWeight.setVisibility(View.VISIBLE);
+        //lineChartWeight.getXAxis().setTextColor(Color.WHITE);
+        lineChartWeight.getXAxis().setTextSize(13f);
+        lineChartWeight.getAxisLeft().setTextColor(Color.WHITE);
+        lineChartWeight.getAxisLeft().setTextSize(18f);
+        lineChartWeight.getAxisLeft().setTypeface(Typeface.MONOSPACE);
+        lineChartWeight.getXAxis().setLabelRotationAngle(75);
+        lineChartWeight.getXAxis().setLabelCount(6);
+        lineChartWeight.setScaleYEnabled(false);
 
         Legend l = lineChartWeight.getLegend();
         l.setEnabled(true);
