@@ -22,6 +22,8 @@ public class Circle {
 
     public float getAngleByPoint(Point point){
         float radius=(float)Math.sqrt(Math.pow(center.x-point.x, 2)+Math.pow(center.y-point.y, 2));
+        if(point.y>center.y)
+            return -(float)(Math.acos((+point.x-center.x)/radius)/Math.PI*180f);
         return (float)(Math.acos((+point.x-center.x)/radius)/Math.PI*180f);
     }
 

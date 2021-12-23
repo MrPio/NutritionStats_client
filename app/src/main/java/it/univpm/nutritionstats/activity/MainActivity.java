@@ -80,6 +80,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -87,11 +88,13 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import it.univpm.nutritionstats.R;
+import it.univpm.nutritionstats.Statistics;
 import it.univpm.nutritionstats.api.APICommunication;
 import it.univpm.nutritionstats.utility.Circle;
 import it.univpm.nutritionstats.utility.DrinkType;
 import it.univpm.nutritionstats.utility.EasingFunctionSine;
 import it.univpm.nutritionstats.utility.InputOutputImpl;
+import it.univpm.nutritionstats.utility.PopUpMenu;
 import it.univpm.nutritionstats.utility.Sound;
 import it.univpm.nutritionstats.utility.Utilities;
 
@@ -120,6 +123,7 @@ public class MainActivity extends AppCompatActivity {
     final static int    REQUEST_CODE_LOGIN            = 2;
     final static int    REQUEST_CODE_ADD_FOOD_BY_EAN  = 3;
     final static int    REQUEST_CODE_ADD_FOOD_BY_NAME = 4;
+    final static int    REQUEST_STATISTICS = 4;
 
     public static ArrayList<JSONObject> resultList    = new ArrayList<JSONObject>();
     public static String                dateForValues = null;
@@ -180,6 +184,8 @@ public class MainActivity extends AppCompatActivity {
     private ImageView imageViewAddDinner    = null;
     private ImageView imageViewAddWater     = null;
     private ImageView imageViewAddRuler     = null;
+    private ImageView imageViewAddWeight=null;
+    private ImageView imageViewViewStats=null;
 
     private ImageView imageViewDiary   = null;
     private ImageView imageViewUser    = null;
@@ -200,13 +206,15 @@ public class MainActivity extends AppCompatActivity {
     private int     actualTab        = 0;
     private boolean addButtonPressed = false;
     Circle circleAddButton = null;
-    private int addButtonSelected = 0;
+    Circle circleRulerButton = null;
+    private int addButtonSelected = -1;
     long startTime;
     private boolean pieChartWaterAnimated = false;
     Point screenSize;
     Point movementStart;
     Point movementEnd;
-    private boolean measureSelected = false;
+    private boolean measurePressed = false;
+    private int measureSelected = -1;
     private boolean updateWeightValueDisplayed;
 
 
@@ -261,8 +269,18 @@ public class MainActivity extends AppCompatActivity {
         imageViewAddDinner = findViewById(R.id.imageViewAddDinner);
         imageViewAddWater = findViewById(R.id.imageViewAddWater);
         imageViewAddRuler = findViewById(R.id.imageViewAddRuler);
-        ImageView[] addMealList =
-                {imageViewAddBreakfast, imageViewAddLunch, imageViewAddSnack, imageViewAddDinner};
+        imageViewViewStats = findViewById(R.id.imageViewViewStats);
+        imageViewAddWeight = findViewById(R.id.imageViewAddWeight);
+        PopUpMenu[] addButtonMenu = {
+                new PopUpMenu(imageViewAddBreakfast, R.drawable.breakfast, R.drawable.breakfast_hover, Sound.Sounds.BIP_5),
+                new PopUpMenu(imageViewAddLunch, R.drawable.lunch, R.drawable.lunch_hover, Sound.Sounds.BIP_3),
+                new PopUpMenu(imageViewAddSnack, R.drawable.snack, R.drawable.snack_hover, Sound.Sounds.BIP_4),
+                new PopUpMenu(imageViewAddDinner, R.drawable.dinner, R.drawable.dinner_hover, Sound.Sounds.BIP_6)
+        };
+        PopUpMenu[] rulerButtonMenu = {
+                new PopUpMenu(imageViewViewStats, R.drawable.stats, R.drawable.stats_hover, Sound.Sounds.BIP_5),
+                new PopUpMenu(imageViewAddWeight, R.drawable.weight, R.drawable.weight_hover, Sound.Sounds.BIP_3)
+        };
 
         imageViewDiary = findViewById(R.id.imageViewDiary);
         imageViewUser = findViewById(R.id.imageViewUser);
@@ -323,7 +341,7 @@ public class MainActivity extends AppCompatActivity {
         imageViewAddButton.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
-
+                float singleStep = 90f / (addButtonMenu.length - 1);
                 if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
                     addButtonSelected = 0;
                     circleAddButton =
@@ -333,15 +351,13 @@ public class MainActivity extends AppCompatActivity {
                     makeSound(Sound.Sounds.BIP_13);
                     imageViewAddButton.setImageDrawable(getResources().getDrawable(R.drawable.add_button_hover));
 
-                    addMealList[0].animate().alpha(1.0f).scaleX(1f).scaleY(1f)
-                            .translationX(circleAddButton.getPointFromAngle(180f).x).translationY(-circleAddButton.getPointFromAngle(180f).y).start();
-                    addMealList[1].animate().alpha(1.0f).scaleX(1f).scaleY(1f)
-                            .translationX(circleAddButton.getPointFromAngle(150f).x).translationY(-circleAddButton.getPointFromAngle(150f).y).start();
-                    addMealList[2].animate().alpha(1.0f).scaleX(1f).scaleY(1f)
-                            .translationX(circleAddButton.getPointFromAngle(120f).x).translationY(-circleAddButton.getPointFromAngle(120f).y).start();
-                    addMealList[3].animate().alpha(1.0f).scaleX(1f).scaleY(1f)
-                            .translationX(circleAddButton.getPointFromAngle(90f).x).translationY(-circleAddButton.getPointFromAngle(90f).y).start();
-
+                    int count =addButtonMenu.length;
+                    for (PopUpMenu iv : addButtonMenu) {
+                        float angle = 90f+singleStep * --count;
+                        iv.getImageView().animate().alpha(1.0f).scaleX(1f).scaleY(1f)
+                                .translationX(circleAddButton.getPointFromAngle(angle).x)
+                                .translationY(-circleAddButton.getPointFromAngle(angle).y).start();
+                    }
                     imageViewAddWater.setAlpha(0f);
                     imageViewAddWater.setVisibility(View.VISIBLE);
                     imageViewAddWater.animate().scaleX(1.35f).scaleY(1.35f).alpha(1.0f).start();
@@ -358,92 +374,42 @@ public class MainActivity extends AppCompatActivity {
                         if (addButtonSelected == -1)
                             return false;
                         addButtonSelected = -1;
-                        addMealList[0].animate().scaleX(1f).scaleY(1f).setDuration(120).start();
-                        addMealList[1].animate().scaleX(1f).scaleY(1f).setDuration(120).start();
-                        addMealList[2].animate().scaleX(1f).scaleY(1f).setDuration(120).start();
-                        addMealList[3].animate().scaleX(1f).scaleY(1f).setDuration(120).start();
-                        addMealList[0].setImageDrawable(getResources().getDrawable(R.drawable.breakfast));
-                        addMealList[1].setImageDrawable(getResources().getDrawable(R.drawable.lunch));
-                        addMealList[2].setImageDrawable(getResources().getDrawable(R.drawable.snack));
-                        addMealList[3].setImageDrawable(getResources().getDrawable(R.drawable.dinner));
-
+                        for (PopUpMenu iv : addButtonMenu) {
+                            iv.getImageView().animate().scaleX(1f).scaleY(1f).setDuration(120).start();
+                            iv.getImageView().setImageDrawable(getResources().getDrawable(iv.getDrawable()));
+                        }
                         imageViewAddWater.animate().scaleX(1f).scaleY(1f).setDuration(120).start();
                     } else {
-
                         float angle =
                                 circleAddButton.getAngleByPoint(new Point((int) motionEvent.getRawX(), (int) motionEvent.getRawY()));
                         if (circleAddButton.getDistaceFromCenter(new Point((int) motionEvent.getRawX(), (int) motionEvent.getRawY())) < 170) {
                             if (addButtonSelected == 0) return true;
                             makeSound(Sound.Sounds.BIP_2);
                             addButtonSelected = 0;
-                            addMealList[0].animate().scaleX(1f).scaleY(1f).setDuration(120).start();
-                            addMealList[1].animate().scaleX(1f).scaleY(1f).setDuration(120).start();
-                            addMealList[2].animate().scaleX(1f).scaleY(1f).setDuration(120).start();
-                            addMealList[3].animate().scaleX(1f).scaleY(1f).setDuration(120).start();
-                            addMealList[0].setImageDrawable(getResources().getDrawable(R.drawable.breakfast));
-                            addMealList[1].setImageDrawable(getResources().getDrawable(R.drawable.lunch));
-                            addMealList[2].setImageDrawable(getResources().getDrawable(R.drawable.snack));
-                            addMealList[3].setImageDrawable(getResources().getDrawable(R.drawable.dinner));
-
+                            for (PopUpMenu iv : addButtonMenu) {
+                                iv.getImageView().animate().scaleX(1f).scaleY(1f).setDuration(120).start();
+                                iv.getImageView().setImageDrawable(getResources().getDrawable(iv.getDrawable()));
+                            }
                             imageViewAddWater.animate().scaleX(1.35f).scaleY(1.35f).setDuration(120).start();
                             return true;
                         }
-                        if (angle > 165f) {
-                            if (addButtonSelected == 1) return true;
-                            makeSound(Sound.Sounds.BIP_5);
-                            addButtonSelected = 1;
-                            addMealList[0].animate().scaleX(1.35f).scaleY(1.35f).setDuration(120).start();
-                            addMealList[1].animate().scaleX(1f).scaleY(1f).setDuration(120).start();
-                            addMealList[2].animate().scaleX(1f).scaleY(1f).setDuration(120).start();
-                            addMealList[3].animate().scaleX(1f).scaleY(1f).setDuration(120).start();
-                            addMealList[0].setImageDrawable(getResources().getDrawable(R.drawable.breakfast_hover));
-                            addMealList[1].setImageDrawable(getResources().getDrawable(R.drawable.lunch));
-                            addMealList[2].setImageDrawable(getResources().getDrawable(R.drawable.snack));
-                            addMealList[3].setImageDrawable(getResources().getDrawable(R.drawable.dinner));
-
-                            imageViewAddWater.animate().scaleX(1f).scaleY(1f).setDuration(120).start();
-                        } else if (angle > 135f) {
-                            if (addButtonSelected == 2) return true;
-                            makeSound(Sound.Sounds.BIP_3);
-                            addButtonSelected = 2;
-                            addMealList[0].animate().scaleX(1f).scaleY(1f).setDuration(120).start();
-                            addMealList[1].animate().scaleX(1.35f).scaleY(1.35f).setDuration(120).start();
-                            addMealList[2].animate().scaleX(1f).scaleY(1f).setDuration(120).start();
-                            addMealList[3].animate().scaleX(1f).scaleY(1f).setDuration(120).start();
-                            addMealList[0].setImageDrawable(getResources().getDrawable(R.drawable.breakfast));
-                            addMealList[1].setImageDrawable(getResources().getDrawable(R.drawable.lunch_hover));
-                            addMealList[2].setImageDrawable(getResources().getDrawable(R.drawable.snack));
-                            addMealList[3].setImageDrawable(getResources().getDrawable(R.drawable.dinner));
-
-                        } else if (angle > 105) {
-                            if (addButtonSelected == 3) return true;
-                            makeSound(Sound.Sounds.BIP_4);
-                            addButtonSelected = 3;
-                            addMealList[0].animate().scaleX(1f).scaleY(1f).setDuration(120).start();
-                            addMealList[1].animate().scaleX(1f).scaleY(1f).setDuration(120).start();
-                            addMealList[2].animate().scaleX(1.35f).scaleY(1.35f).setDuration(120).start();
-                            addMealList[3].animate().scaleX(1f).scaleY(1f).setDuration(120).start();
-                            addMealList[0].setImageDrawable(getResources().getDrawable(R.drawable.breakfast));
-                            addMealList[1].setImageDrawable(getResources().getDrawable(R.drawable.lunch));
-                            addMealList[2].setImageDrawable(getResources().getDrawable(R.drawable.snack_hover));
-                            addMealList[3].setImageDrawable(getResources().getDrawable(R.drawable.dinner));
-
-                        } else if (angle > 75) {
-                            if (addButtonSelected == 4) return true;
-                            makeSound(Sound.Sounds.BIP_6);
-                            addButtonSelected = 4;
-                            addMealList[0].animate().scaleX(1f).scaleY(1f).setDuration(120).start();
-                            addMealList[1].animate().scaleX(1f).scaleY(1f).setDuration(120).start();
-                            addMealList[2].animate().scaleX(1f).scaleY(1f).setDuration(120).start();
-                            addMealList[3].animate().scaleX(1.35f).scaleY(1.35f).setDuration(120).start();
-                            addMealList[0].setImageDrawable(getResources().getDrawable(R.drawable.breakfast));
-                            addMealList[1].setImageDrawable(getResources().getDrawable(R.drawable.lunch));
-                            addMealList[2].setImageDrawable(getResources().getDrawable(R.drawable.snack));
-                            addMealList[3].setImageDrawable(getResources().getDrawable(R.drawable.dinner_hover));
-
-                            imageViewAddWater.animate().scaleX(1f).scaleY(1f).setDuration(120).start();
-
+                        int step = addButtonMenu.length-(int) ((angle - 90+ singleStep/2)/singleStep);
+                        if(step<=0 ||step>addButtonMenu.length)
+                            return false;
+                        if (addButtonSelected == step) return true;
+                        addButtonSelected=step;
+                        makeSound(addButtonMenu[step-1].getSound());
+                        int count = 1;
+                        for (PopUpMenu iv : addButtonMenu) {
+                            if (count++ == addButtonSelected) {
+                                iv.getImageView().animate().scaleX(1.35f).scaleY(1.35f).setDuration(120).start();
+                                iv.getImageView().setImageDrawable(getResources().getDrawable(iv.getDrawableHover()));
+                            } else {
+                                iv.getImageView().animate().scaleX(1f).scaleY(1f).setDuration(120).start();
+                                iv.getImageView().setImageDrawable(getResources().getDrawable(iv.getDrawable()));
+                            }
                         }
+                        imageViewAddWater.animate().scaleX(1f).scaleY(1f).setDuration(120).start();
                     }
                 }
                 if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
@@ -455,16 +421,10 @@ public class MainActivity extends AppCompatActivity {
                     else
                         makeSound(Sound.Sounds.BIP_3);
 
-                    addMealList[0].animate().alpha(0f).scaleX(0.2f).scaleY(0.2f).translationX(0).translationY(0).start();
-                    addMealList[1].animate().alpha(0f).scaleX(0.2f).scaleY(0.2f).translationX(0).translationY(0).start();
-                    addMealList[2].animate().alpha(0f).scaleX(0.2f).scaleY(0.2f).translationX(0).translationY(0).start();
-                    addMealList[3].animate().alpha(0f).scaleX(0.2f).scaleY(0.2f).translationX(0).translationY(0).start();
-
-                    addMealList[0].setImageDrawable(getResources().getDrawable(R.drawable.breakfast));
-                    addMealList[1].setImageDrawable(getResources().getDrawable(R.drawable.lunch));
-                    addMealList[2].setImageDrawable(getResources().getDrawable(R.drawable.snack));
-                    addMealList[3].setImageDrawable(getResources().getDrawable(R.drawable.dinner));
-
+                    for (PopUpMenu iv : addButtonMenu) {
+                            iv.getImageView().animate().alpha(0f).scaleX(0.2f).scaleY(0.2f).translationX(0).translationY(0).start();
+                            iv.getImageView().setImageDrawable(getResources().getDrawable(iv.getDrawable()));
+                    }
                     imageViewAddWater.animate().alpha(0.0f).start();
                     imageViewAddButton.animate().alpha(1.0f).start();
 
@@ -571,14 +531,115 @@ public class MainActivity extends AppCompatActivity {
         imageViewAddRuler.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
-                System.out.println(motionEvent.getAction());
-
+                float baseAngle=90f;
+                if(rulerButtonMenu.length==2)
+                    baseAngle=105f;
+                float singleStep =( 90f-(baseAngle-90f)*2f) / (rulerButtonMenu.length - 1);
                 if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
-                    measureSelected = true;
+                    measureSelected = 0;
+                    circleRulerButton =
+                            new Circle(460, new Point((int) motionEvent.getRawX(), (int) motionEvent.getRawY()));
+                    measurePressed = true;
+                    view.animate().scaleX(1.30f).scaleY(1.30f).setDuration(160).start();
+                    makeSound(Sound.Sounds.BIP_13);
+                    ((ImageView)view).setImageDrawable(getResources().getDrawable(R.drawable.ruler_hover));
+
+                    int count =rulerButtonMenu.length;
+                    for (PopUpMenu iv : rulerButtonMenu) {
+                        float angle = baseAngle+singleStep * --count;
+                        iv.getImageView().animate().alpha(1.0f).scaleX(1f).scaleY(1f)
+                                .translationX(circleRulerButton.getPointFromAngle(angle).x)
+                                .translationY(-circleRulerButton.getPointFromAngle(angle).y).start();
+                    }
+                }
+                if (motionEvent.getAction() == MotionEvent.ACTION_MOVE) {
+                    int radius = view.getMeasuredWidth();
+                    Point center = new Point(radius, radius);
+                    Circle hit = new Circle(center);
+                    float distance =
+                            hit.getDistaceFromCenter(new Point((int) motionEvent.getX(), (int) motionEvent.getY()));
+
+                    if (distance > 580) {
+                        if (measureSelected == -1)
+                            return false;
+                        measureSelected = -1;
+                        for (PopUpMenu iv : rulerButtonMenu) {
+                            iv.getImageView().animate().scaleX(1f).scaleY(1f).setDuration(120).start();
+                            iv.getImageView().setImageDrawable(getResources().getDrawable(iv.getDrawable()));
+                        }
+                        view.animate().scaleX(1f).scaleY(1f).setDuration(120).start();
+                    } else {
+                        float angle =
+                                circleRulerButton.getAngleByPoint(new Point((int) motionEvent.getRawX(), (int) motionEvent.getRawY()));
+                        if (circleRulerButton.getDistaceFromCenter(new Point((int) motionEvent.getRawX(), (int) motionEvent.getRawY())) < 170) {
+                            if (measureSelected == 0) return true;
+                            makeSound(Sound.Sounds.BIP_2);
+                            measureSelected = 0;
+                            for (PopUpMenu iv : rulerButtonMenu) {
+                                iv.getImageView().animate().scaleX(1f).scaleY(1f).setDuration(120).start();
+                                iv.getImageView().setImageDrawable(getResources().getDrawable(iv.getDrawable()));
+                            }
+                            view.animate().scaleX(1.35f).scaleY(1.35f).setDuration(120).start();
+                            return true;
+                        }
+                        int step = rulerButtonMenu.length-(int) ((angle - baseAngle+ singleStep/2)/singleStep);
+                        if(step<=0 ||step>rulerButtonMenu.length)
+                            return false;
+                        if (measureSelected == step)
+                            return true;
+                        measureSelected=step;
+                        makeSound(rulerButtonMenu[step-1].getSound());
+                        int count = 1;
+                        for (PopUpMenu iv : rulerButtonMenu) {
+                            if (count++ == measureSelected) {
+                                iv.getImageView().animate().scaleX(1.35f).scaleY(1.35f).setDuration(120).start();
+                                iv.getImageView().setImageDrawable(getResources().getDrawable(iv.getDrawableHover()));
+                            } else {
+                                iv.getImageView().animate().scaleX(1f).scaleY(1f).setDuration(120).start();
+                                iv.getImageView().setImageDrawable(getResources().getDrawable(iv.getDrawable()));
+                            }
+                        }
+                        view.animate().scaleX(1f).scaleY(1f).setDuration(120).start();
+                    }
+                }
+                if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
+                    addButtonPressed = false;
+                    view.animate().scaleX(1f).scaleY(1f).setDuration(160).start();
+                    ((ImageView)view).setImageDrawable(getResources().getDrawable(R.drawable.ruler));
+                    if (measureSelected == -1)
+                        Sound.makeSound(getApplicationContext(), Sound.Sounds.NO_BUY);
+                    else
+                        makeSound(Sound.Sounds.BIP_3);
+
+                    for (PopUpMenu iv : rulerButtonMenu) {
+                        iv.getImageView().animate().alpha(0f).scaleX(0.2f).scaleY(0.2f).translationX(0).translationY(0).start();
+                        iv.getImageView().setImageDrawable(getResources().getDrawable(iv.getDrawable()));
+                    }
+                    view.animate().alpha(0.0f).start();
+                    view.animate().alpha(1.0f).start();
+
+                    if (measureSelected == 1) {
+                        Intent i = (new Intent(MainActivity.this, Statistics.class));
+                        startActivityForResult(i, REQUEST_STATISTICS);
+                    }
+                    else if (measureSelected == 2)
+                        updateWeightValue(weightMap.lastKey(), weightMap.lastEntry().getValue());
+
+                }
+
+
+
+
+
+
+
+/*                if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+                    measureSelected = 0;
                     imageViewAddRuler.animate().scaleX(1.35f).scaleY(1.35f).setDuration(120).start();
                     Sound.makeSound(getApplicationContext(), Sound.Sounds.BIP_13);
                     imageViewAddRuler.setImageDrawable(getResources().getDrawable(R.drawable.ruler_hover));
-                } else if (motionEvent.getAction() == MotionEvent.ACTION_MOVE) {
+                }
+                if (motionEvent.getAction() == MotionEvent.ACTION_MOVE) {
                     int radius = view.getMeasuredWidth();
                     Point center = new Point(radius, radius);
                     Circle hit = new Circle(center);
@@ -595,14 +656,15 @@ public class MainActivity extends AppCompatActivity {
                         Sound.makeSound(getApplicationContext(), Sound.Sounds.BIP_13);
                         imageViewAddRuler.setImageDrawable(getResources().getDrawable(R.drawable.ruler_hover));
                     }
-                } else if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
+                }
+                if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
                     imageViewAddRuler.animate().scaleX(1f).scaleY(1f).setDuration(120).start();
                     imageViewAddRuler.setImageDrawable(getResources().getDrawable(R.drawable.ruler));
                     if (measureSelected) {
                         measureSelected = false;
                         updateWeightValue(weightMap.lastKey(), weightMap.lastEntry().getValue());
                     }
-                }
+                }*/
                 return true;
             }
         });
@@ -791,7 +853,7 @@ public class MainActivity extends AppCompatActivity {
         date.setTextColor(Color.WHITE);
         date.setTypeface(Typeface.MONOSPACE);
         date.setTextSize(18f);
-        date.setText(defaultDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+            date.setText(defaultDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
         final TextView weightText = new TextView(getApplicationContext());
         weightText.setInputType(InputType.TYPE_CLASS_DATETIME | InputType.TYPE_DATETIME_VARIATION_DATE);
         weightText.setPadding(150, 100, 0, 0);
@@ -827,14 +889,14 @@ public class MainActivity extends AppCompatActivity {
             numberPickerDecimal.setMaxValue(300);
             numberPickerDecimal.setMinValue(10);
             numberPickerDecimal.setWrapSelectorWheel(false);
-            numberPickerDecimal.setTextSize(84);
+            //numberPickerDecimal.setTextSize(84);
             numberPickerDecimal.setValue((int) defaultValue);
             final NumberPicker numberPickerSigned =
                     (NumberPicker) d.findViewById(R.id.numberPickerSigned);
             numberPickerSigned.setMaxValue(9);
             numberPickerSigned.setMinValue(0);
             numberPickerSigned.setWrapSelectorWheel(false);
-            numberPickerSigned.setTextSize(84);
+            //numberPickerSigned.setTextSize(84);
             try {
                 numberPickerSigned.setValue(Integer.parseInt(String.valueOf(defaultValue).split("\\.")[1]));
             } catch (Exception e) {
@@ -906,35 +968,9 @@ public class MainActivity extends AppCompatActivity {
             dialog.cancel();
             updateWeightValueDisplayed = false;
         });
-        builder.setOnCancelListener((dialogInterface)->updateWeightValueDisplayed = false);
+        builder.setOnCancelListener((dialogInterface) -> updateWeightValueDisplayed = false);
 
         builder.show();
-    }
-
-    private LineData getData(int count, float range) {
-
-        ArrayList<Entry> values = new ArrayList<>();
-
-        for (int i = 0; i < count; i++) {
-            float val = (float) (Math.random() * range) + 3;
-            values.add(new Entry(i, val));
-        }
-
-        // create a dataset and give it a type
-        LineDataSet set1 = new LineDataSet(values, "DataSet 1");
-        // set1.setFillAlpha(110);
-        // set1.setFillColor(Color.RED);
-
-        set1.setLineWidth(1.75f);
-        set1.setCircleRadius(5f);
-        set1.setCircleHoleRadius(2.5f);
-        set1.setColor(Color.WHITE);
-        set1.setCircleColor(Color.WHITE);
-        set1.setHighLightColor(Color.WHITE);
-        set1.setDrawValues(false);
-
-        // create a data object with the data sets
-        return new LineData(set1);
     }
 
     private void loadTodayValues() {

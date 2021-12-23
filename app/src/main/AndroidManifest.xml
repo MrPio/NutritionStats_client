@@ -16,6 +16,9 @@
         android:theme="@style/Theme.NutritionStats"
         android:usesCleartextTraffic="true">
         <activity
+            android:name=".Statistics"
+            android:exported="false" />
+        <activity
             android:name=".activity.AddFoodByName"
             android:exported="false" />
         <activity
@@ -27,9 +30,8 @@
             android:name=".activity.MainActivity"
             android:exported="true"
             android:label="NutritionStats">
-<!--
-            android:theme="@style/Theme.NutritionStats">
--->
+
+            <!--             android:theme="@style/Theme.NutritionStats"> -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

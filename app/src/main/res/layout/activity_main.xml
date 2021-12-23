@@ -1073,6 +1073,28 @@
         </ScrollView>
 
         <ImageView
+            android:id="@+id/imageViewAddWeight"
+            android:layout_width="58dp"
+            android:layout_height="58dp"
+            android:layout_marginEnd="24dp"
+            android:layout_marginBottom="32dp"
+            android:alpha="0"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:srcCompat="@drawable/weight_anim" />
+
+        <ImageView
+            android:id="@+id/imageViewViewStats"
+            android:layout_width="58dp"
+            android:layout_height="58dp"
+            android:layout_marginEnd="24dp"
+            android:layout_marginBottom="32dp"
+            android:alpha="0"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:srcCompat="@drawable/stats_anim" />
+
+        <ImageView
             android:id="@+id/imageViewAddRuler"
             android:layout_width="58dp"
             android:layout_height="58dp"
