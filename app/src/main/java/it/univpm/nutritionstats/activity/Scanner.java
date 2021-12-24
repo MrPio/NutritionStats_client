@@ -11,6 +11,8 @@ import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.text.InputType;
 import android.view.View;
@@ -26,6 +28,7 @@ import com.budiyev.android.codescanner.ScanMode;
 import com.google.zxing.Result;
 
 import org.jetbrains.annotations.NotNull;
+import org.json.simple.JSONObject;
 
 import it.univpm.nutritionstats.R;
 import it.univpm.nutritionstats.api.APICommunication;
@@ -68,23 +71,25 @@ public class Scanner extends AppCompatActivity {
                         builder.setTitle("Please specify portion weight:");
                         final EditText input = new EditText(getApplicationContext());
                         input.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_TEXT_VARIATION_NORMAL);
+                        input.setTextColor(Color.WHITE);
+                        input.setTextSize(22);
+                        input.setTypeface(Typeface.SERIF);
                         builder.setView(input);
                         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
+                                if(input.getText().length()==0)
+                                    return;
+
                                 int inputNum=Integer.parseInt(input.getText().toString());
 
-                                APICommunication.requestAddFoodByEan(MainActivity.token,AddFood.mealType,
+                                JSONObject response=APICommunication.requestAddFoodByEan(MainActivity.token,AddFood.mealType,
                                         Long.parseLong(result.getText()),inputNum);
+                                if(response.toJSONString().contains("Sorry, but we couldn't find"))
+                                    Toast.makeText(getApplicationContext(),(String)response.get("message"),Toast.LENGTH_LONG).show();
                                 Intent resultIntent = new Intent();
-                                setResult(Activity.RESULT_OK, resultIntent);
+                                setResult(Activity.RESULT_CANCELED, resultIntent);
                                 finish();
-                            }
-                        });
-                        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.cancel();
                             }
                         });
 

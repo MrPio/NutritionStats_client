@@ -107,7 +107,7 @@ public class AddFoodByName extends AppCompatActivity {
                     textViewCarboydrats.setText("(" + ((JSONObject) infosNutrient.get(0)).get("quantity").toString() + " gr)");
                     textViewProteins.setText("(" + ((JSONObject) infosNutrient.get(1)).get("quantity").toString() + " gr)");
                     textViewLipids.setText("(" + ((JSONObject) infosNutrient.get(2)).get("quantity").toString() + " gr)");
-                    textViewFiber.setText("(" + ((Number) (((JSONObject) infosNotNutrient.get(1)).get("quantity"))).floatValue() * 1000f + " gr)");
+                    textViewFiber.setText("(" + ((Number) (((JSONObject) infosNotNutrient.get(1)).get("quantity"))).floatValue() + " gr)");
                     textViewSodium.setText("(" + ((Number) (((JSONObject) infosNutrient.get(7)).get("quantity"))).floatValue() * 1000f + " mg)");
                     textViewCalcium.setText("(" + ((Number) (((JSONObject) infosNutrient.get(5)).get("quantity"))).floatValue() * 1000f + " mg)");
                     textViewPotassium.setText("(" + ((Number) (((JSONObject) infosNutrient.get(6)).get("quantity"))).floatValue() * 1000f + " mg)");

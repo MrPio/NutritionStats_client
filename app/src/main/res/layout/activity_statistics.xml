@@ -6,4 +6,25 @@
     android:layout_height="match_parent"
     tools:context=".Statistics">
 
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tabNutrient"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tabIndicatorFullWidth="false"
+        app:tabMode="scrollable" />
+
+    <FrameLayout
+        android:id="@+id/statisticFrame"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tabNutrient">
+
+    </FrameLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

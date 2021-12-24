@@ -103,22 +103,26 @@ public class MainActivity extends AppCompatActivity {
     public enum Diet {CLASSIC, PESCATARIAN, VEGETARIAN, VEGAN}
 
     public enum MealType {
-        BREAKFAST(0.20f),
-        LUNCH(0.40f),
-        SNACK(0.10f),
-        DINNER(0.30f);
+        BREAKFAST(R.drawable.breakfast),
+        LUNCH(R.drawable.lunch),
+        SNACK(R.drawable.snack),
+        DINNER(R.drawable.dinner);
 
-        float dailyNeed;
+        private int Drawable;
 
-        MealType(float dailyNeed) {
-            this.dailyNeed = dailyNeed;
+        MealType(int drawable) {
+            Drawable = drawable;
+        }
+
+        public int getDrawable() {
+            return Drawable;
         }
     }
 
     public enum Gender {MALE, FEMALE}
 
     ;
-    final        String TOKEN_PATH                    = "token.dat";
+    public final static       String TOKEN_PATH                    = "token.dat";
     final static int    REQUEST_CODE_ADD              = 1;
     final static int    REQUEST_CODE_LOGIN            = 2;
     final static int    REQUEST_CODE_ADD_FOOD_BY_EAN  = 3;
@@ -308,6 +312,8 @@ public class MainActivity extends AppCompatActivity {
             imageViewDiary.animate().alpha(1f).scaleX(0.75f).scaleY(0.75f).setDuration(400).start();
             imageViewUser.animate().alpha(0.5f).scaleX(0.6f).scaleY(0.6f).setDuration(400).start();
             loadPieChartData();
+
+            APICommunication.requestFoodList(token);
         } else signUp();
 
         if (dateForValues != null) {
@@ -466,16 +472,14 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        APICommunication.requestFoodList(token);
-
-        scrollViewMenuDiary.getViewTreeObserver().addOnScrollChangedListener(new ViewTreeObserver.OnScrollChangedListener() {
+        scrollViewMenuDiary.getViewTreeObserver().addOnScrollChangedListener(
+                new ViewTreeObserver.OnScrollChangedListener() {
             @Override
             public void onScrollChanged() {
                 if (!pieChartWaterAnimated && scrollViewMenuDiary.getScrollY() > 630) {
                     pieChartWater.animateY(3200, Easing.EaseInSine);
                     pieChartWaterAnimated = true;
                 }
-                // DO SOMETHING WITH THE SCROLL COORDINATES
             }
         });
 
@@ -821,14 +825,14 @@ public class MainActivity extends AppCompatActivity {
         //lineChartWeight.getXAxis().setTextColor(Color.WHITE);
         lineChartWeight.getXAxis().setTextSize(13f);
         lineChartWeight.getAxisLeft().setTextColor(Color.WHITE);
-        lineChartWeight.getAxisLeft().setTextSize(18f);
+        lineChartWeight.getAxisLeft().setTextSize(15f);
         lineChartWeight.getAxisLeft().setTypeface(Typeface.MONOSPACE);
         lineChartWeight.getXAxis().setLabelRotationAngle(75);
         lineChartWeight.getXAxis().setLabelCount(6);
         lineChartWeight.setScaleYEnabled(false);
 
         Legend l = lineChartWeight.getLegend();
-        l.setEnabled(true);
+        l.setEnabled(false);
     }
 
     private void updateWeightValue(LocalDate defaultDate, float defaultValue) {
@@ -1215,6 +1219,14 @@ public class MainActivity extends AppCompatActivity {
                 break;
 
             case REQUEST_CODE_LOGIN:
+                if(new InputOutputImpl(getApplicationContext(), TOKEN_PATH).existFile()) {
+                    Toast.makeText(getApplicationContext(),"We Recognized you! No need to proceed " +
+                            "with the signup.",Toast.LENGTH_LONG).show();
+                    Intent intent1 = getIntent();
+                    finish();
+                    startActivity(intent1);
+                    return;
+                }
                 JSONObject response =
                         new APICommunication().requestSignUp(userName, userEmail, birth, diet, weight, height, gender);
                 if (response.get("result").toString().contains("error")) {
@@ -1279,6 +1291,13 @@ public class MainActivity extends AppCompatActivity {
             if (movementStart == null)
                 return true;
             movementEnd = new Point((int) event.getX(), (int) event.getY());
+
+            if(movementEnd.y-movementStart.y> screenSize.y*0.44
+            && Math.abs(movementEnd.x-movementStart.x)< screenSize.x*0.24){
+                Intent intent = getIntent();
+                finish();
+                startActivity(intent);
+            }
 
             if (actualTab == 0) {
                 if ((float) movementStart.x / screenSize.x > 0.85 &&

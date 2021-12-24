@@ -9,11 +9,13 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.format.DateTimeFormatter;
@@ -24,12 +26,13 @@ import java.util.Map;
 import java.util.Objects;
 
 import it.univpm.nutritionstats.activity.MainActivity;
+import it.univpm.nutritionstats.utility.Elements;
 
 public class APICommunication {
     //public final static String       API_BASE_URL              = "https://nutritionstatsoop.herokuapp.com";
     public final static String       API_BASE_URL              = "http://192.168.1.16:5000";
     final static        String       ENDPOINT_EAN              = "/api/ean/";
-    final static        String       ENDPOINT_NAME              = "/api/name/";
+    final static        String       ENDPOINT_NAME             = "/api/name/";
     final static        String       ENDPOINT_SIGNUP           = "/signup";
     final static        String       ENDPOINT_LOGIN            = "/login";
     final static        String       ENDPOINT_TODAY_VALUES     = "/diary/";
@@ -37,7 +40,9 @@ public class APICommunication {
     final static        String       ENDPOINT_ADD_FOOD_BY_NAME = "/add/food/by_name";
     final static        String       ENDPOINT_ADD_WATER        = "/add/water";
     final static        String       ENDPOINT_DIARY_INFO       = "/diary";
-    final static        String       ENDPOINT_UPDATE_WEIGHT        = "/update_weight";
+    final static        String       ENDPOINT_UPDATE_WEIGHT    = "/update_weight";
+    final static        String       ENDPOINT_STATISTIC        = "/stats";
+    final static        String       ENDPOINT_FILTERS        = "/filters";
     static              JSONObject[] outputJson                = {null};
 
     public static JSONObject getInfoFromEan(String ean) {
@@ -110,13 +115,12 @@ public class APICommunication {
 
     public static JSONObject requestTodayValues(String token) {
         String dayId;
-        if(MainActivity.dateForValues==null) {
+        if (MainActivity.dateForValues == null) {
             dayId = String.valueOf(LocalDate.now().getDayOfMonth()) + "-" +
                     String.valueOf(LocalDate.now().getMonthValue()) + "-" +
                     String.valueOf(LocalDate.now().getYear());
-        }
-        else
-            dayId=MainActivity.dateForValues;
+        } else
+            dayId = MainActivity.dateForValues;
 
         String url = API_BASE_URL + ENDPOINT_TODAY_VALUES + dayId
                 + "?token=" + token;
@@ -195,14 +199,13 @@ public class APICommunication {
     public static HashMap<MainActivity.MealType, ArrayList<String>> requestFoodList(String token) {
         HashMap<MainActivity.MealType, ArrayList<String>> foodList = new HashMap<>();
         String dayId;
-        if(MainActivity.dateForValues==null) {
+        if (MainActivity.dateForValues == null) {
             dayId = String.valueOf(LocalDate.now().getYear()) + "-" +
                     String.valueOf(LocalDate.now().getMonthValue()) + "-" +
                     String.valueOf(LocalDate.now().getDayOfMonth());
-        }
-        else {
-            String[] split=MainActivity.dateForValues.split("-");
-            dayId =split[2]+"-"+split[1]+"-"+split[0];
+        } else {
+            String[] split = MainActivity.dateForValues.split("-");
+            dayId = split[2] + "-" + split[1] + "-" + split[0];
         }
 
         String url = API_BASE_URL + ENDPOINT_DIARY_INFO
@@ -216,13 +219,13 @@ public class APICommunication {
             response.put("result", "error: " + e.getMessage());
             return new JSONObject(response);
         }
-        JSONObject response = (JSONObject)makeRequest(conn).get("diary");
+        JSONObject response = (JSONObject) makeRequest(conn).get("diary");
         for (Object day : (JSONArray) response.get("dayList")) {
             if (((JSONObject) day).get("date").equals(dayId)) {
                 for (Object meal : (JSONArray) Objects.requireNonNull(((JSONObject) day).get("mealList"))) {
-                    MainActivity.MealType mealType=
+                    MainActivity.MealType mealType =
                             MainActivity.MealType.valueOf(((JSONObject) meal).get("mealType").toString());
-                    foodList.put(mealType,new ArrayList<>());
+                    foodList.put(mealType, new ArrayList<>());
                     for (Object food : (JSONArray) Objects.requireNonNull(((JSONObject) meal).get("foodList")))
                         foodList.get(mealType).add(((JSONObject) food).get("name").toString());
                 }
@@ -248,32 +251,95 @@ public class APICommunication {
         return makeRequest(conn);
     }
 
+    public static JSONObject requestStats(String token, String startDate, String endDate, ArrayList<Elements> elements) {
+        String nutrientList = "[";
+        for (int i = 0; i < elements.size(); i++) {
+            if (i == elements.size() - 1)
+                nutrientList += "\"" + elements.get(i).name() + "\"";
+            else
+                nutrientList += "\"" + elements.get(i).name() + "\",";
+        }
+        nutrientList+="]";
+        String url = API_BASE_URL + ENDPOINT_STATISTIC
+                + "?token=" + token
+                + "&type=PERCENTAGE, MEAN, STANDARD_DEVIATION";
+        String jsonBody = "{\n" +
+                "    \"start_date\": \"" + startDate + "\",\n" +
+                "    \"end_date\": \"" + endDate + "\",\n" +
+                "     \"nutrient_name\":" + nutrientList + "\n"+
+                "}";
+        HttpURLConnection conn = null;
+        try {
+            conn = (HttpURLConnection) new URL(url).openConnection();
+            conn.setRequestMethod("POST");
+            conn.setDoOutput(true);
+        } catch (IOException e) {
+            HashMap<String, String> response = new HashMap<>();
+            response.put("result", "error: " + e.getMessage());
+            return new JSONObject(response);
+        }
+        return makeRequest(conn,jsonBody);
+    }
+
+    public static JSONObject requestFilters(String token, String startDate, String endDate, ArrayList<Elements> elements) {
+        String nutrientList = "[";
+        for (int i = 0; i < elements.size(); i++) {
+            if (i == elements.size() - 1)
+                nutrientList += "\"" + elements.get(i).name() + "\"";
+            else
+                nutrientList += "\"" + elements.get(i).name() + "\",";
+        }
+        nutrientList+="]";
+        String url = API_BASE_URL + ENDPOINT_FILTERS
+                + "?token=" + token;
+        String jsonBody = "{\n" +
+                "    \"start_date\": \"" + startDate + "\",\n" +
+                "    \"end_date\": \"" + endDate + "\",\n" +
+                "     \"nutrient_name\":" + nutrientList + "\n"+
+                "}";
+        HttpURLConnection conn = null;
+        try {
+            conn = (HttpURLConnection) new URL(url).openConnection();
+            conn.setRequestMethod("POST");
+            conn.setDoOutput(true);
+        } catch (IOException e) {
+            HashMap<String, String> response = new HashMap<>();
+            response.put("result", "error: " + e.getMessage());
+            return new JSONObject(response);
+        }
+        return makeRequest(conn,jsonBody);
+    }
 
 
-        private static String generateTodayId() {
+    private static String generateTodayId() {
         String dayId;
-        if(MainActivity.dateForValues==null) {
+        if (MainActivity.dateForValues == null) {
             dayId = String.valueOf(LocalDate.now().getDayOfMonth()) + "-" +
                     String.valueOf(LocalDate.now().getMonthValue()) + "-" +
                     String.valueOf(LocalDate.now().getYear());
-        }
-        else
-            dayId=MainActivity.dateForValues;
+        } else
+            dayId = MainActivity.dateForValues;
         return dayId;
     }
 
-    private static JSONObject makeRequest(HttpURLConnection conn) {
-        Thread thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    outputJson[0] = (JSONObject) JSONValue.parseWithException(readResult(conn));
-                    outputJson[0].toJSONString();
-                } catch (Exception e) {
-                    HashMap<String, String> response = new HashMap<>();
-                    response.put("result", "error: " + e.getMessage());
-                    outputJson[0] = new JSONObject(response);
+    private static JSONObject makeRequest(HttpURLConnection conn,String ...body) {
+        Thread thread = new Thread(() -> {
+            try {
+                if(body.length>0){
+                    conn.setRequestProperty("Content-Type", "application/json");
+                    conn.setRequestProperty("Accept", "application/json");
+                    try (OutputStream os = conn.getOutputStream()) {
+                        byte[] input = body[0].getBytes(StandardCharsets.US_ASCII);
+                        os.write(input);
+                    }
                 }
+
+                outputJson[0] = (JSONObject) JSONValue.parseWithException(readResult(conn));
+                outputJson[0].toJSONString();
+            } catch (Exception e) {
+                HashMap<String, String> response = new HashMap<>();
+                response.put("result", "error: " + e.getMessage());
+                outputJson[0] = new JSONObject(response);
             }
         });
         thread.start();
@@ -311,7 +377,7 @@ public class APICommunication {
         //se non trova il server continua ad aspettare per 15-20 min la risposta;
         long timer = 0;
         while (in[0] == null) {
-                if (timer > 11000)
+            if (timer > 11000)
                 return "{\"result\":\"error: request timeout\"}";
             try {
                 Thread.sleep(100);
@@ -327,4 +393,6 @@ public class APICommunication {
             data.append(line);
         return data.toString();
     }
+
+
 }

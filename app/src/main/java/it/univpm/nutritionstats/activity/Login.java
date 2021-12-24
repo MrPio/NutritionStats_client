@@ -28,10 +28,16 @@ import com.google.android.gms.common.api.OptionalPendingResult;
 import com.google.android.gms.common.api.ResultCallback;
 import com.squareup.picasso.Picasso;
 
+import org.json.simple.JSONObject;
+
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 
 import it.univpm.nutritionstats.R;
+import it.univpm.nutritionstats.api.APICommunication;
 import it.univpm.nutritionstats.utility.InputOutputImpl;
 
 public class Login extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
@@ -228,6 +234,23 @@ public class Login extends AppCompatActivity implements GoogleApiClient.OnConnec
         }
     }
 
+    public String generateToken(String email) {
+        byte[] bytesOfMessage = new byte[0];
+        try {
+            bytesOfMessage = email.getBytes(StandardCharsets.UTF_8);
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            byte[] theMD5digest = md.digest(bytesOfMessage);
+            StringBuffer sb = new StringBuffer();
+            for (byte b : theMD5digest) {
+                sb.append(Integer.toHexString((b & 0xFF) | 0x100), 1, 3);
+            }
+            return sb.toString();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     private void showResult(GoogleSignInResult result) {
         if (result.isSuccess()) {
             GoogleSignInAccount account = result.getSignInAccount();
@@ -235,10 +258,25 @@ public class Login extends AppCompatActivity implements GoogleApiClient.OnConnec
             MainActivity.userName=account.getDisplayName().trim().replace(' ','_');
             textViewLoginEmail.setText("Email: " + account.getEmail());
             MainActivity.userEmail=account.getEmail();
-            try {
+
+            /*
+            TODO CHECK IF USER ALREADY REGISTERED
+             */
+            JSONObject response=APICommunication.requestLogin(generateToken(MainActivity.userEmail));
+            if(response.containsKey("result") && response.get("result").equals("success!")){
                 new InputOutputImpl(getApplicationContext(),"user_image").writeFile(
                         account.getPhotoUrl().toString());
+                String formatted =
+                        account.getDisplayName() + ":" + account.getEmail() + ":" + generateToken(MainActivity.userEmail);
+                new InputOutputImpl(getApplicationContext(), MainActivity.TOKEN_PATH).writeFile(formatted);
                 Picasso.get().load(account.getPhotoUrl()).into(imageViewLoginPhoto);
+                Intent resultIntent = new Intent();
+                setResult(Activity.RESULT_OK, resultIntent);
+                finish();
+            }
+
+            try {
+                new InputOutputImpl(getApplicationContext(),"user_image").writeFile(account.getPhotoUrl().toString());
             } catch (NullPointerException e) {
                 Toast.makeText(getApplicationContext(), "image not found", Toast.LENGTH_LONG).show();
             }
