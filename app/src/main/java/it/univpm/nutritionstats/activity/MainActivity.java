@@ -825,7 +825,7 @@ public class MainActivity extends AppCompatActivity {
         //lineChartWeight.getXAxis().setTextColor(Color.WHITE);
         lineChartWeight.getXAxis().setTextSize(13f);
         lineChartWeight.getAxisLeft().setTextColor(Color.WHITE);
-        lineChartWeight.getAxisLeft().setTextSize(15f);
+        lineChartWeight.getAxisLeft().setTextSize(13f);
         lineChartWeight.getAxisLeft().setTypeface(Typeface.MONOSPACE);
         lineChartWeight.getXAxis().setLabelRotationAngle(75);
         lineChartWeight.getXAxis().setLabelCount(6);

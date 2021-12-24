@@ -9,10 +9,14 @@ import androidx.fragment.app.FragmentTransaction;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.graphics.Typeface;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.InputType;
+import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
@@ -48,10 +52,15 @@ public class Statistics extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setTitle("Statistics");
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setContentView(R.layout.activity_statistics);
 
         tabNutrient = findViewById(R.id.tabNutrient);
         statisticFrame = findViewById(R.id.statisticFrame);
+        Arrays.fill(choosen, true);
 
         filterNutrients();
         filterEndDate();
@@ -94,16 +103,10 @@ public class Statistics extends AppCompatActivity {
         builder.setIcon(getResources().getDrawable(R.drawable.stats));
 
         builder.setMultiChoiceItems(Arrays.toString(Elements.values()).replaceAll("^.|.$", "").split(", "),
-                new boolean[Elements.values().length], (dialogInterface, i, b) -> {
+                choosen, (dialogInterface, i, b) -> {
                     choosen[i] = b;
                 });
         builder.setPositiveButton("OK", (dialogInterface, i) -> {
-            boolean allFalse = true;
-            for (boolean b2 : choosen)
-                if (b2)
-                    allFalse = false;
-            if (allFalse)
-                choosen[0] = true;
             sendRequest();
         });
 
@@ -121,22 +124,60 @@ public class Statistics extends AppCompatActivity {
         StatsFrag.responseFilters =
                 APICommunication.requestFilters(MainActivity.token, startDate, endDate, elements);
 
+        TabLayout.Tab tab = tabNutrient.newTab();
+        tab.setText("CALORIE");
+        tab.setIcon(R.drawable.calorie);
+        tabNutrient.addTab(tab);
+
         for (Elements el : elements) {
-            TabLayout.Tab tab = tabNutrient.newTab();
+            tab = tabNutrient.newTab();
             tab.setText(el.name().replace("_", " "));
             tab.setIcon(el.getDrawable());
             tabNutrient.addTab(tab);
         }
+        final ColorStateList col=tabNutrient.getTabTextColors();
+        tabNutrient.setTabTextColors(Color.WHITE,Color.YELLOW);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            tabNutrient.setBackgroundColor(Color.rgb(220/255f,210/255f,0f));
+        }
+        tabNutrient.setTabRippleColor(ColorStateList.valueOf(Color.YELLOW));
+        tabNutrient.setSelectedTabIndicatorColor(Color.YELLOW);
+        for(int i=0;i<tabNutrient.getTabCount();i++)
+            tabNutrient.getTabAt(i).getIcon().setColorFilter(Color.YELLOW, PorterDuff.Mode.SRC_IN);
 
         tabNutrient.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-                Fragment fragment = new StatsFrag(Elements.valueOf(tab.getText().toString().replace(" ","_")));
-                FragmentManager fm = getSupportFragmentManager();
-                FragmentTransaction ft = fm.beginTransaction();
-                ft.replace(R.id.statisticFrame, fragment);
-                ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-                ft.commit();
+                if(tab.getText()=="CALORIE"){
+                    tabNutrient.setTabTextColors(Color.WHITE,Color.YELLOW);
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        tabNutrient.setBackgroundColor(Color.rgb(200/255f,195/255f,0f));
+                    }
+                    tabNutrient.setTabRippleColor(ColorStateList.valueOf(Color.YELLOW));
+                    tabNutrient.setSelectedTabIndicatorColor(Color.YELLOW);
+                    for(int i=1;i<tabNutrient.getTabCount();i++)
+                        tabNutrient.getTabAt(i).getIcon().setColorFilter(Color.YELLOW, PorterDuff.Mode.SRC_IN);
+                    Fragment fragment = new StatsFrag("CALORIE");
+                    FragmentManager fm = getSupportFragmentManager();
+                    FragmentTransaction ft = fm.beginTransaction();
+                    ft.replace(R.id.statisticFrame, fragment);
+                    ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                    ft.commit();
+                }
+                else{
+                    tabNutrient.setTabTextColors(col);
+                        tabNutrient.setBackgroundColor(Color.DKGRAY);
+                    tabNutrient.setTabRippleColor(ColorStateList.valueOf(Color.MAGENTA));
+                    tabNutrient.setSelectedTabIndicatorColor(Color.MAGENTA);
+                    for(int i=1;i<tabNutrient.getTabCount();i++)
+                        tabNutrient.getTabAt(i).getIcon().setColorFilter(Color.MAGENTA, PorterDuff.Mode.SRC_IN);
+                    Fragment fragment = new StatsFrag(Elements.valueOf(tab.getText().toString().replace(" ","_")));
+                    FragmentManager fm = getSupportFragmentManager();
+                    FragmentTransaction ft = fm.beginTransaction();
+                    ft.replace(R.id.statisticFrame, fragment);
+                    ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                    ft.commit();
+                }
             }
 
             @Override
@@ -151,11 +192,22 @@ public class Statistics extends AppCompatActivity {
 
         });
 
-        Fragment fragment = new StatsFrag(elements.get(0));
+        Fragment fragment = new StatsFrag("CALORIE");
         FragmentManager fm = getSupportFragmentManager();
         FragmentTransaction ft = fm.beginTransaction();
         ft.replace(R.id.statisticFrame, fragment);
         ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
         ft.commit();
     }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
 }

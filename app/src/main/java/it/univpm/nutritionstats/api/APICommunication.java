@@ -265,8 +265,8 @@ public class APICommunication {
                 + "&type=PERCENTAGE, MEAN, STANDARD_DEVIATION";
         String jsonBody = "{\n" +
                 "    \"start_date\": \"" + startDate + "\",\n" +
-                "    \"end_date\": \"" + endDate + "\",\n" +
-                "     \"nutrient_name\":" + nutrientList + "\n"+
+                "    \"end_date\": \"" + endDate + "\"\n" +
+                //"     \"nutrient_name\":" + nutrientList + "\n"+
                 "}";
         HttpURLConnection conn = null;
         try {
@@ -294,8 +294,8 @@ public class APICommunication {
                 + "?token=" + token;
         String jsonBody = "{\n" +
                 "    \"start_date\": \"" + startDate + "\",\n" +
-                "    \"end_date\": \"" + endDate + "\",\n" +
-                "     \"nutrient_name\":" + nutrientList + "\n"+
+                "    \"end_date\": \"" + endDate + "\"\n" +
+                //"     \"nutrient_name\":" + nutrientList + "\n"+
                 "}";
         HttpURLConnection conn = null;
         try {

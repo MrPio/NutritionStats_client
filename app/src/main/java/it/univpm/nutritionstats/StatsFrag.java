@@ -43,23 +43,28 @@ import it.univpm.nutritionstats.utility.Elements;
 public class StatsFrag extends Fragment {
 
     private       Elements   name;
+    private       String     other = null;
     public static JSONObject responseStats;
     public static JSONObject responseFilters;
 
     private TreeMap<LocalDate, Float> nutrientMap = new TreeMap<>();
 
-    private LineChart lineChartNutrient         = null;
-    private PieChart  pieChartPercentage        = null;
-    private TextView  textViewStatTitle         = null;
-    private TextView  textViewMean              = null;
-    private TextView  textViewVariance          = null;
-    private TextView  textViewStandardDeviation = null;
-    private ScrollView statsScroll=null;
+    private LineChart  lineChartNutrient         = null;
+    private PieChart   pieChartPercentage        = null;
+    private TextView   textViewStatTitle         = null;
+    private TextView   textViewMean              = null;
+    private TextView   textViewVariance          = null;
+    private TextView   textViewStandardDeviation = null;
+    private ScrollView statsScroll               = null;
 
-    private boolean pieChartPercentageAnimated=false;
+    private boolean pieChartPercentageAnimated = false;
 
     public StatsFrag(Elements name) {
         this.name = name;
+    }
+
+    public StatsFrag(String other) {
+        this.other = other;
     }
 
     @Override
@@ -84,39 +89,72 @@ public class StatsFrag extends Fragment {
         textViewMean = getView().findViewById(R.id.textViewMean);
         textViewVariance = getView().findViewById(R.id.textViewVariance);
         textViewStandardDeviation = getView().findViewById(R.id.textViewStandardDeviation);
-        statsScroll=getView().findViewById(R.id.statsScroll);
+        statsScroll = getView().findViewById(R.id.statsScroll);
 
+
+        if (other == null) {
         textViewStatTitle.setText(name.name().replace("_", " ") + " graph:");
+            JSONObject mean =
+                    (JSONObject) ((JSONObject) responseStats.get("MEAN")).get("statsValues");
+            float meanValue = 0.0f;
+            if (!mean.get(name.name()).toString().equals("NaN"))
+                meanValue = ((Number) mean.get(name.name())).floatValue();
+            textViewMean.setText(String.format("%.2f", meanValue));
+            JSONObject sd =
+                    (JSONObject) ((JSONObject) responseStats.get("STANDARD_DEVIATION")).get("statsValues");
+            float standardDeviation = 0.0f;
+            if (!sd.get(name.name()).toString().equals("NaN"))
+                standardDeviation = ((Number) sd.get(name.name())).floatValue();
+            textViewStandardDeviation.setText(String.format("%.2f", standardDeviation));
+            textViewVariance.setText(String.format("%.2f", (float) Math.pow(standardDeviation, 2)));
+        } else {
+            textViewStatTitle.setText("CALORIE graph:");
+            JSONObject mean =
+                    (JSONObject) ((JSONObject) responseStats.get("MEAN"));
+            float meanValue = 0.0f;
+            if (!mean.get("calories").toString().equals("NaN"))
+                meanValue = ((Number) mean.get("calories")).floatValue();
+            textViewMean.setText(String.format("%.2f", meanValue));
+            JSONObject sd =
+                    (JSONObject) ((JSONObject) responseStats.get("STANDARD_DEVIATION"));
+            float standardDeviation = 0.0f;
+            if (!sd.get("calories").toString().equals("NaN"))
+                standardDeviation = ((Number) sd.get("calories")).floatValue();
+            textViewStandardDeviation.setText(String.format("%.2f", standardDeviation));
+            textViewVariance.setText(String.format("%.2f", (float) Math.pow(standardDeviation, 2)));
 
-        JSONObject mean = (JSONObject) ((JSONObject) responseStats.get("MEAN")).get("statsValues");
-        float meanValue = 0.0f;
-        if (!mean.get(name.name()).toString().equals("NaN"))
-            meanValue = ((Number) mean.get(name.name())).floatValue();
-        textViewMean.setText(String.format("%.2f", meanValue));
-        JSONObject sd =
-                (JSONObject) ((JSONObject) responseStats.get("STANDARD_DEVIATION")).get("statsValues");
-        float standardDeviation = 0.0f;
-        if (!sd.get(name.name()).toString().equals("NaN"))
-            standardDeviation = ((Number) sd.get(name.name())).floatValue();
-        textViewStandardDeviation.setText(String.format("%.2f",standardDeviation));
-        textViewVariance.setText(String.format("%.2f", (float) Math.pow(standardDeviation, 2)));
+            pieChartPercentage.setVisibility(View.GONE);
+        }
+
         loadData();
         loadNutrientChart();
         loadResponseStats();
     }
 
     private void loadData() {
-        nutrientMap = new TreeMap<>();
-        JSONObject diary = (JSONObject) responseFilters.get("diary");
-        if (!diary.containsKey("dayList"))
-            return;
-        for (Object day : (JSONArray) (diary.get("dayList"))) {
-            JSONObject sumValues = (JSONObject) ((JSONObject) day).get("sumValues");
-            String date = (String) ((JSONObject) day).get("date");
-            float value = 0.0f;
-            if (sumValues.containsKey(name.name()))
-                value = ((Number) sumValues.get(name.name())).floatValue();
-            nutrientMap.put(LocalDate.parse(date), value);
+        if (other == null) {
+            nutrientMap = new TreeMap<>();
+            JSONObject diary = (JSONObject) responseFilters.get("diary");
+            if (!diary.containsKey("dayList"))
+                return;
+            for (Object day : (JSONArray) (diary.get("dayList"))) {
+                JSONObject sumValues = (JSONObject) ((JSONObject) day).get("sumValues");
+                String date = (String) ((JSONObject) day).get("date");
+                float value = 0.0f;
+                if (sumValues.containsKey(name.name()))
+                    value = ((Number) sumValues.get(name.name())).floatValue();
+                nutrientMap.put(LocalDate.parse(date), value);
+            }
+        } else {
+            nutrientMap = new TreeMap<>();
+            JSONObject diary = (JSONObject) responseFilters.get("diary");
+            if (!diary.containsKey("dayList"))
+                return;
+            for (Object day : (JSONArray) (diary.get("dayList"))) {
+                float sumValues = ((Number) ((JSONObject) day).get("totalCalories")).floatValue();
+                String date = (String) ((JSONObject) day).get("date");
+                nutrientMap.put(LocalDate.parse(date), sumValues);
+            }
         }
     }
 
@@ -135,9 +173,16 @@ public class StatsFrag extends Fragment {
         dataSetW.setLineWidth(3.75f);
         dataSetW.setCircleRadius(8f);
         dataSetW.setCircleHoleRadius(4.8f);
-        dataSetW.setColor(Color.WHITE);
-        dataSetW.setCircleColor(Color.WHITE);
-        dataSetW.setHighLightColor(Color.WHITE);
+        if(other==null) {
+            dataSetW.setColor(Color.WHITE);
+            dataSetW.setCircleColor(Color.WHITE);
+            dataSetW.setHighLightColor(Color.WHITE);
+        }
+        else{
+            dataSetW.setColor(Color.YELLOW);
+            dataSetW.setCircleColor(Color.YELLOW);
+            dataSetW.setHighLightColor(Color.YELLOW);
+        }
         dataSetW.setDrawValues(false);
 
         LineData dataW = new LineData(dataSetW);//getData(10,5);
@@ -157,7 +202,7 @@ public class StatsFrag extends Fragment {
         //lineChartNutrient.getXAxis().setTextColor(Color.WHITE);
         lineChartNutrient.getXAxis().setTextSize(13f);
         lineChartNutrient.getAxisLeft().setTextColor(Color.WHITE);
-        lineChartNutrient.getAxisLeft().setTextSize(15f);
+        lineChartNutrient.getAxisLeft().setTextSize(13f);
         lineChartNutrient.getAxisLeft().setTypeface(Typeface.MONOSPACE);
         lineChartNutrient.getXAxis().setLabelRotationAngle(75);
         lineChartNutrient.getXAxis().setLabelCount(6);
@@ -167,13 +212,14 @@ public class StatsFrag extends Fragment {
         l.setEnabled(false);
     }
 
-    private void loadResponseStats(){
+    private void loadResponseStats() {
         ArrayList<PieEntry> entries = new ArrayList<>();
-        JSONObject statsValues=(JSONObject)((JSONObject)responseStats.get("PERCENTAGE")).get("statsValues");
+        JSONObject statsValues =
+                (JSONObject) ((JSONObject) responseStats.get("PERCENTAGE")).get("statsValues");
         float carbohydrates = 0.0f;
         float proteins = 0.0f;
         float lipids = 0.0f;
-        
+
         if (!statsValues.get("CARBOHYDRATE").toString().equals("NaN"))
             carbohydrates = ((Number) statsValues.get("CARBOHYDRATE")).floatValue();
         if (!statsValues.get("PROTEIN").toString().equals("NaN"))
