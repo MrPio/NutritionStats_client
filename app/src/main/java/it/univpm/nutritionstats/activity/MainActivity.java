@@ -743,6 +743,8 @@ public class MainActivity extends AppCompatActivity {
                         TextView tx = new TextView(getApplicationContext());
                         tx.setText(text);
                         tx.setTextColor(Color.WHITE);
+                        tx.setTypeface(Typeface.SERIF);
+                        tx.setTextSize(18);
                         linearLayoutMessages.addView(tx);
                     }
                 }

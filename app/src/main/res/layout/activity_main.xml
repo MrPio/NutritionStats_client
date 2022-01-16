@@ -1228,8 +1228,22 @@
         android:layout_height="match_parent"
         android:background="#A418141B"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:visibility="gone">
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/textViewTitle2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:fontFamily="serif"
+            android:paddingStart="20dp"
+            android:text="LOADING..."
+            android:textAlignment="center"
+            android:textAllCaps="false"
+            android:textColor="@color/white"
+            android:textSize="24sp"
+            android:textStyle="bold|italic"
+            app:layout_constraintTop_toBottomOf="@+id/progressBar" />
 
         <ProgressBar
             android:id="@+id/progressBar"

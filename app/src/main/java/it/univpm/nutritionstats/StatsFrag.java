@@ -3,16 +3,16 @@ package it.univpm.nutritionstats;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.LinearLayout;
+import android.widget.ScrollView;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ScrollView;
-import android.widget.TextView;
 
 import com.github.mikephil.charting.animation.Easing;
 import com.github.mikephil.charting.charts.LineChart;
@@ -34,7 +34,6 @@ import org.threeten.bp.LocalDate;
 
 import java.util.ArrayList;
 import java.util.Map;
-import java.util.Objects;
 import java.util.TreeMap;
 
 import it.univpm.nutritionstats.utility.Elements;
@@ -55,6 +54,8 @@ public class StatsFrag extends Fragment {
     private TextView   textViewMean              = null;
     private TextView   textViewVariance          = null;
     private TextView   textViewStandardDeviation = null;
+    private TextView textViewWeightCorrelation=null;
+    private LinearLayout linearLayoutWeightCorrelation=null;
     private ScrollView statsScroll               = null;
 
     private boolean pieChartPercentageAnimated = false;
@@ -90,10 +91,12 @@ public class StatsFrag extends Fragment {
         textViewVariance = getView().findViewById(R.id.textViewVariance);
         textViewStandardDeviation = getView().findViewById(R.id.textViewStandardDeviation);
         statsScroll = getView().findViewById(R.id.statsScroll);
+        textViewWeightCorrelation=getView().findViewById(R.id.textViewWeightCorrelation);
+        linearLayoutWeightCorrelation=getView().findViewById(R.id.linearLayoutWeightCorrelation);
 
 
         if (other == null) {
-        textViewStatTitle.setText(name.name().replace("_", " ") + " graph:");
+            textViewStatTitle.setText(name.name().replace("_", " ") + " graph:");
             JSONObject mean =
                     (JSONObject) ((JSONObject) responseStats.get("MEAN")).get("statsValues");
             float meanValue = 0.0f;
@@ -122,6 +125,14 @@ public class StatsFrag extends Fragment {
                 standardDeviation = ((Number) sd.get("calories")).floatValue();
             textViewStandardDeviation.setText(String.format("%.2f", standardDeviation));
             textViewVariance.setText(String.format("%.2f", (float) Math.pow(standardDeviation, 2)));
+
+            linearLayoutWeightCorrelation.setVisibility(View.VISIBLE);
+            JSONObject crr =
+                    (JSONObject) ((JSONObject) responseStats.get("CORRELATION"));
+            float weightCorrelation = 0.0f;
+            if (!crr.get("correlation").toString().equals("NaN"))
+                weightCorrelation = ((Number) crr.get("correlation")).floatValue();
+            textViewWeightCorrelation.setText(String.format("%.2f", weightCorrelation));
 
             pieChartPercentage.setVisibility(View.GONE);
         }
@@ -173,12 +184,11 @@ public class StatsFrag extends Fragment {
         dataSetW.setLineWidth(3.75f);
         dataSetW.setCircleRadius(8f);
         dataSetW.setCircleHoleRadius(4.8f);
-        if(other==null) {
+        if (other == null) {
             dataSetW.setColor(Color.WHITE);
             dataSetW.setCircleColor(Color.WHITE);
             dataSetW.setHighLightColor(Color.WHITE);
-        }
-        else{
+        } else {
             dataSetW.setColor(Color.YELLOW);
             dataSetW.setCircleColor(Color.YELLOW);
             dataSetW.setHighLightColor(Color.YELLOW);

@@ -263,7 +263,7 @@ public class APICommunication {
         nutrientList+="]";
         String url = API_BASE_URL + ENDPOINT_STATISTIC
                 + "?token=" + token
-                + "&type=PERCENTAGE, MEAN, STANDARD_DEVIATION";
+                + "&type=PERCENTAGE, MEAN, STANDARD_DEVIATION, CORRELATION";
         String jsonBody = "{\n" +
                 "    \"start_date\": \"" + startDate + "\",\n" +
                 "    \"end_date\": \"" + endDate + "\"\n" +
