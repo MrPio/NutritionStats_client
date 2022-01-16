@@ -30,8 +30,8 @@ import it.univpm.nutritionstats.utility.Elements;
 
 public class APICommunication {
     final static int TIME_OUT_ERROR=20000;
-    //public final static String       API_BASE_URL              = "https://nutritionstatsoop.herokuapp.com";
-    public final static String       API_BASE_URL              = "http://192.168.1.8:5000";
+    public final static String       API_BASE_URL              = "https://nutritionstatsoop.herokuapp.com";
+    //public final static String       API_BASE_URL              = "http://192.168.1.8:5000";
     final static        String       ENDPOINT_EAN              = "/api/ean/";
     final static        String       ENDPOINT_NAME             = "/api/name/";
     final static        String       ENDPOINT_SIGNUP           = "/signup";
@@ -80,7 +80,7 @@ public class APICommunication {
         String url = API_BASE_URL + ENDPOINT_SIGNUP
                 + "?nickname=" + userName
                 + "&email=" + userEmail
-                + "&year=" + df.format(birth)
+                + "&birth=" + df.format(birth)
                 + "&weight=" + weight
                 + "&height=" + height
                 + "&diet=" + diet.name()
