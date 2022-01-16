@@ -29,8 +29,9 @@ import it.univpm.nutritionstats.activity.MainActivity;
 import it.univpm.nutritionstats.utility.Elements;
 
 public class APICommunication {
+    final static int TIME_OUT_ERROR=20000;
     //public final static String       API_BASE_URL              = "https://nutritionstatsoop.herokuapp.com";
-    public final static String       API_BASE_URL              = "http://192.168.1.16:5000";
+    public final static String       API_BASE_URL              = "http://192.168.1.8:5000";
     final static        String       ENDPOINT_EAN              = "/api/ean/";
     final static        String       ENDPOINT_NAME             = "/api/name/";
     final static        String       ENDPOINT_SIGNUP           = "/signup";
@@ -116,9 +117,9 @@ public class APICommunication {
     public static JSONObject requestTodayValues(String token) {
         String dayId;
         if (MainActivity.dateForValues == null) {
-            dayId = String.valueOf(LocalDate.now().getDayOfMonth()) + "-" +
-                    String.valueOf(LocalDate.now().getMonthValue()) + "-" +
-                    String.valueOf(LocalDate.now().getYear());
+            dayId = String.format("%02d",LocalDate.now().getDayOfMonth()) + "-" +
+                    String.format("%02d",LocalDate.now().getMonthValue()) + "-" +
+                    String.format("%02d",LocalDate.now().getYear());
         } else
             dayId = MainActivity.dateForValues;
 
@@ -200,9 +201,9 @@ public class APICommunication {
         HashMap<MainActivity.MealType, ArrayList<String>> foodList = new HashMap<>();
         String dayId;
         if (MainActivity.dateForValues == null) {
-            dayId = String.valueOf(LocalDate.now().getYear()) + "-" +
-                    String.valueOf(LocalDate.now().getMonthValue()) + "-" +
-                    String.valueOf(LocalDate.now().getDayOfMonth());
+            dayId = String.format("%02d",LocalDate.now().getYear()) + "-" +
+                    String.format("%02d",LocalDate.now().getMonthValue()) + "-" +
+                    String.format("%02d",LocalDate.now().getDayOfMonth());
         } else {
             String[] split = MainActivity.dateForValues.split("-");
             dayId = split[2] + "-" + split[1] + "-" + split[0];
@@ -314,9 +315,9 @@ public class APICommunication {
     private static String generateTodayId() {
         String dayId;
         if (MainActivity.dateForValues == null) {
-            dayId = String.valueOf(LocalDate.now().getDayOfMonth()) + "-" +
-                    String.valueOf(LocalDate.now().getMonthValue()) + "-" +
-                    String.valueOf(LocalDate.now().getYear());
+            dayId = String.format("%02d",LocalDate.now().getDayOfMonth()) + "-" +
+                    String.format("%02d",LocalDate.now().getMonthValue()) + "-" +
+                    String.format("%02d",LocalDate.now().getYear());
         } else
             dayId = MainActivity.dateForValues;
         return dayId;
@@ -377,7 +378,7 @@ public class APICommunication {
         //se non trova il server continua ad aspettare per 15-20 min la risposta;
         long timer = 0;
         while (in[0] == null) {
-            if (timer > 11000)
+            if (timer > TIME_OUT_ERROR)
                 return "{\"result\":\"error: request timeout\"}";
             try {
                 Thread.sleep(100);

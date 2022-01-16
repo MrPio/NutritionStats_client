@@ -75,4 +75,9 @@ public class InputOutputImpl implements InputOutput {
         }
         return true;
     }
+
+    public boolean deleteFile(){
+        File file = new File(context.getFilesDir(),path + fileName);
+        return file.delete();
+    }
 }

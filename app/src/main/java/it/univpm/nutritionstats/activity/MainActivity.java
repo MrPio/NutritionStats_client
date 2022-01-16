@@ -4,9 +4,14 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.TimePickerDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.ColorStateList;
@@ -15,9 +20,11 @@ import android.graphics.Point;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.media.MediaPlayer;
+import android.media.RingtoneManager;
 import android.media.SoundPool;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.InputType;
 import android.util.Log;
 import android.view.Display;
@@ -43,6 +50,8 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.LinearLayoutCompat;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 
 import com.github.mikephil.charting.animation.Easing;
 import com.github.mikephil.charting.charts.BarChart;
@@ -122,12 +131,12 @@ public class MainActivity extends AppCompatActivity {
     public enum Gender {MALE, FEMALE}
 
     ;
-    public final static       String TOKEN_PATH                    = "token.dat";
-    final static int    REQUEST_CODE_ADD              = 1;
-    final static int    REQUEST_CODE_LOGIN            = 2;
-    final static int    REQUEST_CODE_ADD_FOOD_BY_EAN  = 3;
-    final static int    REQUEST_CODE_ADD_FOOD_BY_NAME = 4;
-    final static int    REQUEST_STATISTICS = 4;
+    public final static String TOKEN_PATH                    = "token.dat";
+    final static        int    REQUEST_CODE_ADD              = 1;
+    final static        int    REQUEST_CODE_LOGIN            = 2;
+    final static        int    REQUEST_CODE_ADD_FOOD_BY_EAN  = 3;
+    final static        int    REQUEST_CODE_ADD_FOOD_BY_NAME = 4;
+    final static        int    REQUEST_STATISTICS            = 4;
 
     public static ArrayList<JSONObject> resultList    = new ArrayList<JSONObject>();
     public static String                dateForValues = null;
@@ -161,25 +170,27 @@ public class MainActivity extends AppCompatActivity {
     private ConstraintLayout menuDiary                               = null;
     private ConstraintLayout menuUser                                = null;
     private ImageView        imageViewUserPhoto, imageViewUserPhoto2 = null;
-    private PieChart     pieChartCPG         = null;
-    private TextView     textViewCalories    = null;
-    private TextView     textViewCarboydrats = null;
-    private TextView     textViewProteins    = null;
-    private TextView     textViewLipids      = null;
-    private TextView     textViewFiber       = null;
-    private TextView     textViewSodium      = null;
-    private TextView     textViewCalcium     = null;
-    private TextView     textViewPotassium   = null;
-    private TextView     textViewIron        = null;
-    private TextView     textViewVitaminA    = null;
-    private TextView     textViewVitaminC    = null;
-    private ProgressBar  progressBarWater    = null;
-    private TextView     textViewWaterCount  = null;
-    private PieChart     pieChartWater       = null;
-    private LinearLayout breakfastFoodList   = null;
-    private LinearLayout lunchFoodList       = null;
-    private LinearLayout snackFoodList       = null;
-    private LinearLayout dinnerFoodList      = null;
+    private PieChart     pieChartCPG              = null;
+    private TextView     textViewCalories         = null;
+    private TextView     textViewCarboydrats      = null;
+    private TextView     textViewProteins         = null;
+    private TextView     textViewLipids           = null;
+    private TextView     textViewFiber            = null;
+    private TextView     textViewSodium           = null;
+    private TextView     textViewCalcium          = null;
+    private TextView     textViewPotassium        = null;
+    private TextView     textViewIron             = null;
+    private TextView     textViewVitaminA         = null;
+    private TextView     textViewVitaminC         = null;
+    private ProgressBar  progressBarWater         = null;
+    private TextView     textViewWaterCount       = null;
+    private PieChart     pieChartWater            = null;
+    private LinearLayout breakfastFoodList        = null;
+    private LinearLayout lunchFoodList            = null;
+    private LinearLayout snackFoodList            = null;
+    private LinearLayout dinnerFoodList           = null;
+    private ProgressBar  progressBarCaloricIntake = null;
+    private ImageView MenuMessagesExit=null;
 
     private ImageView imageViewAddButton    = null;
     private ImageView imageViewAddBreakfast = null;
@@ -188,19 +199,24 @@ public class MainActivity extends AppCompatActivity {
     private ImageView imageViewAddDinner    = null;
     private ImageView imageViewAddWater     = null;
     private ImageView imageViewAddRuler     = null;
-    private ImageView imageViewAddWeight=null;
-    private ImageView imageViewViewStats=null;
+    private ImageView imageViewAddWeight    = null;
+    private ImageView imageViewViewStats    = null;
+    private ImageView imageViewLogout       = null;
+    private ConstraintLayout menuLoading=null;
 
-    private ImageView imageViewDiary   = null;
-    private ImageView imageViewUser    = null;
-    private TextView  textViewEmail    = null;
-    private TextView  textViewNickname = null;
-    private TextView  textViewAge      = null;
-    private TextView  textViewWeight   = null;
-    private TextView  textViewHeight   = null;
-    private ImageView imageViewGender  = null;
-    private ImageView imageViewDiet    = null;
-    private LineChart lineChartWeight  = null;
+    private ImageView        imageViewDiary       = null;
+    private ImageView        imageViewUser        = null;
+    private TextView         textViewEmail        = null;
+    private TextView         textViewNickname     = null;
+    private TextView         textViewAge          = null;
+    private TextView         textViewWeight       = null;
+    private TextView         textViewHeight       = null;
+    private ImageView        imageViewGender      = null;
+    private ImageView        imageViewDiet        = null;
+    private LineChart        lineChartWeight      = null;
+    private ConstraintLayout menuMessages         = null;
+    private LinearLayout     linearLayoutMessages = null;
+    private ImageView        imageViewMessages    = null;
 
     private ScrollView scrollViewMenuDiary = null;
     private ImageView  imageViewCalendar   = null;
@@ -209,7 +225,7 @@ public class MainActivity extends AppCompatActivity {
 
     private int     actualTab        = 0;
     private boolean addButtonPressed = false;
-    Circle circleAddButton = null;
+    Circle circleAddButton   = null;
     Circle circleRulerButton = null;
     private int addButtonSelected = -1;
     long startTime;
@@ -217,9 +233,10 @@ public class MainActivity extends AppCompatActivity {
     Point screenSize;
     Point movementStart;
     Point movementEnd;
-    private boolean measurePressed = false;
-    private int measureSelected = -1;
+    private boolean measurePressed  = false;
+    private int     measureSelected = -1;
     private boolean updateWeightValueDisplayed;
+    private boolean messagesDisplayed=false;
 
 
     @RequiresApi(api = Build.VERSION_CODES.O)
@@ -265,6 +282,7 @@ public class MainActivity extends AppCompatActivity {
         lunchFoodList = findViewById(R.id.LunchFoodList);
         snackFoodList = findViewById(R.id.SnackFoodList);
         dinnerFoodList = findViewById(R.id.DinnerFoodList);
+        progressBarCaloricIntake = findViewById(R.id.progressBarCaloricIntake);
 
         imageViewAddButton = findViewById(R.id.imageViewAddButton);
         imageViewAddBreakfast = findViewById(R.id.imageViewAddBreakfast);
@@ -275,6 +293,13 @@ public class MainActivity extends AppCompatActivity {
         imageViewAddRuler = findViewById(R.id.imageViewAddRuler);
         imageViewViewStats = findViewById(R.id.imageViewViewStats);
         imageViewAddWeight = findViewById(R.id.imageViewAddWeight);
+        imageViewLogout = findViewById(R.id.imageViewLogout);
+        menuMessages = findViewById(R.id.menuMessages);
+        linearLayoutMessages = findViewById(R.id.linearLayoutMessages);
+        imageViewMessages = findViewById(R.id.imageViewMessages);
+        MenuMessagesExit=findViewById(R.id.MenuMessagesExit);
+        menuLoading=findViewById(R.id.menuLoading);
+
         PopUpMenu[] addButtonMenu = {
                 new PopUpMenu(imageViewAddBreakfast, R.drawable.breakfast, R.drawable.breakfast_hover, Sound.Sounds.BIP_5),
                 new PopUpMenu(imageViewAddLunch, R.drawable.lunch, R.drawable.lunch_hover, Sound.Sounds.BIP_3),
@@ -302,25 +327,11 @@ public class MainActivity extends AppCompatActivity {
         imageViewHome = findViewById(R.id.imageViewHome);
         textViewTitle = findViewById(R.id.textViewTitle);
 
-        if (isLogged()) {
-            String savedLogin = new InputOutputImpl(getApplicationContext(), TOKEN_PATH).readFile();
-            userName = savedLogin.split(":")[0];
-            userEmail = savedLogin.split(":")[1];
-            Toast.makeText(getApplicationContext(), "Welcome back " + userName + "!", Toast.LENGTH_SHORT).show();
+/*
 
-            fromUserToDiary();
-            imageViewDiary.animate().alpha(1f).scaleX(0.75f).scaleY(0.75f).setDuration(400).start();
-            imageViewUser.animate().alpha(0.5f).scaleX(0.6f).scaleY(0.6f).setDuration(400).start();
-            loadPieChartData();
 
-            APICommunication.requestFoodList(token);
-        } else signUp();
 
-        if (dateForValues != null) {
-            imageViewHome.setVisibility(View.VISIBLE);
-            textViewTitle.setText(dateForValues.replace("-", "/") + " VALUES:");
-        }
-
+ */
 
         imageViewDiary.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -357,9 +368,9 @@ public class MainActivity extends AppCompatActivity {
                     makeSound(Sound.Sounds.BIP_13);
                     imageViewAddButton.setImageDrawable(getResources().getDrawable(R.drawable.add_button_hover));
 
-                    int count =addButtonMenu.length;
+                    int count = addButtonMenu.length;
                     for (PopUpMenu iv : addButtonMenu) {
-                        float angle = 90f+singleStep * --count;
+                        float angle = 90f + singleStep * --count;
                         iv.getImageView().animate().alpha(1.0f).scaleX(1f).scaleY(1f)
                                 .translationX(circleAddButton.getPointFromAngle(angle).x)
                                 .translationY(-circleAddButton.getPointFromAngle(angle).y).start();
@@ -399,12 +410,13 @@ public class MainActivity extends AppCompatActivity {
                             imageViewAddWater.animate().scaleX(1.35f).scaleY(1.35f).setDuration(120).start();
                             return true;
                         }
-                        int step = addButtonMenu.length-(int) ((angle - 90+ singleStep/2)/singleStep);
-                        if(step<=0 ||step>addButtonMenu.length)
+                        int step =
+                                addButtonMenu.length - (int) ((angle - 90 + singleStep / 2) / singleStep);
+                        if (step <= 0 || step > addButtonMenu.length)
                             return false;
                         if (addButtonSelected == step) return true;
-                        addButtonSelected=step;
-                        makeSound(addButtonMenu[step-1].getSound());
+                        addButtonSelected = step;
+                        makeSound(addButtonMenu[step - 1].getSound());
                         int count = 1;
                         for (PopUpMenu iv : addButtonMenu) {
                             if (count++ == addButtonSelected) {
@@ -428,8 +440,8 @@ public class MainActivity extends AppCompatActivity {
                         makeSound(Sound.Sounds.BIP_3);
 
                     for (PopUpMenu iv : addButtonMenu) {
-                            iv.getImageView().animate().alpha(0f).scaleX(0.2f).scaleY(0.2f).translationX(0).translationY(0).start();
-                            iv.getImageView().setImageDrawable(getResources().getDrawable(iv.getDrawable()));
+                        iv.getImageView().animate().alpha(0f).scaleX(0.2f).scaleY(0.2f).translationX(0).translationY(0).start();
+                        iv.getImageView().setImageDrawable(getResources().getDrawable(iv.getDrawable()));
                     }
                     imageViewAddWater.animate().alpha(0.0f).start();
                     imageViewAddButton.animate().alpha(1.0f).start();
@@ -474,14 +486,14 @@ public class MainActivity extends AppCompatActivity {
 
         scrollViewMenuDiary.getViewTreeObserver().addOnScrollChangedListener(
                 new ViewTreeObserver.OnScrollChangedListener() {
-            @Override
-            public void onScrollChanged() {
-                if (!pieChartWaterAnimated && scrollViewMenuDiary.getScrollY() > 630) {
-                    pieChartWater.animateY(3200, Easing.EaseInSine);
-                    pieChartWaterAnimated = true;
-                }
-            }
-        });
+                    @Override
+                    public void onScrollChanged() {
+                        if (!pieChartWaterAnimated && scrollViewMenuDiary.getScrollY() > 630) {
+                            pieChartWater.animateY(3200, Easing.EaseInSine);
+                            pieChartWaterAnimated = true;
+                        }
+                    }
+                });
 
         imageViewCalendar.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -490,9 +502,13 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onDateSet(DatePicker view, int year, int monthOfYear,
                                           int dayOfMonth) {
-                        String dayId = dayOfMonth + "-" + (monthOfYear + 1) + "-" + year;
-                        String todayDayId = LocalDate.now().getDayOfMonth() + "-" +
-                                LocalDate.now().getMonthValue() + "-" + LocalDate.now().getYear();
+                        String dayId = String.format("%02d", dayOfMonth) + "-" +
+                                String.format("%02d", monthOfYear + 1) + "-" +
+                                String.format("%02d", year);
+                        String todayDayId =
+                                String.format("%02d", LocalDate.now().getDayOfMonth()) + "-" +
+                                        String.format("%02d", LocalDate.now().getMonthValue()) + "-" +
+                                        String.format("%02d", LocalDate.now().getYear());
 
                         if (dayId.equals(todayDayId)) {
                             imageViewHome.performClick();
@@ -535,10 +551,10 @@ public class MainActivity extends AppCompatActivity {
         imageViewAddRuler.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
-                float baseAngle=90f;
-                if(rulerButtonMenu.length==2)
-                    baseAngle=105f;
-                float singleStep =( 90f-(baseAngle-90f)*2f) / (rulerButtonMenu.length - 1);
+                float baseAngle = 90f;
+                if (rulerButtonMenu.length == 2)
+                    baseAngle = 105f;
+                float singleStep = (90f - (baseAngle - 90f) * 2f) / (rulerButtonMenu.length - 1);
                 if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
                     measureSelected = 0;
                     circleRulerButton =
@@ -546,11 +562,11 @@ public class MainActivity extends AppCompatActivity {
                     measurePressed = true;
                     view.animate().scaleX(1.30f).scaleY(1.30f).setDuration(160).start();
                     makeSound(Sound.Sounds.BIP_13);
-                    ((ImageView)view).setImageDrawable(getResources().getDrawable(R.drawable.ruler_hover));
+                    ((ImageView) view).setImageDrawable(getResources().getDrawable(R.drawable.ruler_hover));
 
-                    int count =rulerButtonMenu.length;
+                    int count = rulerButtonMenu.length;
                     for (PopUpMenu iv : rulerButtonMenu) {
-                        float angle = baseAngle+singleStep * --count;
+                        float angle = baseAngle + singleStep * --count;
                         iv.getImageView().animate().alpha(1.0f).scaleX(1f).scaleY(1f)
                                 .translationX(circleRulerButton.getPointFromAngle(angle).x)
                                 .translationY(-circleRulerButton.getPointFromAngle(angle).y).start();
@@ -586,13 +602,14 @@ public class MainActivity extends AppCompatActivity {
                             view.animate().scaleX(1.35f).scaleY(1.35f).setDuration(120).start();
                             return true;
                         }
-                        int step = rulerButtonMenu.length-(int) ((angle - baseAngle+ singleStep/2)/singleStep);
-                        if(step<=0 ||step>rulerButtonMenu.length)
+                        int step =
+                                rulerButtonMenu.length - (int) ((angle - baseAngle + singleStep / 2) / singleStep);
+                        if (step <= 0 || step > rulerButtonMenu.length)
                             return false;
                         if (measureSelected == step)
                             return true;
-                        measureSelected=step;
-                        makeSound(rulerButtonMenu[step-1].getSound());
+                        measureSelected = step;
+                        makeSound(rulerButtonMenu[step - 1].getSound());
                         int count = 1;
                         for (PopUpMenu iv : rulerButtonMenu) {
                             if (count++ == measureSelected) {
@@ -609,7 +626,7 @@ public class MainActivity extends AppCompatActivity {
                 if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
                     addButtonPressed = false;
                     view.animate().scaleX(1f).scaleY(1f).setDuration(160).start();
-                    ((ImageView)view).setImageDrawable(getResources().getDrawable(R.drawable.ruler));
+                    ((ImageView) view).setImageDrawable(getResources().getDrawable(R.drawable.ruler));
                     if (measureSelected == -1)
                         Sound.makeSound(getApplicationContext(), Sound.Sounds.NO_BUY);
                     else
@@ -625,8 +642,7 @@ public class MainActivity extends AppCompatActivity {
                     if (measureSelected == 1) {
                         Intent i = (new Intent(MainActivity.this, Statistics.class));
                         startActivityForResult(i, REQUEST_STATISTICS);
-                    }
-                    else if (measureSelected == 2)
+                    } else if (measureSelected == 2)
                         updateWeightValue(weightMap.lastKey(), weightMap.lastEntry().getValue());
 
                 }
@@ -684,6 +700,69 @@ public class MainActivity extends AppCompatActivity {
             public void onNothingSelected() {
 
             }
+        });
+
+        imageViewLogout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                builder.setTitle("Are you sure you want to logout?");
+                builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        InputOutputImpl file1 =
+                                new InputOutputImpl(getApplicationContext(), TOKEN_PATH);
+                        InputOutputImpl file2 =
+                                new InputOutputImpl(getApplicationContext(), "user_image");
+                        file1.deleteFile();
+                        file2.deleteFile();
+
+                        ((ActivityManager) getApplicationContext().getSystemService(ACTIVITY_SERVICE))
+                                .clearApplicationUserData();
+
+                        Intent intent = getIntent();
+                        finish();
+                        startActivity(intent);
+                    }
+                });
+                builder.show();
+            }
+        });
+
+        imageViewMessages.setOnClickListener(view -> {
+            if(messagesDisplayed)return;
+            messagesDisplayed=true;
+            JSONObject data = (JSONObject) APICommunication.requestLogin(token).get("user");
+            JSONObject mailList = (JSONObject) data.get("mailBox");
+
+            for (Object obj : ((JSONObject) mailList.get("mailbox")).entrySet()) {
+                LocalDate date = LocalDate.parse(((Map.Entry<String, JSONArray>) obj).getKey());
+                if (date.equals(LocalDate.now())) {
+                    for (Object msg : ((Map.Entry<String, JSONArray>) obj).getValue()) {
+                        String text = ((JSONObject) msg).get("message").toString();
+                        TextView tx = new TextView(getApplicationContext());
+                        tx.setText(text);
+                        tx.setTextColor(Color.WHITE);
+                        linearLayoutMessages.addView(tx);
+                    }
+                }
+
+            }
+            Sound.makeSound(getApplicationContext(), Sound.Sounds.SLIDE_IN);
+            menuMessages.setAlpha(0f);
+            menuMessages.setVisibility(View.VISIBLE);
+            menuMessages.setTranslationY(screenSize.y);
+            menuMessages.animate().translationY(0).alpha(1f).start();
+
+        });
+
+        MenuMessagesExit.setOnClickListener(view -> {
+            Sound.makeSound(getApplicationContext(), Sound.Sounds.SLIDE_OUT_2);
+            menuMessages.animate().translationY(screenSize.y).alpha(0f).withEndAction(() -> {
+                linearLayoutMessages.removeAllViews();
+                menuMessages.setVisibility(View.GONE);
+                messagesDisplayed=false;
+            }).start();
         });
     }
 
@@ -857,7 +936,7 @@ public class MainActivity extends AppCompatActivity {
         date.setTextColor(Color.WHITE);
         date.setTypeface(Typeface.MONOSPACE);
         date.setTextSize(18f);
-            date.setText(defaultDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+        date.setText(defaultDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
         final TextView weightText = new TextView(getApplicationContext());
         weightText.setInputType(InputType.TYPE_CLASS_DATETIME | InputType.TYPE_DATETIME_VARIATION_DATE);
         weightText.setPadding(150, 100, 0, 0);
@@ -1012,6 +1091,7 @@ public class MainActivity extends AppCompatActivity {
         vitaminC = ((Number) response.get("vitaminc")).floatValue();
 
         textViewCalories.setText("(" + String.valueOf((int) calories) + " kcal)");
+        progressBarCaloricIntake.setProgress((int) calories);
         textViewCarboydrats.setText("(" + String.format("%.2f", carbohydrates) + " gr)");
         textViewProteins.setText("(" + String.format("%.2f", proteins) + " gr)");
         textViewLipids.setText("(" + String.format("%.2f", lipids) + " gr)");
@@ -1171,12 +1251,12 @@ public class MainActivity extends AppCompatActivity {
                 break;
         }
         caloricIntake = ((Number) response.get("dailyCaloricIntake")).intValue();
+        progressBarCaloricIntake.setMax(caloricIntake);
 
         String photoUri = new InputOutputImpl(getApplicationContext(), "user_image").readFile();
         Picasso.get().load(photoUri).into(imageViewUserPhoto);
         Picasso.get().load(photoUri).into(imageViewUserPhoto2);
         Log.e("MY", "login" + String.valueOf((System.nanoTime() - startTime) / 1000000f));
-
     }
 
     private void signUp() {
@@ -1219,9 +1299,9 @@ public class MainActivity extends AppCompatActivity {
                 break;
 
             case REQUEST_CODE_LOGIN:
-                if(new InputOutputImpl(getApplicationContext(), TOKEN_PATH).existFile()) {
-                    Toast.makeText(getApplicationContext(),"We Recognized you! No need to proceed " +
-                            "with the signup.",Toast.LENGTH_LONG).show();
+                if (new InputOutputImpl(getApplicationContext(), TOKEN_PATH).existFile()) {
+                    Toast.makeText(getApplicationContext(), "We Recognized you! No need to proceed " +
+                            "with the signup.", Toast.LENGTH_LONG).show();
                     Intent intent1 = getIntent();
                     finish();
                     startActivity(intent1);
@@ -1292,8 +1372,8 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             movementEnd = new Point((int) event.getX(), (int) event.getY());
 
-            if(movementEnd.y-movementStart.y> screenSize.y*0.44
-            && Math.abs(movementEnd.x-movementStart.x)< screenSize.x*0.24){
+            if (movementEnd.y - movementStart.y > screenSize.y * 0.44
+                    && Math.abs(movementEnd.x - movementStart.x) < screenSize.x * 0.24) {
                 Intent intent = getIntent();
                 finish();
                 startActivity(intent);
@@ -1360,5 +1440,35 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         return super.dispatchTouchEvent(event);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            public void run() {
+                if (isLogged()) {
+                    String savedLogin = new InputOutputImpl(getApplicationContext(), TOKEN_PATH).readFile();
+                    userName = savedLogin.split(":")[0];
+                    userEmail = savedLogin.split(":")[1];
+                    Toast.makeText(getApplicationContext(), "Welcome back " + userName + "!", Toast.LENGTH_SHORT).show();
+
+                    fromUserToDiary();
+                    imageViewDiary.animate().alpha(1f).scaleX(0.75f).scaleY(0.75f).setDuration(400).start();
+                    imageViewUser.animate().alpha(0.5f).scaleX(0.6f).scaleY(0.6f).setDuration(400).start();
+                    loadPieChartData();
+
+                    APICommunication.requestFoodList(token);
+                } else signUp();
+
+                if (dateForValues != null) {
+                    imageViewHome.setVisibility(View.VISIBLE);
+                    textViewTitle.setText(dateForValues.replace("-", "/") + " VALUES:");
+                }
+                menuLoading.animate().alpha(0).start();
+            }
+        }, 100);
+
     }
 }
