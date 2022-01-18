@@ -39,12 +39,25 @@ This is an application using the REST API NutritionStats
 
 ## *Screenshots*
 
+### *Statistics*
 <p float="left">
-<img alt="ENUM" height="480" src="graphics/001.png"/>
 <img alt="ENUM" height="480" src="graphics/002.png"/>
 <img alt="ENUM" height="480" src="graphics/003.png"/>
-<img alt="ENUM" height="480" src="graphics/004.png"/>
-<p float="left">
-<img alt="ENUM" height="480" src="graphics/005.png"/>
 <img alt="ENUM" height="480" src="graphics/photo5886513899535185636.jpg"/>
 <img alt="ENUM" height="480" src="graphics/006.png"/>
+
+***
+     
+### *Diary*
+<p float="left">
+<img alt="ENUM" height="480" src="graphics/001.png"/>
+<img alt="ENUM" height="480" src="graphics/005.png"/>
+<img alt="ENUM" height="480" src="graphics/004.png"/>
+     
+***
+     
+<a name="authors"></a>
+## 👥 Author 👥
+Name | Email | Github profile |
+--|--|--|
+Morelli Valerio|valeriomorelli50@gmail.com|[GitHub](https://github.com/MrPio)
