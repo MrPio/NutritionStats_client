@@ -1,4 +1,8 @@
-# NutritionStats_client
+<div align="center">
+<img alt="Logo" height="200" src="graphics/NutritionStatsLogo.jpg" width="200" />
+<div align="left">
+     
+# NutritionStats (App)
 This is an application using the REST API NutritionStats
 
 ### *GooglePlay page*
