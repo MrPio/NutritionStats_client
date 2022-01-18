@@ -5,9 +5,11 @@
       <map>
         <entry key="..\:/Users/valer/AndroidStudioProjects/NutritionStats2/app/src/main/res/drawable/none.xml" value="0.39427083333333335" />
         <entry key="..\:/Users/valer/AndroidStudioProjects/NutritionStats2/app/src/main/res/layout/activity_add_food.xml" value="0.33" />
+        <entry key="..\:/Users/valer/AndroidStudioProjects/NutritionStats2/app/src/main/res/layout/activity_login.xml" value="0.33" />
         <entry key="..\:/Users/valer/AndroidStudioProjects/NutritionStats2/app/src/main/res/layout/activity_main.xml" value="0.378125" />
         <entry key="..\:/Users/valer/AndroidStudioProjects/NutritionStats2/app/src/main/res/layout/activity_statistics.xml" value="0.276268115942029" />
         <entry key="..\:/Users/valer/AndroidStudioProjects/NutritionStats2/app/src/main/res/layout/date_range_input_dialog.xml" value="0.276268115942029" />
+        <entry key="..\:/Users/valer/AndroidStudioProjects/NutritionStats2/app/src/main/res/layout/float_input_dialog.xml" value="0.22" />
         <entry key="..\:/Users/valer/AndroidStudioProjects/NutritionStats2/app/src/main/res/layout/fragment_stats.xml" value="0.276268115942029" />
         <entry key="..\:/Users/valer/AndroidStudioProjects/NutritionStats2/app/src/main/res/layout/stats_summary.xml" value="0.276268115942029" />
         <entry key="..\:/Users/valer/AndroidStudioProjects/NutritionStats2/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.39427083333333335" />

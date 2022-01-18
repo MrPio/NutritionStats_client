@@ -105,7 +105,6 @@
                 android:orientation="vertical">
 
                 <TextView
-                    android:id="@+id/textViewLoginDieta"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="24dp"
@@ -117,7 +116,6 @@
                     android:textSize="34sp" />
 
                 <TextView
-                    android:id="@+id/textViewLoginDieta2"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="24dp"
@@ -134,7 +132,7 @@
                     android:layout_height="wrap_content">
 
                     <ImageView
-                        android:id="@+id/imageView"
+                        android:id="@+id/imageViewDieta1"
                         android:layout_width="60dp"
                         android:layout_height="60dp"
                         android:layout_marginStart="24dp"
@@ -143,17 +141,18 @@
                         app:srcCompat="@drawable/meat" />
 
                     <TextView
-                        android:id="@+id/textViewLoginDieta3"
+                        android:id="@+id/textViewLoginDieta1"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="24dp"
+                        android:layout_marginBottom="8dp"
                         android:fontFamily="sans-serif-black"
                         android:text="Classic"
                         android:textColor="@color/common_google_signin_btn_text_dark_pressed"
                         android:textSize="24sp"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintStart_toEndOf="@+id/imageView"
-                        app:layout_constraintTop_toTopOf="@+id/imageView" />
+                        app:layout_constraintStart_toEndOf="@+id/imageViewDieta1"
+                        app:layout_constraintTop_toTopOf="@+id/imageViewDieta1" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
                 <androidx.constraintlayout.widget.ConstraintLayout
@@ -162,7 +161,7 @@
                     android:layout_height="wrap_content">
 
                     <ImageView
-                        android:id="@+id/imageView"
+                        android:id="@+id/imageViewDieta2"
                         android:layout_width="60dp"
                         android:layout_height="60dp"
                         android:layout_marginStart="24dp"
@@ -171,17 +170,18 @@
                         app:srcCompat="@drawable/fish" />
 
                     <TextView
-                        android:id="@+id/textViewLoginDieta3"
+                        android:id="@+id/textViewLoginDieta2"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="24dp"
+                        android:layout_marginBottom="8dp"
                         android:fontFamily="sans-serif-black"
                         android:text="Pescetarian"
                         android:textColor="@color/common_google_signin_btn_text_dark_pressed"
                         android:textSize="24sp"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintStart_toEndOf="@+id/imageView"
-                        app:layout_constraintTop_toTopOf="@+id/imageView" />
+                        app:layout_constraintStart_toEndOf="@+id/imageViewDieta2"
+                        app:layout_constraintTop_toTopOf="@+id/imageViewDieta2" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
                 <androidx.constraintlayout.widget.ConstraintLayout
@@ -190,7 +190,7 @@
                     android:layout_height="wrap_content">
 
                     <ImageView
-                        android:id="@+id/imageView"
+                        android:id="@+id/imageViewDieta3"
                         android:layout_width="60dp"
                         android:layout_height="60dp"
                         android:layout_marginStart="24dp"
@@ -203,13 +203,14 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="24dp"
+                        android:layout_marginBottom="8dp"
                         android:fontFamily="sans-serif-black"
                         android:text="Vegetarian"
                         android:textColor="@color/common_google_signin_btn_text_dark_pressed"
                         android:textSize="24sp"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintStart_toEndOf="@+id/imageView"
-                        app:layout_constraintTop_toTopOf="@+id/imageView" />
+                        app:layout_constraintStart_toEndOf="@+id/imageViewDieta3"
+                        app:layout_constraintTop_toTopOf="@+id/imageViewDieta3" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
                 <androidx.constraintlayout.widget.ConstraintLayout
@@ -218,7 +219,7 @@
                     android:layout_height="wrap_content">
 
                     <ImageView
-                        android:id="@+id/imageView"
+                        android:id="@+id/imageViewDieta4"
                         android:layout_width="60dp"
                         android:layout_height="60dp"
                         android:layout_marginStart="24dp"
@@ -227,17 +228,18 @@
                         app:srcCompat="@drawable/plant" />
 
                     <TextView
-                        android:id="@+id/textViewLoginDieta3"
+                        android:id="@+id/textViewLoginDieta4"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="24dp"
+                        android:layout_marginBottom="8dp"
                         android:fontFamily="sans-serif-black"
                         android:text="Vegan"
                         android:textColor="@color/common_google_signin_btn_text_dark_pressed"
                         android:textSize="24sp"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintStart_toEndOf="@+id/imageView"
-                        app:layout_constraintTop_toTopOf="@+id/imageView" />
+                        app:layout_constraintStart_toEndOf="@+id/imageViewDieta4"
+                        app:layout_constraintTop_toTopOf="@+id/imageViewDieta4" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </LinearLayout>
         </ScrollView>
@@ -269,7 +271,7 @@
                     android:layout_height="wrap_content">
 
                     <TextView
-                        android:id="@+id/textViewLoginDieta4"
+                        android:id="@+id/textViewLoginDieta"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="24dp"
@@ -295,7 +297,7 @@
                         android:textSize="24sp"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/textViewLoginDieta4" />
+                        app:layout_constraintTop_toBottomOf="@+id/textViewLoginDieta" />
 
                     <EditText
                         android:id="@+id/editTextNumberDecimalWeight"

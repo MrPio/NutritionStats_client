@@ -259,9 +259,6 @@ public class Login extends AppCompatActivity implements GoogleApiClient.OnConnec
             textViewLoginEmail.setText("Email: " + account.getEmail());
             MainActivity.userEmail=account.getEmail();
 
-            /*
-            TODO CHECK IF USER ALREADY REGISTERED
-             */
             JSONObject response=APICommunication.requestLogin(generateToken(MainActivity.userEmail));
             if(response.containsKey("result") && response.get("result").equals("success!")){
                 new InputOutputImpl(getApplicationContext(),"user_image").writeFile(
