@@ -31,7 +31,7 @@ This is an application using the REST API NutritionStats
 <p float="left">
 <img alt="ENUM" height="480" src="graphics/AddFood.gif"/>
 <img alt="ENUM" height="480" src="graphics/Scan1.gif"/>
-    <img alt="ENUM" height="480" src="graphics/AddWater.gif"/>
+<img alt="ENUM" height="480" src="graphics/AddWater.gif"/>
 <img alt="ENUM" height="480" src="graphics/Scan2.gif"/>
 
 
@@ -53,6 +53,7 @@ This is an application using the REST API NutritionStats
 <img alt="ENUM" height="480" src="graphics/001.png"/>
 <img alt="ENUM" height="480" src="graphics/005.png"/>
 <img alt="ENUM" height="480" src="graphics/004.png"/>
+<img alt="ENUM" height="480" src="graphics/007.png"/>
      
 ***
      
