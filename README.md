@@ -1,5 +1,5 @@
 <div align="center">
-<img alt="Logo" height="180" src="graphics/NutritionStatsLogo.jpg" width="200" />
+<img alt="Logo" height="180" src="graphics/NutritionStatsLogo.jpg" width="190" />
 <div align="left">
      
 # NutritionStats (App)
