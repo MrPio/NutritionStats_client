@@ -53,7 +53,7 @@ This is an application using the REST API NutritionStats
 <img alt="ENUM" height="480" src="graphics/001.png"/>
 <img alt="ENUM" height="480" src="graphics/005.png"/>
 <img alt="ENUM" height="480" src="graphics/004.png"/>
-<img alt="ENUM" height="480" src="graphics/007.png"/>
+<img alt="ENUM" height="480" src="graphics/007.jpg"/>
      
 ***
      
