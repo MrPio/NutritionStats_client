@@ -179,15 +179,15 @@ public class StatsFrag extends Fragment {
         dataSetW.setColors(new ArrayList<Integer>() {{
             add(Color.CYAN);
         }});
-        dataSetW.setValueTextColor(Color.WHITE);
+        dataSetW.setValueTextColor(Color.GRAY);
         dataSetW.setValueTextSize(16);
         dataSetW.setLineWidth(3.75f);
         dataSetW.setCircleRadius(8f);
         dataSetW.setCircleHoleRadius(4.8f);
         if (other == null) {
-            dataSetW.setColor(Color.WHITE);
-            dataSetW.setCircleColor(Color.WHITE);
-            dataSetW.setHighLightColor(Color.WHITE);
+            dataSetW.setColor(Color.GRAY);
+            dataSetW.setCircleColor(Color.GRAY);
+            dataSetW.setHighLightColor(Color.GRAY);
         } else {
             dataSetW.setColor(Color.YELLOW);
             dataSetW.setCircleColor(Color.YELLOW);
@@ -200,7 +200,7 @@ public class StatsFrag extends Fragment {
 
         dataW.setDrawValues(true);
         dataW.setValueTextSize(20f);
-        dataW.setValueTextColor(Color.WHITE);
+        dataW.setValueTextColor(Color.GRAY);
         dataW.setValueTypeface(Typeface.DEFAULT_BOLD);
         dataW.setValueTextSize(16);
 
@@ -209,9 +209,8 @@ public class StatsFrag extends Fragment {
         lineChartNutrient.invalidate();
         lineChartNutrient.setClickable(true);
         lineChartNutrient.setVisibility(View.VISIBLE);
-        //lineChartNutrient.getXAxis().setTextColor(Color.WHITE);
         lineChartNutrient.getXAxis().setTextSize(13f);
-        lineChartNutrient.getAxisLeft().setTextColor(Color.WHITE);
+        lineChartNutrient.getAxisLeft().setTextColor(Color.GRAY);
         lineChartNutrient.getAxisLeft().setTextSize(13f);
         lineChartNutrient.getAxisLeft().setTypeface(Typeface.MONOSPACE);
         lineChartNutrient.getXAxis().setLabelRotationAngle(75);

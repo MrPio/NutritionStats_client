@@ -1448,28 +1448,26 @@ public class MainActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
-            public void run() {
-                if (isLogged()) {
-                    String savedLogin = new InputOutputImpl(getApplicationContext(), TOKEN_PATH).readFile();
-                    userName = savedLogin.split(":")[0];
-                    userEmail = savedLogin.split(":")[1];
-                    Toast.makeText(getApplicationContext(), "Welcome back " + userName + "!", Toast.LENGTH_SHORT).show();
+        handler.postDelayed(() -> {
+            if (isLogged()) {
+                String savedLogin = new InputOutputImpl(getApplicationContext(), TOKEN_PATH).readFile();
+                userName = savedLogin.split(":")[0];
+                userEmail = savedLogin.split(":")[1];
+                Toast.makeText(getApplicationContext(), "Welcome back " + userName + "!", Toast.LENGTH_SHORT).show();
 
-                    fromUserToDiary();
-                    imageViewDiary.animate().alpha(1f).scaleX(0.75f).scaleY(0.75f).setDuration(400).start();
-                    imageViewUser.animate().alpha(0.5f).scaleX(0.6f).scaleY(0.6f).setDuration(400).start();
-                    loadPieChartData();
+                fromUserToDiary();
+                imageViewDiary.animate().alpha(1f).scaleX(0.75f).scaleY(0.75f).setDuration(400).start();
+                imageViewUser.animate().alpha(0.5f).scaleX(0.6f).scaleY(0.6f).setDuration(400).start();
+                loadPieChartData();
 
-                    APICommunication.requestFoodList(token);
-                } else signUp();
+                APICommunication.requestFoodList(token);
+            } else signUp();
 
-                if (dateForValues != null) {
-                    imageViewHome.setVisibility(View.VISIBLE);
-                    textViewTitle.setText(dateForValues.replace("-", "/") + " VALUES:");
-                }
-                menuLoading.animate().alpha(0).start();
+            if (dateForValues != null) {
+                imageViewHome.setVisibility(View.VISIBLE);
+                textViewTitle.setText(dateForValues.replace("-", "/") + " VALUES:");
             }
+            menuLoading.animate().alpha(0).start();
         }, 100);
 
     }
