@@ -16,7 +16,7 @@
         android:theme="@style/Theme.NutritionStats"
         android:usesCleartextTraffic="true">
         <activity
-            android:name=".Statistics"
+            android:name=".activity.Statistics"
             android:exported="false" />
         <activity
             android:name=".activity.AddFoodByName"

@@ -3,25 +3,16 @@ package it.univpm.nutritionstats.activity;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.app.TimePickerDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Typeface;
-import android.graphics.drawable.GradientDrawable;
 import android.media.MediaPlayer;
-import android.media.RingtoneManager;
-import android.media.SoundPool;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -42,38 +33,25 @@ import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.TimePicker;
 import android.widget.Toast;
 
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.LinearLayoutCompat;
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.core.app.NotificationCompat;
-import androidx.core.app.NotificationManagerCompat;
 
 import com.github.mikephil.charting.animation.Easing;
-import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.charts.PieChart;
-import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.components.Description;
 import com.github.mikephil.charting.components.Legend;
-import com.github.mikephil.charting.components.XAxis;
-import com.github.mikephil.charting.data.BarData;
-import com.github.mikephil.charting.data.BarDataSet;
-import com.github.mikephil.charting.data.BarEntry;
-import com.github.mikephil.charting.data.DataSet;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
-import com.github.mikephil.charting.formatter.DefaultAxisValueFormatter;
 import com.github.mikephil.charting.formatter.PercentFormatter;
-import com.github.mikephil.charting.formatter.ValueFormatter;
 import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import com.github.mikephil.charting.utils.ColorTemplate;
@@ -85,11 +63,9 @@ import org.json.simple.JSONObject;
 import org.threeten.bp.LocalDate;
 import org.threeten.bp.format.DateTimeFormatter;
 
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -97,7 +73,6 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import it.univpm.nutritionstats.R;
-import it.univpm.nutritionstats.Statistics;
 import it.univpm.nutritionstats.api.APICommunication;
 import it.univpm.nutritionstats.utility.Circle;
 import it.univpm.nutritionstats.utility.DrinkType;
@@ -105,7 +80,6 @@ import it.univpm.nutritionstats.utility.EasingFunctionSine;
 import it.univpm.nutritionstats.utility.InputOutputImpl;
 import it.univpm.nutritionstats.utility.PopUpMenu;
 import it.univpm.nutritionstats.utility.Sound;
-import it.univpm.nutritionstats.utility.Utilities;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -1302,8 +1276,6 @@ public class MainActivity extends AppCompatActivity {
 
             case REQUEST_CODE_LOGIN:
                 if (new InputOutputImpl(getApplicationContext(), TOKEN_PATH).existFile()) {
-                    Toast.makeText(getApplicationContext(), "We Recognized you! No need to proceed " +
-                            "with the signup.", Toast.LENGTH_LONG).show();
                     Intent intent1 = getIntent();
                     finish();
                     startActivity(intent1);

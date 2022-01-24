@@ -71,7 +71,7 @@ public class Scanner extends AppCompatActivity {
                         builder.setTitle("Please specify portion weight:");
                         final EditText input = new EditText(getApplicationContext());
                         input.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_TEXT_VARIATION_NORMAL);
-                        input.setTextColor(Color.WHITE);
+                        input.setTextColor(Color.GRAY);
                         input.setTextSize(22);
                         input.setTypeface(Typeface.SERIF);
                         builder.setView(input);
