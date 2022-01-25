@@ -2,21 +2,17 @@ package it.univpm.nutritionstats.activity;
 
 import android.app.Activity;
 import android.app.DatePickerDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.Typeface;
 import android.os.Bundle;
-import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
-import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
@@ -40,7 +36,11 @@ import java.util.Calendar;
 
 import it.univpm.nutritionstats.R;
 import it.univpm.nutritionstats.api.APICommunication;
-import it.univpm.nutritionstats.utility.InputOutputImpl;
+import it.univpm.nutritionstats.enums.TextColor;
+import it.univpm.nutritionstats.enums.TextSize;
+import it.univpm.nutritionstats.utility.graphics.dialog.DefaultDialog;
+import it.univpm.nutritionstats.utility.graphics.view.DefaultEditText;
+import it.univpm.nutritionstats.utility.io.InputOutput;
 
 public class Login extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
     final   int             TOTAL_STAGES = 3;
@@ -104,129 +104,91 @@ public class Login extends AppCompatActivity implements GoogleApiClient.OnConnec
             startActivityForResult(intent, RC_SIGN_IN);
         });
 
-        diet[0].setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                MainActivity.diet = MainActivity.Diet.CLASSIC;
-                diet[0].animate().scaleX(1.2f).scaleY(1.2f).alpha(1.0f).setDuration(600).start();
-                diet[1].animate().scaleX(1).scaleY(1).alpha(0.5f).setDuration(600).start();
-                diet[2].animate().scaleX(1).scaleY(1).alpha(0.5f).setDuration(600).start();
-                diet[3].animate().scaleX(1).scaleY(1).alpha(0.5f).setDuration(600).start();
-            }
+        diet[0].setOnClickListener(view -> {
+            MainActivity.diet = MainActivity.Diet.CLASSIC;
+            diet[0].animate().scaleX(1.2f).scaleY(1.2f).alpha(1.0f).setDuration(600).start();
+            diet[1].animate().scaleX(1).scaleY(1).alpha(0.5f).setDuration(600).start();
+            diet[2].animate().scaleX(1).scaleY(1).alpha(0.5f).setDuration(600).start();
+            diet[3].animate().scaleX(1).scaleY(1).alpha(0.5f).setDuration(600).start();
         });
-        diet[1].setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                MainActivity.diet = MainActivity.Diet.PESCATARIAN;
-                diet[1].animate().scaleX(1.2f).scaleY(1.2f).alpha(1.0f).setDuration(600).start();
-                diet[0].animate().scaleX(1).scaleY(1).alpha(0.5f).setDuration(600).start();
-                diet[2].animate().scaleX(1).scaleY(1).alpha(0.5f).setDuration(600).start();
-                diet[3].animate().scaleX(1).scaleY(1).alpha(0.5f).setDuration(600).start();
-            }
+        diet[1].setOnClickListener(view -> {
+            MainActivity.diet = MainActivity.Diet.PESCATARIAN;
+            diet[1].animate().scaleX(1.2f).scaleY(1.2f).alpha(1.0f).setDuration(600).start();
+            diet[0].animate().scaleX(1).scaleY(1).alpha(0.5f).setDuration(600).start();
+            diet[2].animate().scaleX(1).scaleY(1).alpha(0.5f).setDuration(600).start();
+            diet[3].animate().scaleX(1).scaleY(1).alpha(0.5f).setDuration(600).start();
         });
-        diet[2].setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                MainActivity.diet = MainActivity.Diet.VEGETARIAN;
-                diet[2].animate().scaleX(1.2f).scaleY(1.2f).alpha(1.0f).setDuration(600).start();
-                diet[1].animate().scaleX(1).scaleY(1).alpha(0.5f).setDuration(600).start();
-                diet[0].animate().scaleX(1).scaleY(1).alpha(0.5f).setDuration(600).start();
-                diet[3].animate().scaleX(1).scaleY(1).alpha(0.5f).setDuration(600).start();
+        diet[2].setOnClickListener(view -> {
+            MainActivity.diet = MainActivity.Diet.VEGETARIAN;
+            diet[2].animate().scaleX(1.2f).scaleY(1.2f).alpha(1.0f).setDuration(600).start();
+            diet[1].animate().scaleX(1).scaleY(1).alpha(0.5f).setDuration(600).start();
+            diet[0].animate().scaleX(1).scaleY(1).alpha(0.5f).setDuration(600).start();
+            diet[3].animate().scaleX(1).scaleY(1).alpha(0.5f).setDuration(600).start();
 
-            }
         });
-        diet[3].setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                MainActivity.diet = MainActivity.Diet.VEGAN;
-                diet[3].animate().scaleX(1.2f).scaleY(1.2f).alpha(1.0f).setDuration(600).start();
-                diet[1].animate().scaleX(1).scaleY(1).alpha(0.5f).setDuration(600).start();
-                diet[2].animate().scaleX(1).scaleY(1).alpha(0.5f).setDuration(600).start();
-                diet[0].animate().scaleX(1).scaleY(1).alpha(0.5f).setDuration(600).start();
-            }
+        diet[3].setOnClickListener(view -> {
+            MainActivity.diet = MainActivity.Diet.VEGAN;
+            diet[3].animate().scaleX(1.2f).scaleY(1.2f).alpha(1.0f).setDuration(600).start();
+            diet[1].animate().scaleX(1).scaleY(1).alpha(0.5f).setDuration(600).start();
+            diet[2].animate().scaleX(1).scaleY(1).alpha(0.5f).setDuration(600).start();
+            diet[0].animate().scaleX(1).scaleY(1).alpha(0.5f).setDuration(600).start();
         });
 
-        male.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                female.animate().translationY(0).scaleX(1.0f).scaleY(1.0f).setDuration(400).alpha(0.5f).start();
-                male.animate().translationY(40).scaleX(1.2f).scaleY(1.2f).setDuration(600).alpha(1.0f).start();
-                MainActivity.gender = MainActivity.Gender.MALE;
-            }
+        male.setOnClickListener(view -> {
+            female.animate().translationY(0).scaleX(1.0f).scaleY(1.0f).setDuration(400).alpha(0.5f).start();
+            male.animate().translationY(40).scaleX(1.2f).scaleY(1.2f).setDuration(600).alpha(1.0f).start();
+            MainActivity.gender = MainActivity.Gender.MALE;
         });
-        female.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                female.animate().translationY(40).scaleX(1.2f).scaleY(1.2f).setDuration(400).alpha(1.0f).start();
-                male.animate().translationY(0).scaleX(1.0f).scaleY(1.0f).setDuration(600).alpha(0.5f).start();
-                MainActivity.gender = MainActivity.Gender.FEMALE;
-            }
+        female.setOnClickListener(view -> {
+            female.animate().translationY(40).scaleX(1.2f).scaleY(1.2f).setDuration(400).alpha(1.0f).start();
+            male.animate().translationY(0).scaleX(1.0f).scaleY(1.0f).setDuration(600).alpha(0.5f).start();
+            MainActivity.gender = MainActivity.Gender.FEMALE;
         });
 
-        editTextNumberDecimalWeight.setOnKeyListener(new View.OnKeyListener() {
-            @Override
-            public boolean onKey(View view, int i, KeyEvent keyEvent) {
-                String text = ((EditText) view).getText().toString();
-                if (!text.equals(""))
-                    MainActivity.weight = Integer.parseInt(text);
-                return false;
-            }
+        editTextNumberDecimalWeight.setOnKeyListener((view, i, keyEvent) -> {
+            String text = ((EditText) view).getText().toString();
+            if (!text.equals(""))
+                MainActivity.weight = Integer.parseInt(text);
+            return false;
         });
-        editTextNumberDecimalHeight.setOnKeyListener(new View.OnKeyListener() {
-            @Override
-            public boolean onKey(View view, int i, KeyEvent keyEvent) {
-                String text = ((EditText) view).getText().toString();
-                if (!text.equals(""))
-                    MainActivity.height = Integer.parseInt(text);
-                return false;
-            }
+        editTextNumberDecimalHeight.setOnKeyListener((view, i, keyEvent) -> {
+            String text = ((EditText) view).getText().toString();
+            if (!text.equals(""))
+                MainActivity.height = Integer.parseInt(text);
+            return false;
         });
 
-        DatePickerDialog.OnDateSetListener date = new DatePickerDialog.OnDateSetListener() {
-
-            @Override
-            public void onDateSet(DatePicker view, int year, int monthOfYear,
-                                  int dayOfMonth) {
-                Calendar calendar = Calendar.getInstance();
-                calendar.set(year, monthOfYear, dayOfMonth);
-                MainActivity.birth = calendar.getTime();
-                editTextDate.setText(dayOfMonth + "/" + monthOfYear + "/" + year);
-            }
-
+        DatePickerDialog.OnDateSetListener date = (view, year, monthOfYear, dayOfMonth) -> {
+            Calendar calendar = Calendar.getInstance();
+            calendar.set(year, monthOfYear, dayOfMonth);
+            MainActivity.birth = calendar.getTime();
+            editTextDate.setText(dayOfMonth + "/" + monthOfYear + "/" + year);
         };
-        editTextDate.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                new DatePickerDialog(Login.this, date, 2000, 1, 1).show();
-            }
-        });
+        editTextDate.setOnClickListener(view -> new DatePickerDialog(Login.this, date, 2000, 1, 1).show());
 
         textViewInvitationCode.setOnClickListener(view -> {
-            AlertDialog.Builder builder = new AlertDialog.Builder(Login.this);
-            builder.setTitle("Please enter your invitation code:");
-            EditText input = new EditText(getApplicationContext());
-            input.setTypeface(Typeface.MONOSPACE);
-            input.setTextColor(Color.GRAY);
-            builder.setView(input);
-            builder.setPositiveButton("Confirm", (dialogInterface, i) -> {
+            EditText input =
+                    new DefaultEditText(getApplicationContext(), "", TextSize.MEDIUM, TextColor.LIGHT).getView();
+            DialogInterface.OnClickListener onPositive = (dialogInterface, i) -> {
                 String logoUrl =
                         "https://raw.githubusercontent.com/MrPio/NutritionStats_client/master/graphics/NutritionStatsLogo_small.jpg";
                 JSONObject response =
                         APICommunication.requestLogin(input.getText().toString());
                 if (response.containsKey("result") && response.get("result").equals("success!")) {
-                    new InputOutputImpl(getApplicationContext(), "user_image").writeFile(logoUrl);
-                    JSONObject userResponse=(JSONObject)response.get("user");
+                    new InputOutput(getApplicationContext(), "user_image").writeFile(logoUrl);
+                    JSONObject userResponse = (JSONObject) response.get("user");
                     String formatted =
                             userResponse.get("nickname") + ":" + userResponse.get("email") + ":" + input.getText().toString();
-                    new InputOutputImpl(getApplicationContext(), MainActivity.TOKEN_PATH).writeFile(formatted);
+                    new InputOutput(getApplicationContext(), MainActivity.TOKEN_PATH).writeFile(formatted);
                     Picasso.get().load(logoUrl).into(imageViewLoginPhoto);
                     Intent resultIntent = new Intent();
                     setResult(Activity.RESULT_OK, resultIntent);
                     finish();
                 } else
                     Toast.makeText(getApplicationContext(), "This isn't a valid invitation code", Toast.LENGTH_LONG).show();
-            });
-            builder.show();
+            };
+            new DefaultDialog(input, "Please enter your invitation code:", onPositive, null)
+                    .spawnDialog(Login.this);
         });
     }
 
@@ -293,11 +255,11 @@ public class Login extends AppCompatActivity implements GoogleApiClient.OnConnec
             if (response.containsKey("result") && response.get("result").equals("success!")) {
                 Toast.makeText(getApplicationContext(), "We Recognized you! No need to proceed " +
                         "with the signup.", Toast.LENGTH_LONG).show();
-                new InputOutputImpl(getApplicationContext(), "user_image").writeFile(
+                new InputOutput(getApplicationContext(), "user_image").writeFile(
                         account.getPhotoUrl().toString());
                 String formatted =
                         account.getDisplayName() + ":" + account.getEmail() + ":" + generateToken(MainActivity.userEmail);
-                new InputOutputImpl(getApplicationContext(), MainActivity.TOKEN_PATH).writeFile(formatted);
+                new InputOutput(getApplicationContext(), MainActivity.TOKEN_PATH).writeFile(formatted);
                 Picasso.get().load(account.getPhotoUrl()).into(imageViewLoginPhoto);
                 Intent resultIntent = new Intent();
                 setResult(Activity.RESULT_OK, resultIntent);
@@ -305,7 +267,7 @@ public class Login extends AppCompatActivity implements GoogleApiClient.OnConnec
             }
 
             try {
-                new InputOutputImpl(getApplicationContext(), "user_image").writeFile(account.getPhotoUrl().toString());
+                new InputOutput(getApplicationContext(), "user_image").writeFile(account.getPhotoUrl().toString());
             } catch (NullPointerException e) {
                 Toast.makeText(getApplicationContext(), "image not found", Toast.LENGTH_LONG).show();
             }

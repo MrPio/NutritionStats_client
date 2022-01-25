@@ -36,7 +36,7 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;
 
-import it.univpm.nutritionstats.utility.Elements;
+import it.univpm.nutritionstats.enums.Elements;
 
 
 public class StatsFrag extends Fragment {

@@ -22,6 +22,7 @@ import android.view.Display;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
+import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
@@ -74,12 +75,13 @@ import java.util.TreeMap;
 
 import it.univpm.nutritionstats.R;
 import it.univpm.nutritionstats.api.APICommunication;
-import it.univpm.nutritionstats.utility.Circle;
-import it.univpm.nutritionstats.utility.DrinkType;
-import it.univpm.nutritionstats.utility.EasingFunctionSine;
-import it.univpm.nutritionstats.utility.InputOutputImpl;
-import it.univpm.nutritionstats.utility.PopUpMenu;
-import it.univpm.nutritionstats.utility.Sound;
+import it.univpm.nutritionstats.utility.io.Serialization;
+import it.univpm.nutritionstats.utility.mathematics.Circle;
+import it.univpm.nutritionstats.enums.DrinkType;
+import it.univpm.nutritionstats.utility.mathematics.EasingFunctionSine;
+import it.univpm.nutritionstats.utility.io.InputOutput;
+import it.univpm.nutritionstats.utility.graphics.PopUpMenu;
+import it.univpm.nutritionstats.utility.sound.Sound;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -91,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
         SNACK(R.drawable.snack),
         DINNER(R.drawable.dinner);
 
-        private int Drawable;
+        private final int Drawable;
 
         MealType(int drawable) {
             Drawable = drawable;
@@ -220,6 +222,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         AndroidThreeTen.init(this);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN);
         getWindow().getDecorView().setSystemUiVisibility(
                 View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                         | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
@@ -307,319 +311,299 @@ public class MainActivity extends AppCompatActivity {
 
  */
 
-        imageViewDiary.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (actualTab == 0)
-                    return;
-                imageViewDiary.animate().alpha(1f).scaleX(0.75f).scaleY(0.75f).setDuration(400).start();
-                imageViewUser.animate().alpha(0.5f).scaleX(0.6f).scaleY(0.6f).setDuration(400).start();
-                fromUserToDiary();
-            }
+        imageViewDiary.setOnClickListener(view -> {
+            if (actualTab == 0)
+                return;
+            imageViewDiary.animate().alpha(1f).scaleX(0.75f).scaleY(0.75f).setDuration(400).start();
+            imageViewUser.animate().alpha(0.5f).scaleX(0.6f).scaleY(0.6f).setDuration(400).start();
+            fromUserToDiary();
         });
 
-        imageViewUser.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (actualTab == 1)
-                    return;
-                imageViewDiary.animate().alpha(0.5f).scaleX(0.6f).scaleY(0.6f).setDuration(400).start();
-                imageViewUser.animate().alpha(1f).scaleX(0.75f).scaleY(0.75f).setDuration(400).start();
-                fromDiaryToUser();
-            }
+        imageViewUser.setOnClickListener(view -> {
+            if (actualTab == 1)
+                return;
+            imageViewDiary.animate().alpha(0.5f).scaleX(0.6f).scaleY(0.6f).setDuration(400).start();
+            imageViewUser.animate().alpha(1f).scaleX(0.75f).scaleY(0.75f).setDuration(400).start();
+            fromDiaryToUser();
         });
 
-        imageViewAddButton.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                float singleStep = 90f / (addButtonMenu.length - 1);
-                if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
-                    addButtonSelected = 0;
-                    circleAddButton =
-                            new Circle(460, new Point((int) motionEvent.getRawX(), (int) motionEvent.getRawY()));
-                    addButtonPressed = true;
-                    imageViewAddButton.animate().scaleX(1.30f).scaleY(1.30f).setDuration(160).start();
-                    makeSound(Sound.Sounds.BIP_13);
-                    imageViewAddButton.setImageDrawable(getResources().getDrawable(R.drawable.add_button_hover));
+        imageViewAddButton.setOnTouchListener((view, motionEvent) -> {
+            float singleStep = 90f / (addButtonMenu.length - 1);
+            if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+                addButtonSelected = 0;
+                circleAddButton =
+                        new Circle(460, new Point((int) motionEvent.getRawX(), (int) motionEvent.getRawY()));
+                addButtonPressed = true;
+                imageViewAddButton.animate().scaleX(1.30f).scaleY(1.30f).setDuration(160).start();
+                makeSound(Sound.Sounds.BIP_13);
+                imageViewAddButton.setImageDrawable(getResources().getDrawable(R.drawable.add_button_hover));
 
-                    int count = addButtonMenu.length;
-                    for (PopUpMenu iv : addButtonMenu) {
-                        float angle = 90f + singleStep * --count;
-                        iv.getImageView().animate().alpha(1.0f).scaleX(1f).scaleY(1f)
-                                .translationX(circleAddButton.getPointFromAngle(angle).x)
-                                .translationY(-circleAddButton.getPointFromAngle(angle).y).start();
-                    }
-                    imageViewAddWater.setAlpha(0f);
-                    imageViewAddWater.setVisibility(View.VISIBLE);
-                    imageViewAddWater.animate().scaleX(1.35f).scaleY(1.35f).alpha(1.0f).start();
-                    imageViewAddButton.animate().alpha(0.0f).start();
+                int count = addButtonMenu.length;
+                for (PopUpMenu iv : addButtonMenu) {
+                    float angle = 90f + singleStep * --count;
+                    iv.getImageView().animate().alpha(1.0f).scaleX(1f).scaleY(1f)
+                            .translationX(circleAddButton.getPointFromAngle(angle).x)
+                            .translationY(-circleAddButton.getPointFromAngle(angle).y).start();
                 }
-                if (motionEvent.getAction() == MotionEvent.ACTION_MOVE) {
-                    int radius = view.getMeasuredWidth();
-                    Point center = new Point(radius, radius);
-                    Circle hit = new Circle(center);
-                    float distance =
-                            hit.getDistaceFromCenter(new Point((int) motionEvent.getX(), (int) motionEvent.getY()));
+                imageViewAddWater.setAlpha(0f);
+                imageViewAddWater.setVisibility(View.VISIBLE);
+                imageViewAddWater.animate().scaleX(1.35f).scaleY(1.35f).alpha(1.0f).start();
+                imageViewAddButton.animate().alpha(0.0f).start();
+            }
+            if (motionEvent.getAction() == MotionEvent.ACTION_MOVE) {
+                int radius = view.getMeasuredWidth();
+                Point center = new Point(radius, radius);
+                Circle hit = new Circle(center);
+                float distance =
+                        hit.getDistaceFromCenter(new Point((int) motionEvent.getX(), (int) motionEvent.getY()));
 
-                    if (distance > 580) {
-                        if (addButtonSelected == -1)
-                            return false;
-                        addButtonSelected = -1;
+                if (distance > 580) {
+                    if (addButtonSelected == -1)
+                        return false;
+                    addButtonSelected = -1;
+                    for (PopUpMenu iv : addButtonMenu) {
+                        iv.getImageView().animate().scaleX(1f).scaleY(1f).setDuration(120).start();
+                        iv.getImageView().setImageDrawable(getResources().getDrawable(iv.getDrawable()));
+                    }
+                    imageViewAddWater.animate().scaleX(1f).scaleY(1f).setDuration(120).start();
+                } else {
+                    float angle =
+                            circleAddButton.getAngleByPoint(new Point((int) motionEvent.getRawX(), (int) motionEvent.getRawY()));
+                    if (circleAddButton.getDistaceFromCenter(new Point((int) motionEvent.getRawX(), (int) motionEvent.getRawY())) < 170) {
+                        if (addButtonSelected == 0) return true;
+                        makeSound(Sound.Sounds.BIP_2);
+                        addButtonSelected = 0;
                         for (PopUpMenu iv : addButtonMenu) {
                             iv.getImageView().animate().scaleX(1f).scaleY(1f).setDuration(120).start();
                             iv.getImageView().setImageDrawable(getResources().getDrawable(iv.getDrawable()));
                         }
-                        imageViewAddWater.animate().scaleX(1f).scaleY(1f).setDuration(120).start();
-                    } else {
-                        float angle =
-                                circleAddButton.getAngleByPoint(new Point((int) motionEvent.getRawX(), (int) motionEvent.getRawY()));
-                        if (circleAddButton.getDistaceFromCenter(new Point((int) motionEvent.getRawX(), (int) motionEvent.getRawY())) < 170) {
-                            if (addButtonSelected == 0) return true;
-                            makeSound(Sound.Sounds.BIP_2);
-                            addButtonSelected = 0;
-                            for (PopUpMenu iv : addButtonMenu) {
-                                iv.getImageView().animate().scaleX(1f).scaleY(1f).setDuration(120).start();
-                                iv.getImageView().setImageDrawable(getResources().getDrawable(iv.getDrawable()));
-                            }
-                            imageViewAddWater.animate().scaleX(1.35f).scaleY(1.35f).setDuration(120).start();
-                            return true;
-                        }
-                        int step =
-                                addButtonMenu.length - (int) ((angle - 90 + singleStep / 2) / singleStep);
-                        if (step <= 0 || step > addButtonMenu.length)
-                            return false;
-                        if (addButtonSelected == step) return true;
-                        addButtonSelected = step;
-                        makeSound(addButtonMenu[step - 1].getSound());
-                        int count = 1;
-                        for (PopUpMenu iv : addButtonMenu) {
-                            if (count++ == addButtonSelected) {
-                                iv.getImageView().animate().scaleX(1.35f).scaleY(1.35f).setDuration(120).start();
-                                iv.getImageView().setImageDrawable(getResources().getDrawable(iv.getDrawableHover()));
-                            } else {
-                                iv.getImageView().animate().scaleX(1f).scaleY(1f).setDuration(120).start();
-                                iv.getImageView().setImageDrawable(getResources().getDrawable(iv.getDrawable()));
-                            }
-                        }
-                        imageViewAddWater.animate().scaleX(1f).scaleY(1f).setDuration(120).start();
+                        imageViewAddWater.animate().scaleX(1.35f).scaleY(1.35f).setDuration(120).start();
+                        return true;
                     }
-                }
-                if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
-                    addButtonPressed = false;
-                    imageViewAddButton.animate().scaleX(1f).scaleY(1f).setDuration(160).start();
-                    imageViewAddButton.setImageDrawable(getResources().getDrawable(R.drawable.add_button));
-                    if (addButtonSelected == -1)
-                        Sound.makeSound(getApplicationContext(), Sound.Sounds.NO_BUY);
-                    else
-                        makeSound(Sound.Sounds.BIP_3);
-
+                    int step =
+                            addButtonMenu.length - (int) ((angle - 90 + singleStep / 2) / singleStep);
+                    if (step <= 0 || step > addButtonMenu.length)
+                        return false;
+                    if (addButtonSelected == step) return true;
+                    addButtonSelected = step;
+                    makeSound(addButtonMenu[step - 1].getSound());
+                    int count = 1;
                     for (PopUpMenu iv : addButtonMenu) {
-                        iv.getImageView().animate().alpha(0f).scaleX(0.2f).scaleY(0.2f).translationX(0).translationY(0).start();
-                        iv.getImageView().setImageDrawable(getResources().getDrawable(iv.getDrawable()));
+                        if (count++ == addButtonSelected) {
+                            iv.getImageView().animate().scaleX(1.35f).scaleY(1.35f).setDuration(120).start();
+                            iv.getImageView().setImageDrawable(getResources().getDrawable(iv.getDrawableHover()));
+                        } else {
+                            iv.getImageView().animate().scaleX(1f).scaleY(1f).setDuration(120).start();
+                            iv.getImageView().setImageDrawable(getResources().getDrawable(iv.getDrawable()));
+                        }
                     }
-                    imageViewAddWater.animate().alpha(0.0f).start();
-                    imageViewAddButton.animate().alpha(1.0f).start();
-
-                    if (addButtonSelected > 0) {
-                        AddFood.mealType = MealType.values()[addButtonSelected - 1];
-                        Intent i = (new Intent(MainActivity.this, AddFood.class));
-                        startActivityForResult(i, REQUEST_CODE_ADD);
-                    } else if (addButtonSelected == 0) {
-                        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-                        builder.setTitle("Please the amount of water you drank [mL]:");
-                        final Spinner input = new Spinner(getApplicationContext());
-                        input.setAdapter(new ArrayAdapter<>(MainActivity.this, R.layout.spinner_drink_type, DrinkType.values()));
-                        input.setPadding(50, 50, 0, 0);
-                        builder.setView(input);
-                        builder.setPositiveButton("OK", (dialog, which) -> {
-                            new Thread(() -> {
-                                APICommunication.requestAddWater(MainActivity.token, (int) ((DrinkType) input.getSelectedItem()).getValue());
-                            }).start();
-
-                            Toast.makeText(MainActivity.this, "Water successfully added!", Toast.LENGTH_SHORT).show();
-                            makeSound(Sound.Sounds.WATER_SPLASH);
-
-                            EasingFunctionSine.delay = water / 2000f;
-                            water += (int) ((DrinkType) input.getSelectedItem()).getValue();
-                            loadWaterChart();
-                            pieChartWater.animateY(1000, EasingFunctionSine.EaseOutSineDelay);
-                        });
-                        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.cancel();
-                            }
-                        });
-
-                        builder.show();
-                    }
+                    imageViewAddWater.animate().scaleX(1f).scaleY(1f).setDuration(120).start();
                 }
-                return true;
             }
+            if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
+                addButtonPressed = false;
+                imageViewAddButton.animate().scaleX(1f).scaleY(1f).setDuration(160).start();
+                imageViewAddButton.setImageDrawable(getResources().getDrawable(R.drawable.add_button));
+                if (addButtonSelected == -1)
+                    Sound.makeSound(getApplicationContext(), Sound.Sounds.NO_BUY);
+                else
+                    makeSound(Sound.Sounds.BIP_3);
+
+                for (PopUpMenu iv : addButtonMenu) {
+                    iv.getImageView().animate().alpha(0f).scaleX(0.2f).scaleY(0.2f).translationX(0).translationY(0).start();
+                    iv.getImageView().setImageDrawable(getResources().getDrawable(iv.getDrawable()));
+                }
+                imageViewAddWater.animate().alpha(0.0f).start();
+                imageViewAddButton.animate().alpha(1.0f).start();
+
+                if (addButtonSelected > 0) {
+                    AddFood.mealType = MealType.values()[addButtonSelected - 1];
+                    Intent i = (new Intent(MainActivity.this, AddFood.class));
+                    startActivityForResult(i, REQUEST_CODE_ADD);
+                } else if (addButtonSelected == 0) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                    builder.setTitle("Please the amount of water you drank [mL]:");
+                    final Spinner input = new Spinner(getApplicationContext());
+                    input.setAdapter(new ArrayAdapter<>(MainActivity.this, R.layout.spinner_drink_type, DrinkType.values()));
+                    input.setPadding(50, 50, 0, 0);
+                    builder.setView(input);
+                    builder.setPositiveButton("OK", (dialog, which) -> {
+                        new Thread(() -> {
+                            APICommunication.requestAddWater(MainActivity.token, (int) ((DrinkType) input.getSelectedItem()).getValue());
+                        }).start();
+
+                        Toast.makeText(MainActivity.this, "Water successfully added!", Toast.LENGTH_SHORT).show();
+                        makeSound(Sound.Sounds.WATER_SPLASH);
+
+                        EasingFunctionSine.delay = water / 2000f;
+                        water += (int) ((DrinkType) input.getSelectedItem()).getValue();
+                        loadWaterChart();
+                        pieChartWater.animateY(1000, EasingFunctionSine.EaseOutSineDelay);
+                    });
+                    builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.cancel();
+                        }
+                    });
+
+                    builder.show();
+                }
+            }
+            return true;
         });
 
         scrollViewMenuDiary.getViewTreeObserver().addOnScrollChangedListener(
-                new ViewTreeObserver.OnScrollChangedListener() {
-                    @Override
-                    public void onScrollChanged() {
-                        if (!pieChartWaterAnimated && scrollViewMenuDiary.getScrollY() > 630) {
-                            pieChartWater.animateY(3200, Easing.EaseInSine);
-                            pieChartWaterAnimated = true;
-                        }
+                () -> {
+                    if (!pieChartWaterAnimated && scrollViewMenuDiary.getScrollY() > 630) {
+                        pieChartWater.animateY(3200, Easing.EaseInSine);
+                        pieChartWaterAnimated = true;
                     }
                 });
 
-        imageViewCalendar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                DatePickerDialog.OnDateSetListener date = new DatePickerDialog.OnDateSetListener() {
-                    @Override
-                    public void onDateSet(DatePicker view, int year, int monthOfYear,
-                                          int dayOfMonth) {
-                        String dayId = String.format("%02d", dayOfMonth) + "-" +
-                                String.format("%02d", monthOfYear + 1) + "-" +
-                                String.format("%02d", year);
-                        String todayDayId =
-                                String.format("%02d", LocalDate.now().getDayOfMonth()) + "-" +
-                                        String.format("%02d", LocalDate.now().getMonthValue()) + "-" +
-                                        String.format("%02d", LocalDate.now().getYear());
+        imageViewCalendar.setOnClickListener(view -> {
+            DatePickerDialog.OnDateSetListener date = new DatePickerDialog.OnDateSetListener() {
+                @Override
+                public void onDateSet(DatePicker view, int year, int monthOfYear,
+                                      int dayOfMonth) {
+                    String dayId = String.format("%02d", dayOfMonth) + "-" +
+                            String.format("%02d", monthOfYear + 1) + "-" +
+                            String.format("%02d", year);
+                    String todayDayId =
+                            String.format("%02d", LocalDate.now().getDayOfMonth()) + "-" +
+                                    String.format("%02d", LocalDate.now().getMonthValue()) + "-" +
+                                    String.format("%02d", LocalDate.now().getYear());
 
-                        if (dayId.equals(todayDayId)) {
-                            imageViewHome.performClick();
-                            return;
-                        }
-                        dateForValues = dayId;
-                        imageViewHome.setVisibility(View.VISIBLE);
-
-                        Intent intent = getIntent();
-                        finish();
-                        startActivity(intent);
+                    if (dayId.equals(todayDayId)) {
+                        imageViewHome.performClick();
+                        return;
                     }
+                    dateForValues = dayId;
+                    imageViewHome.setVisibility(View.VISIBLE);
 
-                };
-                if (dateForValues == null) {
-                    new DatePickerDialog(MainActivity.this, date,
-                            LocalDate.now().getYear(),
-                            LocalDate.now().getMonthValue() - 1,
-                            LocalDate.now().getDayOfMonth()).show();
-                } else
-                    new DatePickerDialog(MainActivity.this, date,
-                            Integer.parseInt(dateForValues.split("-")[2]),
-                            Integer.parseInt(dateForValues.split("-")[1]) - 1,
-                            Integer.parseInt(dateForValues.split("-")[0])).show();
-
-            }
-        });
-
-        imageViewHome.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                dateForValues = null;
-
-                Intent intent = getIntent();
-                finish();
-                startActivity(intent);
-            }
-        });
-
-        imageViewAddRuler.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                float baseAngle = 90f;
-                if (rulerButtonMenu.length == 2)
-                    baseAngle = 105f;
-                float singleStep = (90f - (baseAngle - 90f) * 2f) / (rulerButtonMenu.length - 1);
-                if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
-                    measureSelected = 0;
-                    circleRulerButton =
-                            new Circle(460, new Point((int) motionEvent.getRawX(), (int) motionEvent.getRawY()));
-                    measurePressed = true;
-                    view.animate().scaleX(1.30f).scaleY(1.30f).setDuration(160).start();
-                    makeSound(Sound.Sounds.BIP_13);
-                    ((ImageView) view).setImageDrawable(getResources().getDrawable(R.drawable.ruler_hover));
-
-                    int count = rulerButtonMenu.length;
-                    for (PopUpMenu iv : rulerButtonMenu) {
-                        float angle = baseAngle + singleStep * --count;
-                        iv.getImageView().animate().alpha(1.0f).scaleX(1f).scaleY(1f)
-                                .translationX(circleRulerButton.getPointFromAngle(angle).x)
-                                .translationY(-circleRulerButton.getPointFromAngle(angle).y).start();
-                    }
+                    Intent intent = getIntent();
+                    finish();
+                    startActivity(intent);
                 }
-                if (motionEvent.getAction() == MotionEvent.ACTION_MOVE) {
-                    int radius = view.getMeasuredWidth();
-                    Point center = new Point(radius, radius);
-                    Circle hit = new Circle(center);
-                    float distance =
-                            hit.getDistaceFromCenter(new Point((int) motionEvent.getX(), (int) motionEvent.getY()));
 
-                    if (distance > 580) {
-                        if (measureSelected == -1)
-                            return false;
-                        measureSelected = -1;
+            };
+            if (dateForValues == null) {
+                new DatePickerDialog(MainActivity.this, date,
+                        LocalDate.now().getYear(),
+                        LocalDate.now().getMonthValue() - 1,
+                        LocalDate.now().getDayOfMonth()).show();
+            } else
+                new DatePickerDialog(MainActivity.this, date,
+                        Integer.parseInt(dateForValues.split("-")[2]),
+                        Integer.parseInt(dateForValues.split("-")[1]) - 1,
+                        Integer.parseInt(dateForValues.split("-")[0])).show();
+
+        });
+
+        imageViewHome.setOnClickListener(view -> {
+            dateForValues = null;
+
+            Intent intent = getIntent();
+            finish();
+            startActivity(intent);
+        });
+
+        imageViewAddRuler.setOnTouchListener((view, motionEvent) -> {
+            float baseAngle = 90f;
+            if (rulerButtonMenu.length == 2)
+                baseAngle = 105f;
+            float singleStep = (90f - (baseAngle - 90f) * 2f) / (rulerButtonMenu.length - 1);
+            if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+                measureSelected = 0;
+                circleRulerButton =
+                        new Circle(460, new Point((int) motionEvent.getRawX(), (int) motionEvent.getRawY()));
+                measurePressed = true;
+                view.animate().scaleX(1.30f).scaleY(1.30f).setDuration(160).start();
+                makeSound(Sound.Sounds.BIP_13);
+                ((ImageView) view).setImageDrawable(getResources().getDrawable(R.drawable.ruler_hover));
+
+                int count = rulerButtonMenu.length;
+                for (PopUpMenu iv : rulerButtonMenu) {
+                    float angle = baseAngle + singleStep * --count;
+                    iv.getImageView().animate().alpha(1.0f).scaleX(1f).scaleY(1f)
+                            .translationX(circleRulerButton.getPointFromAngle(angle).x)
+                            .translationY(-circleRulerButton.getPointFromAngle(angle).y).start();
+                }
+            }
+            if (motionEvent.getAction() == MotionEvent.ACTION_MOVE) {
+                int radius = view.getMeasuredWidth();
+                Point center = new Point(radius, radius);
+                Circle hit = new Circle(center);
+                float distance =
+                        hit.getDistaceFromCenter(new Point((int) motionEvent.getX(), (int) motionEvent.getY()));
+
+                if (distance > 580) {
+                    if (measureSelected == -1)
+                        return false;
+                    measureSelected = -1;
+                    for (PopUpMenu iv : rulerButtonMenu) {
+                        iv.getImageView().animate().scaleX(1f).scaleY(1f).setDuration(120).start();
+                        iv.getImageView().setImageDrawable(getResources().getDrawable(iv.getDrawable()));
+                    }
+                    view.animate().scaleX(1f).scaleY(1f).setDuration(120).start();
+                } else {
+                    float angle =
+                            circleRulerButton.getAngleByPoint(new Point((int) motionEvent.getRawX(), (int) motionEvent.getRawY()));
+                    if (circleRulerButton.getDistaceFromCenter(new Point((int) motionEvent.getRawX(), (int) motionEvent.getRawY())) < 170) {
+                        if (measureSelected == 0) return true;
+                        makeSound(Sound.Sounds.BIP_2);
+                        measureSelected = 0;
                         for (PopUpMenu iv : rulerButtonMenu) {
                             iv.getImageView().animate().scaleX(1f).scaleY(1f).setDuration(120).start();
                             iv.getImageView().setImageDrawable(getResources().getDrawable(iv.getDrawable()));
                         }
-                        view.animate().scaleX(1f).scaleY(1f).setDuration(120).start();
-                    } else {
-                        float angle =
-                                circleRulerButton.getAngleByPoint(new Point((int) motionEvent.getRawX(), (int) motionEvent.getRawY()));
-                        if (circleRulerButton.getDistaceFromCenter(new Point((int) motionEvent.getRawX(), (int) motionEvent.getRawY())) < 170) {
-                            if (measureSelected == 0) return true;
-                            makeSound(Sound.Sounds.BIP_2);
-                            measureSelected = 0;
-                            for (PopUpMenu iv : rulerButtonMenu) {
-                                iv.getImageView().animate().scaleX(1f).scaleY(1f).setDuration(120).start();
-                                iv.getImageView().setImageDrawable(getResources().getDrawable(iv.getDrawable()));
-                            }
-                            view.animate().scaleX(1.35f).scaleY(1.35f).setDuration(120).start();
-                            return true;
-                        }
-                        int step =
-                                rulerButtonMenu.length - (int) ((angle - baseAngle + singleStep / 2) / singleStep);
-                        if (step <= 0 || step > rulerButtonMenu.length)
-                            return false;
-                        if (measureSelected == step)
-                            return true;
-                        measureSelected = step;
-                        makeSound(rulerButtonMenu[step - 1].getSound());
-                        int count = 1;
-                        for (PopUpMenu iv : rulerButtonMenu) {
-                            if (count++ == measureSelected) {
-                                iv.getImageView().animate().scaleX(1.35f).scaleY(1.35f).setDuration(120).start();
-                                iv.getImageView().setImageDrawable(getResources().getDrawable(iv.getDrawableHover()));
-                            } else {
-                                iv.getImageView().animate().scaleX(1f).scaleY(1f).setDuration(120).start();
-                                iv.getImageView().setImageDrawable(getResources().getDrawable(iv.getDrawable()));
-                            }
-                        }
-                        view.animate().scaleX(1f).scaleY(1f).setDuration(120).start();
+                        view.animate().scaleX(1.35f).scaleY(1.35f).setDuration(120).start();
+                        return true;
                     }
-                }
-                if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
-                    addButtonPressed = false;
-                    view.animate().scaleX(1f).scaleY(1f).setDuration(160).start();
-                    ((ImageView) view).setImageDrawable(getResources().getDrawable(R.drawable.ruler));
-                    if (measureSelected == -1)
-                        Sound.makeSound(getApplicationContext(), Sound.Sounds.NO_BUY);
-                    else
-                        makeSound(Sound.Sounds.BIP_3);
-
+                    int step =
+                            rulerButtonMenu.length - (int) ((angle - baseAngle + singleStep / 2) / singleStep);
+                    if (step <= 0 || step > rulerButtonMenu.length)
+                        return false;
+                    if (measureSelected == step)
+                        return true;
+                    measureSelected = step;
+                    makeSound(rulerButtonMenu[step - 1].getSound());
+                    int count = 1;
                     for (PopUpMenu iv : rulerButtonMenu) {
-                        iv.getImageView().animate().alpha(0f).scaleX(0.2f).scaleY(0.2f).translationX(0).translationY(0).start();
-                        iv.getImageView().setImageDrawable(getResources().getDrawable(iv.getDrawable()));
+                        if (count++ == measureSelected) {
+                            iv.getImageView().animate().scaleX(1.35f).scaleY(1.35f).setDuration(120).start();
+                            iv.getImageView().setImageDrawable(getResources().getDrawable(iv.getDrawableHover()));
+                        } else {
+                            iv.getImageView().animate().scaleX(1f).scaleY(1f).setDuration(120).start();
+                            iv.getImageView().setImageDrawable(getResources().getDrawable(iv.getDrawable()));
+                        }
                     }
-                    view.animate().alpha(0.0f).start();
-                    view.animate().alpha(1.0f).start();
-
-                    if (measureSelected == 1) {
-                        Intent i = (new Intent(MainActivity.this, Statistics.class));
-                        startActivityForResult(i, REQUEST_STATISTICS);
-                    } else if (measureSelected == 2)
-                        updateWeightValue(weightMap.lastKey(), weightMap.lastEntry().getValue());
-
+                    view.animate().scaleX(1f).scaleY(1f).setDuration(120).start();
                 }
+            }
+            if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
+                addButtonPressed = false;
+                view.animate().scaleX(1f).scaleY(1f).setDuration(160).start();
+                ((ImageView) view).setImageDrawable(getResources().getDrawable(R.drawable.ruler));
+                if (measureSelected == -1)
+                    Sound.makeSound(getApplicationContext(), Sound.Sounds.NO_BUY);
+                else
+                    makeSound(Sound.Sounds.BIP_3);
+
+                for (PopUpMenu iv : rulerButtonMenu) {
+                    iv.getImageView().animate().alpha(0f).scaleX(0.2f).scaleY(0.2f).translationX(0).translationY(0).start();
+                    iv.getImageView().setImageDrawable(getResources().getDrawable(iv.getDrawable()));
+                }
+                view.animate().alpha(0.0f).start();
+                view.animate().alpha(1.0f).start();
+
+                if (measureSelected == 1) {
+                    Intent i = (new Intent(MainActivity.this, Statistics.class));
+                    startActivityForResult(i, REQUEST_STATISTICS);
+                } else if (measureSelected == 2)
+                    updateWeightValue(weightMap.lastKey(), weightMap.lastEntry().getValue());
+
+            }
 
 
 
@@ -628,39 +612,38 @@ public class MainActivity extends AppCompatActivity {
 
 
 /*                if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
-                    measureSelected = 0;
+                measureSelected = 0;
+                imageViewAddRuler.animate().scaleX(1.35f).scaleY(1.35f).setDuration(120).start();
+                Sound.makeSound(getApplicationContext(), Sound.Sounds.BIP_13);
+                imageViewAddRuler.setImageDrawable(getResources().getDrawable(R.drawable.ruler_hover));
+            }
+            if (motionEvent.getAction() == MotionEvent.ACTION_MOVE) {
+                int radius = view.getMeasuredWidth();
+                Point center = new Point(radius, radius);
+                Circle hit = new Circle(center);
+                float distance =
+                        hit.getDistaceFromCenter(new Point((int) motionEvent.getX(), (int) motionEvent.getY()));
+
+                if (measureSelected && distance > radius) {
+                    measureSelected = false;
+                    imageViewAddRuler.animate().scaleX(1f).scaleY(1f).setDuration(120).start();
+                    imageViewAddRuler.setImageDrawable(getResources().getDrawable(R.drawable.ruler));
+                } else if (!measureSelected && distance < radius) {
+                    measureSelected = true;
                     imageViewAddRuler.animate().scaleX(1.35f).scaleY(1.35f).setDuration(120).start();
                     Sound.makeSound(getApplicationContext(), Sound.Sounds.BIP_13);
                     imageViewAddRuler.setImageDrawable(getResources().getDrawable(R.drawable.ruler_hover));
                 }
-                if (motionEvent.getAction() == MotionEvent.ACTION_MOVE) {
-                    int radius = view.getMeasuredWidth();
-                    Point center = new Point(radius, radius);
-                    Circle hit = new Circle(center);
-                    float distance =
-                            hit.getDistaceFromCenter(new Point((int) motionEvent.getX(), (int) motionEvent.getY()));
-
-                    if (measureSelected && distance > radius) {
-                        measureSelected = false;
-                        imageViewAddRuler.animate().scaleX(1f).scaleY(1f).setDuration(120).start();
-                        imageViewAddRuler.setImageDrawable(getResources().getDrawable(R.drawable.ruler));
-                    } else if (!measureSelected && distance < radius) {
-                        measureSelected = true;
-                        imageViewAddRuler.animate().scaleX(1.35f).scaleY(1.35f).setDuration(120).start();
-                        Sound.makeSound(getApplicationContext(), Sound.Sounds.BIP_13);
-                        imageViewAddRuler.setImageDrawable(getResources().getDrawable(R.drawable.ruler_hover));
-                    }
-                }
-                if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
-                    imageViewAddRuler.animate().scaleX(1f).scaleY(1f).setDuration(120).start();
-                    imageViewAddRuler.setImageDrawable(getResources().getDrawable(R.drawable.ruler));
-                    if (measureSelected) {
-                        measureSelected = false;
-                        updateWeightValue(weightMap.lastKey(), weightMap.lastEntry().getValue());
-                    }
-                }*/
-                return true;
             }
+            if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
+                imageViewAddRuler.animate().scaleX(1f).scaleY(1f).setDuration(120).start();
+                imageViewAddRuler.setImageDrawable(getResources().getDrawable(R.drawable.ruler));
+                if (measureSelected) {
+                    measureSelected = false;
+                    updateWeightValue(weightMap.lastKey(), weightMap.lastEntry().getValue());
+                }
+            }*/
+            return true;
         });
 
         lineChartWeight.setOnChartValueSelectedListener(new OnChartValueSelectedListener() {
@@ -676,31 +659,28 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        imageViewLogout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-                builder.setTitle("Are you sure you want to logout?");
-                builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        InputOutputImpl file1 =
-                                new InputOutputImpl(getApplicationContext(), TOKEN_PATH);
-                        InputOutputImpl file2 =
-                                new InputOutputImpl(getApplicationContext(), "user_image");
-                        file1.deleteFile();
-                        file2.deleteFile();
+        imageViewLogout.setOnClickListener(view -> {
+            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+            builder.setTitle("Are you sure you want to logout?");
+            builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    InputOutput file1 =
+                            new InputOutput(getApplicationContext(), TOKEN_PATH);
+                    InputOutput file2 =
+                            new InputOutput(getApplicationContext(), "user_image");
+                    file1.deleteFile();
+                    file2.deleteFile();
 
-                        ((ActivityManager) getApplicationContext().getSystemService(ACTIVITY_SERVICE))
-                                .clearApplicationUserData();
+                    ((ActivityManager) getApplicationContext().getSystemService(ACTIVITY_SERVICE))
+                            .clearApplicationUserData();
 
-                        Intent intent = getIntent();
-                        finish();
-                        startActivity(intent);
-                    }
-                });
-                builder.show();
-            }
+                    Intent intent = getIntent();
+                    finish();
+                    startActivity(intent);
+                }
+            });
+            builder.show();
         });
 
         imageViewMessages.setOnClickListener(view -> {
@@ -1154,7 +1134,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private boolean isLogged() {
-        InputOutputImpl file = new InputOutputImpl(getApplicationContext(), TOKEN_PATH);
+        InputOutput file = new InputOutput(getApplicationContext(), TOKEN_PATH);
         if (!file.existFile())
             return false;
         token = file.readFile().split(":")[2];
@@ -1229,7 +1209,7 @@ public class MainActivity extends AppCompatActivity {
         caloricIntake = ((Number) response.get("dailyCaloricIntake")).intValue();
         progressBarCaloricIntake.setMax(caloricIntake);
 
-        String photoUri = new InputOutputImpl(getApplicationContext(), "user_image").readFile();
+        String photoUri = new InputOutput(getApplicationContext(), "user_image").readFile();
         Picasso.get().load(photoUri).into(imageViewUserPhoto);
         Picasso.get().load(photoUri).into(imageViewUserPhoto2);
         Log.e("MY", "login" + String.valueOf((System.nanoTime() - startTime) / 1000000f));
@@ -1262,6 +1242,16 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    private void goFullscreen(){
+        getWindow().getDecorView().setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_FULLSCREEN
+                        | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+    }
+
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -1275,7 +1265,7 @@ public class MainActivity extends AppCompatActivity {
                 break;
 
             case REQUEST_CODE_LOGIN:
-                if (new InputOutputImpl(getApplicationContext(), TOKEN_PATH).existFile()) {
+                if (new InputOutput(getApplicationContext(), TOKEN_PATH).existFile()) {
                     Intent intent1 = getIntent();
                     finish();
                     startActivity(intent1);
@@ -1290,7 +1280,7 @@ public class MainActivity extends AppCompatActivity {
                 token = response.get("token").toString();
                 String formatted =
                         userName + ":" + userEmail + ":" + token;
-                new InputOutputImpl(getApplicationContext(), TOKEN_PATH).writeFile(formatted);
+                new InputOutput(getApplicationContext(), TOKEN_PATH).writeFile(formatted);
                 Toast.makeText(getApplicationContext(), "You successfully signed-up!", Toast.LENGTH_SHORT).show();
                 fromUserToDiary();
                 loadPieChartData();
@@ -1301,6 +1291,8 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent event) {
+        goFullscreen();
+
         if (event.getY() / screenSize.y > 0.7f)
             return super.dispatchTouchEvent(event);
         if (addButtonPressed)
@@ -1422,7 +1414,7 @@ public class MainActivity extends AppCompatActivity {
         Handler handler = new Handler();
         handler.postDelayed(() -> {
             if (isLogged()) {
-                String savedLogin = new InputOutputImpl(getApplicationContext(), TOKEN_PATH).readFile();
+                String savedLogin = new InputOutput(getApplicationContext(), TOKEN_PATH).readFile();
                 userName = savedLogin.split(":")[0];
                 userEmail = savedLogin.split(":")[1];
                 Toast.makeText(getApplicationContext(), "Welcome back " + userName + "!", Toast.LENGTH_SHORT).show();

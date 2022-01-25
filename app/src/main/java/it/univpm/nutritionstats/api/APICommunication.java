@@ -11,22 +11,17 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 
 import it.univpm.nutritionstats.activity.MainActivity;
-import it.univpm.nutritionstats.utility.Elements;
+import it.univpm.nutritionstats.enums.Elements;
 
 public class APICommunication {
     final static int TIME_OUT_ERROR=20000;

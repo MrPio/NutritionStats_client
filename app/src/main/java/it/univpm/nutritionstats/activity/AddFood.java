@@ -8,20 +8,17 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.Bundle;
-import android.text.InputType;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
 import it.univpm.nutritionstats.R;
 import it.univpm.nutritionstats.api.APICommunication;
-import it.univpm.nutritionstats.utility.DrinkType;
-import it.univpm.nutritionstats.utility.Sound;
+import it.univpm.nutritionstats.enums.DrinkType;
+import it.univpm.nutritionstats.utility.sound.Sound;
 
 public class AddFood extends AppCompatActivity {
 

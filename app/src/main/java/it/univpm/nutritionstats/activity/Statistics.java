@@ -25,7 +25,7 @@ import java.util.Arrays;
 import it.univpm.nutritionstats.R;
 import it.univpm.nutritionstats.StatsFrag;
 import it.univpm.nutritionstats.api.APICommunication;
-import it.univpm.nutritionstats.utility.Elements;
+import it.univpm.nutritionstats.enums.Elements;
 
 public class Statistics extends AppCompatActivity {
 

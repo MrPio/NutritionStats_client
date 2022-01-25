@@ -35,6 +35,7 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.1.2'
     implementation 'org.jetbrains:annotations:15.0'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'androidx.compose.ui:ui-graphics:1.0.0-beta04'
     //implementation 'org.jetbrains:annotations:15.0'
     //testImplementation 'junit:junit:5.4'
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.7.2")
