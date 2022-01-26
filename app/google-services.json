@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "732909906968",
+    "project_id": "nutritionstats-1639308395905",
+    "storage_bucket": "nutritionstats-1639308395905.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:732909906968:android:d33a4abde385824190276d",
+        "android_client_info": {
+          "package_name": "it.univpm.nutritionstats"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "732909906968-mfc76o14011bu0kok0druv14jc7g54a6.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "it.univpm.nutritionstats",
+            "certificate_hash": "ca2dd7f59d37944b48fa6cc6d8916f55574cab1f"
+          }
+        },
+        {
+          "client_id": "732909906968-6r9n9h0rgioks1rqqq3hkk3sdf1atrd7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBIAL64rnSvyU-OQR6n-ARD8iqINsm99yc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "732909906968-6r9n9h0rgioks1rqqq3hkk3sdf1atrd7.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

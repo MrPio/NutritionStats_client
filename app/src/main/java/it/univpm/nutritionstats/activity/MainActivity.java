@@ -3,6 +3,7 @@ package it.univpm.nutritionstats.activity;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
@@ -21,8 +22,8 @@ import android.util.Log;
 import android.view.Display;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewTreeObserver;
 import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
@@ -70,17 +71,17 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
 
 import it.univpm.nutritionstats.R;
 import it.univpm.nutritionstats.api.APICommunication;
-import it.univpm.nutritionstats.utility.io.Serialization;
-import it.univpm.nutritionstats.utility.mathematics.Circle;
 import it.univpm.nutritionstats.enums.DrinkType;
-import it.univpm.nutritionstats.utility.mathematics.EasingFunctionSine;
-import it.univpm.nutritionstats.utility.io.InputOutput;
 import it.univpm.nutritionstats.utility.graphics.PopUpMenu;
+import it.univpm.nutritionstats.utility.io.InputOutput;
+import it.univpm.nutritionstats.utility.mathematics.Circle;
+import it.univpm.nutritionstats.utility.mathematics.EasingFunctionSine;
 import it.univpm.nutritionstats.utility.sound.Sound;
 
 public class MainActivity extends AppCompatActivity {
@@ -106,15 +107,13 @@ public class MainActivity extends AppCompatActivity {
 
     public enum Gender {MALE, FEMALE}
 
-    ;
-    public final static String TOKEN_PATH                    = "token.dat";
+        public final static String TOKEN_PATH                    = "token.dat";
     final static        int    REQUEST_CODE_ADD              = 1;
     final static        int    REQUEST_CODE_LOGIN            = 2;
     final static        int    REQUEST_CODE_ADD_FOOD_BY_EAN  = 3;
     final static        int    REQUEST_CODE_ADD_FOOD_BY_NAME = 4;
     final static        int    REQUEST_STATISTICS            = 4;
 
-    public static ArrayList<JSONObject> resultList    = new ArrayList<JSONObject>();
     public static String                dateForValues = null;
 
     public static String                    token         = "";
@@ -147,9 +146,9 @@ public class MainActivity extends AppCompatActivity {
     private ConstraintLayout menuUser                                = null;
     private ImageView        imageViewUserPhoto, imageViewUserPhoto2 = null;
     private PieChart     pieChartCPG              = null;
-    private TextView     textViewCalories         = null;
-    private TextView     textViewCarboydrats      = null;
-    private TextView     textViewProteins         = null;
+    private TextView textViewCalories      = null;
+    private TextView textViewCarbohydrates = null;
+    private TextView textViewProteins      = null;
     private TextView     textViewLipids           = null;
     private TextView     textViewFiber            = null;
     private TextView     textViewSodium           = null;
@@ -166,18 +165,9 @@ public class MainActivity extends AppCompatActivity {
     private LinearLayout snackFoodList            = null;
     private LinearLayout dinnerFoodList           = null;
     private ProgressBar  progressBarCaloricIntake = null;
-    private ImageView MenuMessagesExit=null;
 
     private ImageView imageViewAddButton    = null;
-    private ImageView imageViewAddBreakfast = null;
-    private ImageView imageViewAddLunch     = null;
-    private ImageView imageViewAddSnack     = null;
-    private ImageView imageViewAddDinner    = null;
     private ImageView imageViewAddWater     = null;
-    private ImageView imageViewAddRuler     = null;
-    private ImageView imageViewAddWeight    = null;
-    private ImageView imageViewViewStats    = null;
-    private ImageView imageViewLogout       = null;
     private ConstraintLayout menuLoading=null;
 
     private ImageView        imageViewDiary       = null;
@@ -192,10 +182,8 @@ public class MainActivity extends AppCompatActivity {
     private LineChart        lineChartWeight      = null;
     private ConstraintLayout menuMessages         = null;
     private LinearLayout     linearLayoutMessages = null;
-    private ImageView        imageViewMessages    = null;
 
     private ScrollView scrollViewMenuDiary = null;
-    private ImageView  imageViewCalendar   = null;
     private ImageView  imageViewHome       = null;
     private TextView   textViewTitle       = null;
 
@@ -209,12 +197,12 @@ public class MainActivity extends AppCompatActivity {
     Point screenSize;
     Point movementStart;
     Point movementEnd;
-    private boolean measurePressed  = false;
     private int     measureSelected = -1;
     private boolean updateWeightValueDisplayed;
     private boolean messagesDisplayed=false;
 
 
+    @SuppressLint({"ClickableViewAccessibility", "UseCompatLoadingForDrawables"})
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -242,7 +230,7 @@ public class MainActivity extends AppCompatActivity {
         imageViewUserPhoto = findViewById(R.id.imageViewUserPhoto);
         imageViewUserPhoto2 = findViewById(R.id.imageViewUserPhoto2);
         pieChartCPG = findViewById(R.id.pieChartCPG);
-        textViewCarboydrats = findViewById(R.id.textViewCarboydrats);
+        textViewCarbohydrates = findViewById(R.id.textViewCarboydrats);
         textViewProteins = findViewById(R.id.textViewProteins);
         textViewLipids = findViewById(R.id.textViewLipids);
         textViewCalories = findViewById(R.id.textViewCalories);
@@ -263,19 +251,19 @@ public class MainActivity extends AppCompatActivity {
         progressBarCaloricIntake = findViewById(R.id.progressBarCaloricIntake);
 
         imageViewAddButton = findViewById(R.id.imageViewAddButton);
-        imageViewAddBreakfast = findViewById(R.id.imageViewAddBreakfast);
-        imageViewAddLunch = findViewById(R.id.imageViewAddLunch);
-        imageViewAddSnack = findViewById(R.id.imageViewAddSnack);
-        imageViewAddDinner = findViewById(R.id.imageViewAddDinner);
+        ImageView imageViewAddBreakfast = findViewById(R.id.imageViewAddBreakfast);
+        ImageView imageViewAddLunch = findViewById(R.id.imageViewAddLunch);
+        ImageView imageViewAddSnack = findViewById(R.id.imageViewAddSnack);
+        ImageView imageViewAddDinner = findViewById(R.id.imageViewAddDinner);
         imageViewAddWater = findViewById(R.id.imageViewAddWater);
-        imageViewAddRuler = findViewById(R.id.imageViewAddRuler);
-        imageViewViewStats = findViewById(R.id.imageViewViewStats);
-        imageViewAddWeight = findViewById(R.id.imageViewAddWeight);
-        imageViewLogout = findViewById(R.id.imageViewLogout);
+        ImageView imageViewAddRuler = findViewById(R.id.imageViewAddRuler);
+        ImageView imageViewViewStats = findViewById(R.id.imageViewViewStats);
+        ImageView imageViewAddWeight = findViewById(R.id.imageViewAddWeight);
+        ImageView imageViewLogout = findViewById(R.id.imageViewLogout);
         menuMessages = findViewById(R.id.menuMessages);
         linearLayoutMessages = findViewById(R.id.linearLayoutMessages);
-        imageViewMessages = findViewById(R.id.imageViewMessages);
-        MenuMessagesExit=findViewById(R.id.MenuMessagesExit);
+        ImageView imageViewMessages = findViewById(R.id.imageViewMessages);
+        ImageView menuMessagesExit = findViewById(R.id.MenuMessagesExit);
         menuLoading=findViewById(R.id.menuLoading);
 
         PopUpMenu[] addButtonMenu = {
@@ -301,7 +289,7 @@ public class MainActivity extends AppCompatActivity {
         lineChartWeight = findViewById(R.id.lineChartWeight);
 
         scrollViewMenuDiary = findViewById(R.id.scrollViewMenuDiary);
-        imageViewCalendar = findViewById(R.id.imageViewCalendar);
+        ImageView imageViewCalendar = findViewById(R.id.imageViewCalendar);
         imageViewHome = findViewById(R.id.imageViewHome);
         textViewTitle = findViewById(R.id.textViewTitle);
 
@@ -428,9 +416,7 @@ public class MainActivity extends AppCompatActivity {
                     input.setPadding(50, 50, 0, 0);
                     builder.setView(input);
                     builder.setPositiveButton("OK", (dialog, which) -> {
-                        new Thread(() -> {
-                            APICommunication.requestAddWater(MainActivity.token, (int) ((DrinkType) input.getSelectedItem()).getValue());
-                        }).start();
+                        new Thread(() -> APICommunication.requestAddWater(MainActivity.token, (int) ((DrinkType) input.getSelectedItem()).getValue())).start();
 
                         Toast.makeText(MainActivity.this, "Water successfully added!", Toast.LENGTH_SHORT).show();
                         makeSound(Sound.Sounds.WATER_SPLASH);
@@ -440,12 +426,7 @@ public class MainActivity extends AppCompatActivity {
                         loadWaterChart();
                         pieChartWater.animateY(1000, EasingFunctionSine.EaseOutSineDelay);
                     });
-                    builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.cancel();
-                        }
-                    });
+                    builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
 
                     builder.show();
                 }
@@ -462,30 +443,25 @@ public class MainActivity extends AppCompatActivity {
                 });
 
         imageViewCalendar.setOnClickListener(view -> {
-            DatePickerDialog.OnDateSetListener date = new DatePickerDialog.OnDateSetListener() {
-                @Override
-                public void onDateSet(DatePicker view, int year, int monthOfYear,
-                                      int dayOfMonth) {
-                    String dayId = String.format("%02d", dayOfMonth) + "-" +
-                            String.format("%02d", monthOfYear + 1) + "-" +
-                            String.format("%02d", year);
-                    String todayDayId =
-                            String.format("%02d", LocalDate.now().getDayOfMonth()) + "-" +
-                                    String.format("%02d", LocalDate.now().getMonthValue()) + "-" +
-                                    String.format("%02d", LocalDate.now().getYear());
+            DatePickerDialog.OnDateSetListener date = (view1, year, monthOfYear, dayOfMonth) -> {
+                String dayId = String.format(Locale.getDefault(),"%02d", dayOfMonth) + "-" +
+                        String.format(Locale.getDefault(),"%02d", monthOfYear + 1) + "-" +
+                        String.format(Locale.getDefault(),"%02d", year);
+                String todayDayId =
+                        String.format(Locale.getDefault(),"%02d", LocalDate.now().getDayOfMonth()) + "-" +
+                                String.format(Locale.getDefault(),"%02d", LocalDate.now().getMonthValue()) + "-" +
+                                String.format(Locale.getDefault(),"%02d", LocalDate.now().getYear());
 
-                    if (dayId.equals(todayDayId)) {
-                        imageViewHome.performClick();
-                        return;
-                    }
-                    dateForValues = dayId;
-                    imageViewHome.setVisibility(View.VISIBLE);
-
-                    Intent intent = getIntent();
-                    finish();
-                    startActivity(intent);
+                if (dayId.equals(todayDayId)) {
+                    imageViewHome.performClick();
+                    return;
                 }
+                dateForValues = dayId;
+                imageViewHome.setVisibility(View.VISIBLE);
 
+                Intent intent = getIntent();
+                finish();
+                startActivity(intent);
             };
             if (dateForValues == null) {
                 new DatePickerDialog(MainActivity.this, date,
@@ -517,7 +493,6 @@ public class MainActivity extends AppCompatActivity {
                 measureSelected = 0;
                 circleRulerButton =
                         new Circle(460, new Point((int) motionEvent.getRawX(), (int) motionEvent.getRawY()));
-                measurePressed = true;
                 view.animate().scaleX(1.30f).scaleY(1.30f).setDuration(160).start();
                 makeSound(Sound.Sounds.BIP_13);
                 ((ImageView) view).setImageDrawable(getResources().getDrawable(R.drawable.ruler_hover));
@@ -602,47 +577,7 @@ public class MainActivity extends AppCompatActivity {
                     startActivityForResult(i, REQUEST_STATISTICS);
                 } else if (measureSelected == 2)
                     updateWeightValue(weightMap.lastKey(), weightMap.lastEntry().getValue());
-
             }
-
-
-
-
-
-
-
-/*                if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
-                measureSelected = 0;
-                imageViewAddRuler.animate().scaleX(1.35f).scaleY(1.35f).setDuration(120).start();
-                Sound.makeSound(getApplicationContext(), Sound.Sounds.BIP_13);
-                imageViewAddRuler.setImageDrawable(getResources().getDrawable(R.drawable.ruler_hover));
-            }
-            if (motionEvent.getAction() == MotionEvent.ACTION_MOVE) {
-                int radius = view.getMeasuredWidth();
-                Point center = new Point(radius, radius);
-                Circle hit = new Circle(center);
-                float distance =
-                        hit.getDistaceFromCenter(new Point((int) motionEvent.getX(), (int) motionEvent.getY()));
-
-                if (measureSelected && distance > radius) {
-                    measureSelected = false;
-                    imageViewAddRuler.animate().scaleX(1f).scaleY(1f).setDuration(120).start();
-                    imageViewAddRuler.setImageDrawable(getResources().getDrawable(R.drawable.ruler));
-                } else if (!measureSelected && distance < radius) {
-                    measureSelected = true;
-                    imageViewAddRuler.animate().scaleX(1.35f).scaleY(1.35f).setDuration(120).start();
-                    Sound.makeSound(getApplicationContext(), Sound.Sounds.BIP_13);
-                    imageViewAddRuler.setImageDrawable(getResources().getDrawable(R.drawable.ruler_hover));
-                }
-            }
-            if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
-                imageViewAddRuler.animate().scaleX(1f).scaleY(1f).setDuration(120).start();
-                imageViewAddRuler.setImageDrawable(getResources().getDrawable(R.drawable.ruler));
-                if (measureSelected) {
-                    measureSelected = false;
-                    updateWeightValue(weightMap.lastKey(), weightMap.lastEntry().getValue());
-                }
-            }*/
             return true;
         });
 
@@ -712,7 +647,7 @@ public class MainActivity extends AppCompatActivity {
 
         });
 
-        MenuMessagesExit.setOnClickListener(view -> {
+        menuMessagesExit.setOnClickListener(view -> {
             Sound.makeSound(getApplicationContext(), Sound.Sounds.SLIDE_OUT_2);
             menuMessages.animate().translationY(screenSize.y).alpha(0f).withEndAction(() -> {
                 linearLayoutMessages.removeAllViews();
@@ -779,12 +714,14 @@ public class MainActivity extends AppCompatActivity {
         progressBarWater.setMax(100);
         progressBarWater.setProgress((int) (progress * 100));
         int color =
-                Color.rgb((3 + (progress - 0.5f) * 2 * 15) / 255f, 244f / 255, (244 - 240 * (progress - 0.5f) * 2) / 255f);
-        if (progress < 0.5f)
-            color = Color.rgb(3, 120 + 124 * progress * 2, 244);
-        else
-            color =
-                    Color.rgb((3 + (progress - 0.5f) * 2 * 15) / 255f, 244f / 255, (244 - 240 * (progress - 0.5f) * 2) / 255f);
+                Color.CYAN;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (progress < 0.5f)
+                color = Color.rgb(3, 120 + 124 * progress * 2, 244);
+            else
+                color =
+                        Color.rgb((3 + (progress - 0.5f) * 2 * 15) / 255f, 244f / 255, (244 - 240 * (progress - 0.5f) * 2) / 255f);
+        }
 
         progressBarWater.setProgressTintList(ColorStateList.valueOf(color));
         textViewWaterCount.setText(String.valueOf((int) water) + "ml / 2000ml");
@@ -959,7 +896,7 @@ public class MainActivity extends AppCompatActivity {
             DatePickerDialog.OnDateSetListener datePicker =
                     (view2, year, monthOfYear, dayOfMonth) -> {
                         String dayId =
-                                String.format("%02d", dayOfMonth) + "/" + String.format("%02d", (monthOfYear + 1)) + "/" + year;
+                                String.format(Locale.getDefault(),"%02d", dayOfMonth) + "/" + String.format(Locale.getDefault(),"%02d", (monthOfYear + 1)) + "/" + year;
                         date.setText(dayId);
                         final DateTimeFormatter formatter =
                                 DateTimeFormatter.ofPattern("dd/MM/yyyy");
@@ -1048,7 +985,7 @@ public class MainActivity extends AppCompatActivity {
 
         textViewCalories.setText("(" + String.valueOf((int) calories) + " kcal)");
         progressBarCaloricIntake.setProgress((int) calories);
-        textViewCarboydrats.setText("(" + String.format("%.2f", carbohydrates) + " gr)");
+        textViewCarbohydrates.setText("(" + String.format("%.2f", carbohydrates) + " gr)");
         textViewProteins.setText("(" + String.format("%.2f", proteins) + " gr)");
         textViewLipids.setText("(" + String.format("%.2f", lipids) + " gr)");
         textViewFiber.setText("(" + String.format("%.3f", fiber) + " gr)");
@@ -1240,6 +1177,19 @@ public class MainActivity extends AppCompatActivity {
             }
         }).start();
 
+    }
+
+    public static <T extends AppCompatActivity> void hideKeyboard(T activity) {
+        View currentFocus = activity.getCurrentFocus();
+        if (currentFocus != null) {
+            InputMethodManager imm =
+                    (InputMethodManager) activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
+            imm.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
+            activity.getCurrentFocus().clearFocus();
+            activity.getWindow().setSoftInputMode(
+                    WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN
+            );
+        }
     }
 
     private void goFullscreen(){

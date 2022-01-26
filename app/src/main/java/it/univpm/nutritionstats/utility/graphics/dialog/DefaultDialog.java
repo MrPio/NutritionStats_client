@@ -30,9 +30,6 @@ public class DefaultDialog {
         if (negativeButtonFunction != null)
             builder.setNegativeButton("Cancel", negativeButtonFunction);
         AlertDialog alertDialog = builder.create();
-        alertDialog.getWindow().setFlags(
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
         alertDialog.show();
     }
 }

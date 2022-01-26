@@ -1,7 +1,7 @@
 plugins {
     id 'com.android.application'
 }
-
+apply plugin: 'com.google.gms.google-services'
 android {
     compileSdkVersion 31
     buildToolsVersion "31.0.0"
@@ -10,8 +10,8 @@ android {
         applicationId "it.univpm.nutritionstats"
         minSdkVersion 21
         targetSdkVersion 31
-        versionCode 3
-        versionName "1.2"
+        versionCode 5
+        versionName "1.5"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -29,6 +29,8 @@ android {
 }
 
 dependencies {
+    implementation platform('com.google.firebase:firebase-bom:29.0.4')
+    implementation 'com.google.firebase:firebase-analytics'
 
     implementation 'androidx.appcompat:appcompat:1.4.0'
     implementation 'com.google.android.material:material:1.4.0'

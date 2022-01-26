@@ -1,5 +1,7 @@
 package it.univpm.nutritionstats.activity;
 
+import static it.univpm.nutritionstats.activity.MainActivity.hideKeyboard;
+
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
@@ -65,7 +67,7 @@ public class AddFoodByName extends AppCompatActivity {
         searchCacheSerialization = new Serialization(getApplicationContext(), SEARCH_CACHE_PATH);
 
         buttonAddFood.setOnClickListener(view -> {
-            hideKeyboard();
+            hideKeyboard(this);
             String foodName = editTextFoodName.getText().toString();
             if (editTextPortionWeight.getText().toString().equals("")) return;
             int weight = Integer.parseInt(editTextPortionWeight.getText().toString());
@@ -159,7 +161,7 @@ public class AddFoodByName extends AppCompatActivity {
                         new DefaultDropDownDialog(new ArrayList<>(cacheSearchWeights), 220).popupWindows(AddFoodByName.this);
                 ((ListView) popupWindow.getContentView()).setOnItemClickListener((adapterView, view1, i, l) -> {
                     editTextPortionWeight.setText(adapterView.getItemAtPosition(i).toString());
-                    hideKeyboard();
+                    hideKeyboard(this);
                     popupWindow.dismiss();
                     buttonAddFood.performClick();
                 });
@@ -210,18 +212,4 @@ public class AddFoodByName extends AppCompatActivity {
         textViewVitaminC = findViewById(R.id.textViewVitaminC);
         textViewWater = findViewById(R.id.textViewWater);
     }
-
-    private void hideKeyboard() {
-        View currentFocus = this.getCurrentFocus();
-        if (currentFocus != null) {
-            InputMethodManager imm =
-                    (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
-            imm.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
-            this.getCurrentFocus().clearFocus();
-            getWindow().setSoftInputMode(
-                    WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN
-            );
-        }
-    }
-
 }
