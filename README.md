@@ -7,7 +7,7 @@ This is an application using the REST API NutritionStats
 
 ### *GooglePlay page*
 
->You can find this app avaible on GooglePlay store (***not ready***):
+>You can find this app avaible on GooglePlay store (***now ready***):
 >
 > *https://play.google.com/store/apps/details?id=it.univpm.nutritionstats*
 
