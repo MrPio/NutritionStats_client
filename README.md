@@ -17,6 +17,9 @@ This is an application using the REST API NutritionStats
 >
 > *https://github.com/MrPio/ProgettoEsameOOP_Morelli-Mazzatenta*
 ***
+     
+<a href='https://play.google.com/store/apps/details?id=it.univpm.nutritionstats&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'><img alt='Get it on Google Play' height="160" src='https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png'/></a>
+     
 ## *Animations*
 ### *Access and Statistic*
 <p float="left">
